@@ -5,7 +5,6 @@ import com._blog.myblog.repository.UserRepository;
 import com._blog.myblog.services.JwtService;
 import com._blog.myblog.services.UserService;
 
-import java.nio.file.OpenOption;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;

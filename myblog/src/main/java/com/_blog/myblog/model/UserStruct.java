@@ -6,13 +6,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
-@Entity  
+@Entity
 @Table(name = "users")
 public class UserStruct {
 
@@ -32,4 +30,7 @@ public class UserStruct {
     private String bio;
 
     private int age;
+    @Column(nullable = false)
+
+    private String role = "USER";
 }

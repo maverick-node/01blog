@@ -33,11 +33,12 @@ public class LoginAPI {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> login(@RequestBody UserStruct user, HttpServletResponse response) {
+        System.out.println(user.getMail());
         Optional<UserStruct> optionalUser = userRepository.findByMail(user.getMail());
         if (optionalUser.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Mail not found"));
         }
-System.out.println(user.getPassword());
+
         UserStruct dbUser = optionalUser.get();
         if (!passwordEncoder.matches(user.getPassword(), dbUser.getPassword())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Password Invalid"));
