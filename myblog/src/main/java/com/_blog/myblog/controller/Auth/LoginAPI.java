@@ -37,7 +37,7 @@ public class LoginAPI {
         if (optionalUser.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Mail not found"));
         }
-
+System.out.println(user.getPassword());
         UserStruct dbUser = optionalUser.get();
         if (!passwordEncoder.matches(user.getPassword(), dbUser.getPassword())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Password Invalid"));
@@ -45,15 +45,19 @@ public class LoginAPI {
 
         String token = jwtService.generateToken(dbUser.getUsername());
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true) 
-                .path("/") 
+                .httpOnly(true)
+                .path("/")
                 .maxAge(24 * 60 * 60)
-                .sameSite("Strict") 
+                .sameSite("Strict")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
         return ResponseEntity.ok(Map.of(
                 "message", "Login successful",
-                "username", dbUser.getUsername()));
+                "username", dbUser.getUsername(),
+                "token", token)
+
+        );
+
     }
 }

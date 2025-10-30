@@ -29,6 +29,7 @@ public class RegisterAPI {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody UserStruct user) {
+        System.out.println(user.getPassword());
         // Check if email already exists
         if (userRepository.findByMail(user.getMail()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message","mail used"));
