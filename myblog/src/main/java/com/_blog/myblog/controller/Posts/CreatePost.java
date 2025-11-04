@@ -1,5 +1,6 @@
 package com._blog.myblog.controller.Posts;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com._blog.myblog.model.PostStruct;
@@ -9,9 +10,13 @@ import com._blog.myblog.repository.SubscriptionRepository;
 import com._blog.myblog.repository.UserRepository;
 import com._blog.myblog.services.JwtService;
 import com._blog.myblog.services.UserService;
+
+import io.micrometer.core.ipc.http.HttpSender.Response;
+
 import com._blog.myblog.services.NotificationService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,8 +41,8 @@ public class CreatePost {
     }
 
     @PostMapping("/create-post")
-    public String CreatePost(@RequestBody PostStruct post,
-                             @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Map<String, String>> CreatePost(@RequestBody PostStruct post,
+                             @CookieValue(name = "jwt", required = false) String token) {
 
 
         String username = jwtService.extractUsername(token.replace("Bearer ", ""));
@@ -45,7 +50,7 @@ public class CreatePost {
 
         Optional<UserStruct> optionalUser = userRepository.findByusername(username);
         if (optionalUser.isEmpty()) {
-            return "User not found";
+            return ResponseEntity.status(401).body(Map.of("message", "User not found"));
         }
 
         UserStruct dbUser = optionalUser.get();
@@ -66,6 +71,6 @@ public class CreatePost {
             );
         }
 
-        return "Post created successfully!";
+        return ResponseEntity.ok(Map.of("message", "Post created successfully!"));
     }
 }

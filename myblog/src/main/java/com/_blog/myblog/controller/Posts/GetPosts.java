@@ -23,12 +23,15 @@ public class GetPosts {
     public ResponseEntity<List<Map<String, String>>> getAllPosts() {
         List<PostStruct> posts = repo.findAll();
 
-        List<Map<String, String>> result = posts.stream().map(post -> Map.of(
-                "id", post.getId().toString(),            // include ID to identify posts
+        List<Map<String, String>> result = posts.stream()
+        
+            .sorted((post1, post2) -> post2.getId().compareTo(post1.getId()))
+            .map(post -> Map.of(
+                "id", post.getId().toString(),          
                 "title", post.getTitle().toString(),
                 "text", post.getText(),
                 "author", post.getAuthor() != null ? post.getAuthor() : "Unknown"
-        )).toList();
+            )).toList();
 
         return ResponseEntity.ok(result);
     }

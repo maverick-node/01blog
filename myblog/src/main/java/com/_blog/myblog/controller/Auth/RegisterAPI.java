@@ -5,13 +5,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com._blog.myblog.model.UserStruct;
 import com._blog.myblog.repository.UserRepository;
+import com._blog.myblog.services.JwtService;
 import com._blog.myblog.services.UserService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping
@@ -21,9 +25,11 @@ public class RegisterAPI {
     private final UserService userService;
     private final UserRepository userRepository;
 
+
     public RegisterAPI(UserService userService, UserRepository userRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
+
     }
  
 
@@ -54,7 +60,8 @@ public class RegisterAPI {
  
         userService.registerUser(user.getMail(), user.getPassword(), user.getUsername(), user.getBio(),user.getAge());
 
-
+        
+     
 
           return ResponseEntity.ok(Map.of("message", "Register Succesful"));
     }

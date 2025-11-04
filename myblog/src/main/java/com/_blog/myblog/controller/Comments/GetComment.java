@@ -3,11 +3,9 @@ package com._blog.myblog.controller.Comments;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.myblog.model.CommentStruct;
@@ -24,7 +22,7 @@ public class GetComment {
 
     @GetMapping("/posts/{postId}/comments")
     public List<CommentStruct> getComments(@PathVariable int postId) {
-        System.out.println("Post ID = " + postId);
+        
         return commentRepository.findByPostId(postId);
     }
 

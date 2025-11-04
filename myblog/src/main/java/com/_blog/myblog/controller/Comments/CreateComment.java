@@ -1,24 +1,21 @@
 package com._blog.myblog.controller.Comments;
 
-import com._blog.myblog.repository.CommentRepository;
 import com._blog.myblog.repository.PostRepository;
 import com._blog.myblog.repository.UserRepository;
 import com._blog.myblog.services.JwtService;
 import com._blog.myblog.services.NotificationService;
 import com._blog.myblog.services.UserService;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import com._blog.myblog.controller.Profile.GetInfo;
 import com._blog.myblog.model.CommentStruct;
 import com._blog.myblog.model.PostStruct;
-import com._blog.myblog.model.SubscriptionStruct;
 import com._blog.myblog.model.UserStruct;
 
 @RestController
@@ -29,15 +26,13 @@ public class CreateComment {
 
     private final UserService userService;
 
-    private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    CreateComment(JwtService jwtService, CommentRepository commentRepository, UserService userService,
+    CreateComment(JwtService jwtService,  UserService userService,
             PostRepository postRepository, NotificationService notificationService, UserRepository userRepository) {
         this.jwtService = jwtService;
-        this.commentRepository = commentRepository;
         this.userService = userService;
         this.postRepository = postRepository;
         this.notificationService = notificationService;
@@ -46,20 +41,31 @@ public class CreateComment {
     }
 
     @PostMapping("/create-comment")
-    public ResponseEntity<String> createComment(
+    public ResponseEntity<Map<String,String>> createComment(
             @RequestBody CommentStruct comment,
-            @RequestHeader("Authorization") String token) {
+            @CookieValue(name = "jwt", required = false) String token) {
 
-        // 1️⃣ Check post exists
-        int postId = comment.getPostId();
-        if (!postRepository.existsById(postId)) {
-            return ResponseEntity.badRequest().body("Post not found");
+     
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Authentication token is required"));
         }
 
-        String username = jwtService.extractUsername(token.replace("Bearer ", ""));
+
+   
+        int postId = comment.getPostId();
+        if (!postRepository.existsById(postId)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Post not found"));
+        }
+
+        String username;
+        try {
+            username = jwtService.extractUsername(token.replace("Bearer ", ""));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid authentication token"));
+        }
         Optional<UserStruct> optionalUser = userRepository.findByusername(username);
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(401).body("User not found");
+            return ResponseEntity.status(401).body(Map.of("error", "User not found"));
         }
         UserStruct dbUser = optionalUser.get();
         userService.saveComment(username, comment.getComment(), postId);
@@ -67,7 +73,7 @@ public class CreateComment {
       
         Optional<PostStruct> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            return ResponseEntity.badRequest().body("Post not found");
+            return ResponseEntity.badRequest().body(Map.of("error", "Post not found"));
         }
         PostStruct post = optionalPost.get();
         String userF = post.getAuthor();
@@ -81,7 +87,7 @@ public class CreateComment {
                     dbUser.getUsername() + " commented on your post.");
         }
 
-        return ResponseEntity.ok("Comment created successfully!");
+        return ResponseEntity.ok(Map.of("message", "Comment created successfully!"));
     }
 
 }

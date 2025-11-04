@@ -1,0 +1,73 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Dashboard</h1>
+        <div class="user-info">
+            <span class="username">Welcome, {{ username }}!</span>
+            <div class="header-buttons">
+                <button class="profile-btn" (click)="viewProfile()">Profile</button>
+                <button class="logout-btn" (click)="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-content">
+        <div *ngIf="errorMessage" class="notification error">
+            {{ errorMessage }}
+        </div>
+
+        <section class="create-post-section">
+            <div class="section-header">
+                <h2>Create New Post</h2>
+            </div>
+        
+            <div class="create-post-form">
+                <input type="text" [(ngModel)]="newPost.title" placeholder="Post title" class="post-input">
+                <textarea [(ngModel)]="newPost.text" placeholder="Write your post content here..." class="post-textarea"></textarea>
+                <button class="create-btn" (click)="createPost()">Create Post</button>
+            </div>
+        </section>
+
+        <section class="posts-section">
+            <div class="section-header">
+                <h2>Your Posts</h2>
+                <button class="load-btn" (click)="loadPosts()">Load Posts</button>
+            </div>
+            
+            <div class="posts-list" *ngIf="posts && posts.length > 0">
+                <div class="post-item" *ngFor="let post of posts">
+                    <h4 class="post-author">{{ post.author }}</h4>
+                    <h3 class="post-title">{{ post.title }}</h3>
+                    <p class="post-content">{{ post.text }}</p>
+                    
+                    <!-- Comments Section -->
+                    <div class="comments-section">
+                        <div class="comments-header">
+                            <h5 class="comments-title">Comments</h5>
+                            <button class="load-comments-btn" (click)="getComments(post.id)">Load Comments</button>
+                        </div>
+                        
+                        <div class="add-comment">
+                            <textarea [(ngModel)]="newComment[post.id]" placeholder="Add a comment..." class="comment-textarea"></textarea>
+                            <button class="add-comment-btn" (click)="addComment(post.id)" [disabled]="!newComment[post.id]">Add Comment</button>
+                        </div>
+                        
+                        <div class="comments-list" *ngIf="comments[post.id] && comments[post.id].length > 0">
+                            <div class="comment-item" *ngFor="let comment of comments[post.id]">
+                                <div class="comment-author">{{ comment.username }}</div>
+                                <div class="comment-text">{{ comment.comment }}</div>
+                                <div class="comment-date">{{ comment.createdAt }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="no-comments" *ngIf="!comments[post.id] || comments[post.id].length === 0">
+                            <p>No comments yet. Be the first to comment!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="no-posts" *ngIf="!posts || posts.length === 0">
+                <p>No posts available. Click "Load Posts" to fetch your posts.</p>
+            </div>
+        </section>
+    </main>
+</div>

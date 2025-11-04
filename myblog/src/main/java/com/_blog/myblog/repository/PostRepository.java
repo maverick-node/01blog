@@ -12,5 +12,6 @@ public interface PostRepository extends JpaRepository<PostStruct, Integer> {
     List<PostStruct> findAll();
     Optional<PostStruct> findById(int id);
     boolean existsById(int id);
+    List<PostStruct> findByAuthor(String author);
     
 }
