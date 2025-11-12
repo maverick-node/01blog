@@ -1,10 +1,11 @@
 package com._blog.myblog.controller.Followers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import com._blog.myblog.services.NotificationService;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,43 +35,57 @@ public class toggleSubscribe {
     }
 
     @PostMapping("/users/{targetId}/subscribe")
-    public ResponseEntity<String> toggleSubscribe(@PathVariable Integer targetId,
+    @Transactional
+    public ResponseEntity<Map<String, String>> toggleSubscribe(@PathVariable String targetId,
             @RequestHeader("Authorization") String token) {
 
         String username = jwtService.extractUsername(token.replace("Bearer ", ""));
         Optional<UserStruct> optionalUser = userRepository.findByusername(username);
         UserStruct dbUser = optionalUser.get();
 
-        boolean exists = subscriptionRepository.existsBySubscriberIdAndTargetId(dbUser.getId(), targetId);
+        Optional<UserStruct> targetUserOpt = userRepository.findByusername(targetId);
+        if (targetUserOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Target user not found"));
+        }
+        Integer idd = targetUserOpt.get().getId();
+
+        boolean exists = subscriptionRepository.existsBySubscriberIdAndTargetId(dbUser.getId(), idd);
 
         if (exists) {
-            subscriptionRepository.deleteBySubscriberIdAndTargetId(dbUser.getId(), targetId);
-            return ResponseEntity.ok("Unsubscribed successfully");
+            subscriptionRepository.deleteBySubscriberIdAndTargetId(dbUser.getId(), idd);
+            return ResponseEntity.ok(Map.of("message", "Unsubscribed successfully"));
         }
 
         SubscriptionStruct s = new SubscriptionStruct();
         s.setSubscriberId(dbUser.getId());
-        s.setTargetId(targetId);
+        s.setTargetId(idd);
         subscriptionRepository.save(s);
+       System.out.println("Subscriber ID: " + targetId);
+       System.out.println("Target ID: " + username);
+      
+        if (!username.equals(targetId)) {
+            List<SubscriptionStruct> subscribers = subscriptionRepository.findByTargetId(dbUser.getId());
 
-
-     List<SubscriptionStruct> subscribers = subscriptionRepository.findByTargetId(dbUser.getId());
-
-        for (SubscriptionStruct sub : subscribers) {
-            notificationService.createNotification(
-                    sub.getSubscriberId(),
-                    dbUser.getId(),
-                    "NEW_POST",
-                    dbUser.getUsername() + " published a new post!"
-            );
+            for (SubscriptionStruct sub : subscribers) {
+                notificationService.createNotification(
+                        sub.getSubscriberId(),
+                        dbUser.getId(),
+                        "NEW_FOLLOWER",
+                        dbUser.getUsername() + " Followed you!");
+            }
         }
-
-        return ResponseEntity.ok("Subscribed successfully");
+        return ResponseEntity.ok(Map.of("message", "Subscribed successfully"));
     }
 
     @GetMapping("/users/{userId}/subscriptions")
-    public List<SubscriptionStruct> getSubscriptions(@PathVariable Integer userId) {
-        return subscriptionRepository.findBySubscriberId(userId);
+    public List<SubscriptionStruct> getSubscriptions(@PathVariable String userId) {
+        Optional<UserStruct> user = userRepository.findByusername(userId);
+        if (user.isPresent()) {
+            return subscriptionRepository.findBySubscriberId(user.get().getId());
+        }
+        return List.of();
     }
+
+   
 
 }

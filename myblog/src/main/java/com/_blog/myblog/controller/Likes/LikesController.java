@@ -12,6 +12,7 @@ import com._blog.myblog.repository.UserRepository;
 import com._blog.myblog.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,7 +37,7 @@ public class LikesController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<String> addLike(@PathVariable int postId,
+    public ResponseEntity<Map<String, String>> addLike(@PathVariable int postId,
             @RequestHeader("Authorization") String token) {
 
     
@@ -56,7 +57,7 @@ public class LikesController {
                 notifyPostOwner(postId, user);
             }
 
-            return ResponseEntity.ok(message);
+            return ResponseEntity.ok(Map.of("message", message));
         }
 
         LikesStruct newLike = new LikesStruct();
@@ -67,7 +68,7 @@ public class LikesController {
 
         notifyPostOwner(postId, user);
 
-        return ResponseEntity.ok("Post liked successfully");
+        return ResponseEntity.ok(Map.of("message", "Post liked successfully"));
     }
 
     private void notifyPostOwner(int postId, UserStruct liker) {
@@ -89,5 +90,12 @@ public class LikesController {
                 liker.getId(),
                 "NEW_LIKE",
                 liker.getUsername() + " liked your post.");
+    }
+    @GetMapping("/count/{postId}")
+    public ResponseEntity<Map<String, Long>> getLikeCount(@PathVariable int postId) {
+        long likeCount = likesRepository.countByPostIdAndLikedTrue(postId);
+    
+        
+        return ResponseEntity.ok(Map.of("likeCount", likeCount));
     }
 }

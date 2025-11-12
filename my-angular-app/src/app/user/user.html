@@ -1,0 +1,52 @@
+<div class="user-container">
+  <header class="user-header">
+    <!-- Avatar -->
+    <div class="avatar">
+      {{ (profile.username || 'U')[0].toUpperCase() }}
+    </div>
+
+    <!-- User Meta -->
+    <div class="user-meta">
+      <h2 class="user-name">{{ profile.username || 'User' }}</h2>
+      <div class="meta-sub">
+        <span *ngIf="profile.age">{{ profile.age }} years old</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="user-actions">
+      <button class="btn follow-btn" (click)="follow()">
+        {{ isFollowing ? '✓ Following' : '+ Follow' }}
+      </button>
+      <button class="btn report-btn" (click)="reportProfile()">
+        ⚠ Report
+      </button>
+    </div>
+  </header>
+
+  <main class="user-main">
+    <div *ngIf="errorMessage" class="notification error">{{ errorMessage }}</div>
+
+    <section class="profile-info">
+      <h3>About</h3>
+      <p class="bio">{{ profile.bio || 'No bio available.' }}</p>
+    </section>
+
+    <section class="user-posts">
+      <div class="section-header">
+        <h3>Posts by {{ profile.username }}</h3>
+      </div>
+
+      <div *ngIf="posts && posts.length > 0" class="posts-list">
+        <div class="post-item" *ngFor="let post of posts" (click)="goToPost(post.id)">
+          <h4 class="post-title">{{ post.title }}</h4>
+          <p class="post-content">{{ post.text }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="!posts || posts.length === 0" class="no-posts">
+        <p>No posts from this user yet.</p>
+      </div>
+    </section>
+  </main>
+</div>

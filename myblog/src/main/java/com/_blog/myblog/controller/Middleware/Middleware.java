@@ -43,7 +43,7 @@ public class Middleware {
             UserStruct dbuser = user.get();
 
             return ResponseEntity.ok(Map.of("username", username, "token", jwtToken, "mail", dbuser.getMail(), "bio",
-                    dbuser.getBio(), "age", dbuser.getAge() + ""));
+                    dbuser.getBio(), "age", dbuser.getAge() + "", "role", dbuser.getRole()));
 
         } catch (Exception e) {
 

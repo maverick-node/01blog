@@ -8,10 +8,10 @@ import com._blog.myblog.repository.ReportRepository;
 import com._blog.myblog.repository.UserRepository;
 import com._blog.myblog.services.JwtService;
 
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/reports")
+
 public class ReportController {
 
     private final ReportRepository reportRepository;
@@ -26,8 +26,8 @@ public class ReportController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping("/posts/{postId}/report")
-    public ResponseEntity<String> reportPost(@PathVariable Integer postId,
+    @PostMapping("/users/{userId}/report")
+    public ResponseEntity<Map<String, String>> reportUser(@PathVariable Integer userId,
             @RequestBody ReportStruct report,
             @RequestHeader("Authorization") String token) {
         String username = jwtService.extractUsername(token.replace("Bearer ", ""));
@@ -35,10 +35,10 @@ public class ReportController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         report.setReporterId(reporter.getId());
-        report.setTargetPostId(postId);
+        report.setTargetUserId(userId);
 
         reportRepository.save(report);
-        return ResponseEntity.ok("Post reported successfully!");
+        return ResponseEntity.ok(Map.of("message", "User reported successfully!"));
     }
 
     @GetMapping("/pending")
@@ -46,15 +46,5 @@ public class ReportController {
         return ResponseEntity.ok(reportRepository.findByResolvedFalse());
     }
 
-    @PostMapping("/{id}/resolve")
-    public ResponseEntity<String> resolveReport(@PathVariable int id) {
-        Optional<ReportStruct> optionalReport = reportRepository.findById(id);
-        if (optionalReport.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        ReportStruct report = optionalReport.get();
-        report.setResolved(true);
-        reportRepository.save(report);
-        return ResponseEntity.ok("Report resolved successfully");
-    }
+  
 }

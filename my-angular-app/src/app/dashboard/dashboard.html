@@ -4,12 +4,16 @@
         <div class="user-info">
             <span class="username">Welcome, {{ username }}!</span>
             <div class="header-buttons">
+
                 <button class="profile-btn" (click)="viewProfile()">Profile</button>
+                <button *ngIf="userRole === 'admin'" class="admin-panel-btn" (click)="goToAdminPanel()">Admin Panel</button>
                 <button class="logout-btn" (click)="logout()">Logout</button>
+                
             </div>
         </div>
     </header>
-
+<br>
+     <app-notification></app-notification>
     <main class="dashboard-content">
         <div *ngIf="errorMessage" class="notification error">
             {{ errorMessage }}
@@ -23,9 +27,33 @@
             <div class="create-post-form">
                 <input type="text" [(ngModel)]="newPost.title" placeholder="Post title" class="post-input">
                 <textarea [(ngModel)]="newPost.text" placeholder="Write your post content here..." class="post-textarea"></textarea>
+                <input type="file" accept="image/*,video/*" (change)="onFileSelected($event)" class="file-input">
+                <div *ngIf="selectedFile" class="selected-file">Selected: {{ selectedFile.name }}</div>
                 <button class="create-btn" (click)="createPost()">Create Post</button>
             </div>
         </section>
+
+        <!-- All Usernames -->
+        <section class="usernames-section">
+            <div class="section-header">
+                <h2>All Usernames</h2>
+                <button class="load-btn" (click)="getUsernames()">Load Usernames</button>
+            </div>
+
+            <div class="usernames-list" *ngIf="allusernames && allusernames.length > 0">
+                <ul>
+                    <li *ngFor="let name of allusernames">
+                        <button class="username-chip" (click)="goToUser(name)">{{ name }}</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="no-usernames" *ngIf="!allusernames || allusernames.length === 0">
+                <p>No usernames loaded. Click "Load Usernames" to fetch.</p>
+            </div>
+        </section>
+
+ 
 
         <section class="posts-section">
             <div class="section-header">
@@ -37,7 +65,22 @@
                 <div class="post-item" *ngFor="let post of posts">
                     <h4 class="post-author">{{ post.author }}</h4>
                     <h3 class="post-title">{{ post.title }}</h3>
+                    <div class="post-media" *ngIf="post.mediaUrl">
+                        <img *ngIf="post.mediaType && post.mediaType.startsWith('image')" [src]="'http://localhost:8080' + post.mediaUrl" alt="post media">
+                        <video *ngIf="post.mediaType && post.mediaType.startsWith('video')" controls>
+                            <source [src]="'http://localhost:8080' + post.mediaUrl" [type]="post.mediaType">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
                     <p class="post-content">{{ post.text }}</p>
+                    <div class="post-actions">
+                        <button class="like-btn" (click)="likePost(post.id)">
+                            <span *ngIf="likedPosts[post.id]">❤️</span>
+                            <span *ngIf="!likedPosts[post.id]">🤍</span>
+                            <span class="like-label">Like</span>
+                            <span class="like-count" *ngIf="likeCounts[post.id] !== undefined">{{ likeCounts[post.id] }}</span>
+                        </button>
+                    </div>
                     
                     <!-- Comments Section -->
                     <div class="comments-section">

@@ -34,10 +34,16 @@ public class UserService {
         return userRepository.save(user);
     }
     public PostStruct savePost(String author, String title,String text){
-        PostStruct post =new PostStruct();
+        return savePost(author, title, text, null, null);
+    }
+
+    public PostStruct savePost(String author, String title, String text, String mediaUrl, String mediaType) {
+        PostStruct post = new PostStruct();
         post.setAuthor(author);
         post.setText(text);
         post.setTitle(title);
+        post.setMediaUrl(mediaUrl);
+        post.setMediaType(mediaType);
         return postRepository.save(post);
     }
 

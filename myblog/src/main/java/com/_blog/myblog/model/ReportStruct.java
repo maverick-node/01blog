@@ -12,13 +12,13 @@ public class ReportStruct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    
+    private Integer reporterId;
+    private Integer targetUserId; 
+    private Integer targetPostId;
 
-    private Integer reporterId; // who is reporting
-    private Integer targetUserId; // reported user (optional)
-    private Integer targetPostId; // reported post (optional)
-
-    private String reason; // reason for report
-    private boolean resolved = false; // admin marks as resolved
+    private String reason; 
+    private boolean resolved = false; 
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

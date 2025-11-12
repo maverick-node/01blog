@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import com._blog.myblog.model.CommentStruct;
 import com._blog.myblog.model.PostStruct;
@@ -20,7 +21,6 @@ import com._blog.myblog.model.UserStruct;
 
 @RestController
 public class CreateComment {
-
 
     private final NotificationService notificationService;
 
@@ -30,28 +30,25 @@ public class CreateComment {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    CreateComment(JwtService jwtService,  UserService userService,
+    CreateComment(JwtService jwtService, UserService userService,
             PostRepository postRepository, NotificationService notificationService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userService = userService;
         this.postRepository = postRepository;
         this.notificationService = notificationService;
         this.userRepository = userRepository;
-    
+
     }
 
     @PostMapping("/create-comment")
-    public ResponseEntity<Map<String,String>> createComment(
+    public ResponseEntity<Map<String, String>> createComment(
             @RequestBody CommentStruct comment,
             @CookieValue(name = "jwt", required = false) String token) {
-
-     
+            
         if (token == null || token.isEmpty()) {
             return ResponseEntity.status(401).body(Map.of("error", "Authentication token is required"));
         }
 
-
-   
         int postId = comment.getPostId();
         if (!postRepository.existsById(postId)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Post not found"));
@@ -70,7 +67,6 @@ public class CreateComment {
         UserStruct dbUser = optionalUser.get();
         userService.saveComment(username, comment.getComment(), postId);
 
-      
         Optional<PostStruct> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Post not found"));
@@ -79,13 +75,22 @@ public class CreateComment {
         String userF = post.getAuthor();
         Optional<UserStruct> ss = userRepository.findByusername(userF);
         UserStruct last = ss.get();
-        if (post.getId() != dbUser.getId()) {
-            notificationService.createNotification(
-                    last.getId(),
-                    dbUser.getId(),
-                    "NEW_COMMENT",
-                    dbUser.getUsername() + " commented on your post.");
+        if (!username.equals(last.getUsername())) {
+
+            if (post.getId() != dbUser.getId()) {
+                notificationService.createNotification(
+                        last.getId(),
+                        dbUser.getId(),
+                        "NEW_COMMENT",
+                        dbUser.getUsername() + " commented on your post.");
+            }
         }
+
+        notificationService.createNotification(
+                dbUser.getId(),
+                dbUser.getId(),
+                "COMMENT_POST",
+                "You commented on " + post.getTitle() + " post.");
 
         return ResponseEntity.ok(Map.of("message", "Comment created successfully!"));
     }

@@ -2,11 +2,12 @@
     <!-- Header Section -->
     <header class="profile-header">
         <div class="header-content">
+       
             <button class="back-btn" (click)="goBack()">← Back to Dashboard</button>
             <h1>User Profile</h1>
         </div>
     </header>
-
+     <app-notification></app-notification>
     <!-- Main Profile Content -->
     <main class="profile-content">
         <div *ngIf="errorMessage" class="notification error">

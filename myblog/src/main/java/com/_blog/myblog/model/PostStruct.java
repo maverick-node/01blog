@@ -20,4 +20,10 @@ public class PostStruct {
 
     @Column(nullable = false)
     private String author;
+
+    
+    private String mediaUrl;
+
+
+    private String mediaType;
 }

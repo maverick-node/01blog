@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Notification } from '../notification/notification';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, FormsModule,Notification],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -17,6 +18,7 @@ export class Profile implements OnInit {
     age: null,
     bio: ''
   };
+
   editProfile: any = {};
   userPosts: any[] = [];
   editingPostId: string | null = null;
@@ -24,6 +26,7 @@ export class Profile implements OnInit {
   loading = false;
   isEditing = false;
   errorMessage = '';
+   dbUser : any;
 
   constructor(private http: HttpClient, private router: Router) {}
     middleware() {
@@ -31,7 +34,7 @@ export class Profile implements OnInit {
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       (response: any) => {
         console.log(response);
-        
+        this.dbUser = response.username;
       },
       (error) => {
         console.log(error.error);
@@ -57,6 +60,7 @@ export class Profile implements OnInit {
       (response: any) => {
         console.log('Profile loaded:', response);
         this.userProfile.username = response.username || 'User';
+     
         // For now, set default values since we don't have a full profile API
         this.userProfile.mail = response.mail || 'user@example.com';
         this.userProfile.age = response.age || null;

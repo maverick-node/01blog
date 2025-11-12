@@ -31,7 +31,7 @@ export class Login {
       },
       (error) => {
         console.log('User not authenticated:', error.error);
-           window.location.href = '/login';
+          
       }
     );
   }

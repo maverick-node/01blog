@@ -6,4 +6,5 @@ import com._blog.myblog.model.LikesStruct;
 
 public interface LikesRepository extends JpaRepository<LikesStruct, Integer> { 
     LikesStruct findByPostIdAndUserId(int postid,int id);
+    Long countByPostIdAndLikedTrue(int postId);
 }

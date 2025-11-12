@@ -45,30 +45,26 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-    @PostMapping("/{notificationId}/read")
-    public ResponseEntity<String> markAsRead(@PathVariable Integer notificationId,
-                                             @RequestHeader("Authorization") String token) {
-
+    @GetMapping("/read")
+    public ResponseEntity<String> markAsRead(@RequestHeader("Authorization") String token) {
+System.out.println("mark as read called/n mark as read called");
+       //set all notification read
         String username = jwtService.extractUsername(token.replace("Bearer ", ""));
         Optional<UserStruct> optionalUser = userRepository.findByusername(username);
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(401).body("Invalid user");
+            return ResponseEntity.status(401).build();
         }
 
-        Optional<NotificationStruct> optionalNotification = notificationRepository.findById(notificationId);
-        if (optionalNotification.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        UserStruct user = optionalUser.get();
+        List<NotificationStruct> notifications = notificationRepository
+                .findByUserIdOrderByCreatedAtDesc(user.getId());
+
+        for (NotificationStruct notification : notifications) {
+            notification.setRead(true);
+            notificationRepository.save(notification);
         }
 
-        NotificationStruct notification = optionalNotification.get();
-        if (!notification.getUserId().equals(optionalUser.get().getId())) {
-            return ResponseEntity.status(403).body("You can only modify your own notifications");
-        }
-
-        notification.setRead(true);
-        notificationRepository.save(notification);
-
-        return ResponseEntity.ok("Notification marked as read");
+        return ResponseEntity.ok("All notifications marked as read");
     }
 }

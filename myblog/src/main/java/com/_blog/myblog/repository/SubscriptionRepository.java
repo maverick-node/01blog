@@ -11,4 +11,5 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionStruct
     List<SubscriptionStruct> findByTargetId(Integer targetId);
     boolean existsBySubscriberIdAndTargetId(Integer subscriberId, Integer targetId);
     void deleteBySubscriberIdAndTargetId(Integer subscriberId, Integer targetId);
+    void deleteBySubscriberId(Integer subscriberId);
 }
