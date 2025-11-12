@@ -1,7 +1,0 @@
-<form action="#" th:action="@{/register}" th:object="${userStruct}" method="post">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Register</button>
-    <p th:text="${error}"></p>
-</form>
-<a th:href="@{/login}">Login</a>
