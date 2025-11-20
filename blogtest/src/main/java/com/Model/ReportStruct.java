@@ -14,10 +14,11 @@ public class ReportStruct {
     private int id;
     
     private Integer reporterId;
-    private Integer targetUserId; 
+    private String targetUsername; 
 
     private String reason; 
-    private boolean resolved = false; 
+    private boolean resolved = false;
+    private Integer reportedPostId; 
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

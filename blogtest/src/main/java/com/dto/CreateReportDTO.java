@@ -7,4 +7,5 @@ import lombok.Data;
 public class CreateReportDTO {
     @NotBlank(message = "Reason is required")
     private String reason;
+    private int reportedPostId;
 }

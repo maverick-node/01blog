@@ -10,6 +10,24 @@
 	<div *ngIf="errorMessage" class="notification error">{{ errorMessage }}</div>
 
 	<main class="admin-content">
+		<!-- Summary cards -->
+		<div class="summary-cards">
+			<div class="summary-card">
+				<div class="card-title">Posts</div>
+				<div class="card-value">{{ postsCount }}</div>
+			</div>
+			<div class="summary-card">
+				<div class="card-title">Users</div>
+				<div class="card-value">{{ usersCount }}</div>
+			</div>
+			<div class="summary-card">
+				<div class="card-title">Reports</div>
+				<div class="card-value">
+					<span class="unsolved">Unsolved: {{ unsolvedReports.length }}</span>
+					<span class="solved">Solved: {{ solvedReports.length }}</span>
+				</div>
+			</div>
+		</div>
 		<section class="card">
 			<div class="card-header">
 				<h2>All Users</h2>
@@ -28,10 +46,11 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let u of users">
-							<td>{{ u.id }}</td>
+						<tr *ngFor="let u of users; let i = index">
+							
+							<td>{{ i + 1 }}</td>
 							<td>{{ u.username }}</td>
-							<td>{{ u.mail }}</td>
+							<td>{{ u.email }}</td>
 										<td>{{ u.role }}</td>
 										<td>{{ u.age }}</td>
 										<td>
@@ -51,37 +70,106 @@
 				<h2>Reports</h2>
 				<span class="count">{{ reports?.length || 0 }}</span>
 			</div>
-			<div class="table-wrapper" *ngIf="reports && reports.length; else noReports">
-				<table class="table">
-					<thead>
-						<tr>
-							<th>ID</th>
-							<th>Reporter</th>
-							<th>Target User</th>
-							<th>Target Post</th>
-							<th>Reason</th>
-							<th>Created</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr *ngFor="let r of reports">
-							<td>{{ r.id }}</td>
-							<td>{{ r.reporterId }}</td>
-							<td>{{ r.targetUserId || '-' }}</td>
-							<td>{{ r.targetPostId || '-' }}</td>
-							<td>{{ r.reason }}</td>
-							<td>{{ r.createdAt | date:'short' }}</td>
-							<td>
-								<button class="resolve-btn" (click)="resolveReport(r.id)">Resolve</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+
+			<!-- Report Profiles subsection -->
+			<div class="sub-section">
+				<h3>Report Profiles <span class="count">{{ reportedUsers.length || 0 }}</span></h3>
+				<div class="table-wrapper" *ngIf="reportedUsers.length; else noReportedUsers">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Reporter</th>
+								<th>Target User</th>
+								<th>Reason</th>
+								<th>Created</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let r of reportedUsers">
+								<td>{{ r.id }}</td>
+								<td>{{ r.reporterName }}</td>
+								<td>{{ r.targetUserName || '-' }}</td>
+								<td>{{ r.reason }}</td>
+								<td>{{ r.createdAt | date:'short' }}</td>
+								<td>
+									<button class="resolve-btn" (click)="resolveReport(r.id)">Resolve</button>
+									<button class="danger-btn" (click)="actionOnUser(r.targetUserName)">Actions</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<ng-template #noReportedUsers>
+					<div class="empty">No reported users found.</div>
+				</ng-template>
 			</div>
-			<ng-template #noReports>
-				<div class="empty">No reports found.</div>
-			</ng-template>
+
+			<!-- Reported Posts subsection -->
+			<div class="sub-section">
+				<h3>Reported Posts <span class="count">{{ reportedPosts.length || 0 }}</span></h3>
+				<div class="table-wrapper" *ngIf="reportedPosts.length; else noReportedPosts">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Reported Post</th>
+								<th>Reporter</th>
+								<th>Reason</th>
+								<th>Created</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let p of reportedPosts">
+								<td>{{ p.id }}</td>
+								<td>{{ p.reportedPostId }}</td>
+								<td>{{ p.reporterName }}</td>
+								<td>{{ p.reason }}</td>
+								<td>{{ p.createdAt | date:'short' }}</td>
+								<td>
+									<button class="resolve-btn" (click)="resolveReport(p.id)">Resolve</button>
+									<button class="danger-btn" (click)="deletePost(p.reportedPostId)">Delete Post</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Solved Reports subsection -->
+				<div class="sub-section">
+					<h3>Solved Reports <span class="count">{{ solvedReports.length || 0 }}</span></h3>
+					<div class="table-wrapper" *ngIf="solvedReports.length; else noSolvedReports">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Target</th>
+									<th>Reporter</th>
+									<th>Reason</th>
+									<th>Resolved At</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let s of solvedReports">
+									<td>{{ s.id }}</td>
+									<td>{{ s.targetUserName || s.reportedPostId || '-' }}</td>
+									<td>{{ s.reporterName }}</td>
+									<td>{{ s.reason }}</td>
+									<td>{{ s.createdAt ? (s.createdAt | date:'short') : (s.createdAt | date:'short') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<ng-template #noSolvedReports>
+						<div class="empty">No solved reports found.</div>
+					</ng-template>
+				</div>
+				<ng-template #noReportedPosts>
+					<div class="empty">No reported posts found.</div>
+				</ng-template>
+			</div>
 		</section>
 
 		<section class="card">
@@ -96,7 +184,7 @@
 							<th>ID</th>
 							<th>Title</th>
 							<th>Author</th>
-										<th>Excerpt</th>
+										<th>Content</th>
 										<th>Actions</th>
 						</tr>
 					</thead>
@@ -105,7 +193,7 @@
 							<td>{{ p.id }}</td>
 							<td>{{ p.title }}</td>
 							<td>{{ p.author }}</td>
-										<td>{{ (p.text || '').slice(0, 80) }}{{ (p.text?.length || 0) > 80 ? '…' : '' }}</td>
+										<td>{{ (p.content || '').slice(0, 80) }}{{ (p.text?.length || 0) > 80 ? '…' : '' }}</td>
 										<td>
 											<button class="danger-btn" (click)="deletePost(p.id)">Delete</button>
 										</td>

@@ -374,6 +374,34 @@
     box-shadow: 0 6px 18px rgba(102,126,234,0.06);
 }
 
+/* Report button styling */
+.report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(45deg, #ff7a59, #ff4d6d);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.18s ease;
+}
+
+.report-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255,77,109,0.12);
+}
+
+.report-icon {
+    font-size: 1.05rem;
+}
+
+.report-label {
+    font-size: 0.95rem;
+}
+
 .like-label {
     font-size: 0.95rem;
     color: #374151;

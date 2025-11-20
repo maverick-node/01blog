@@ -19,6 +19,7 @@ import com.services.JwtService;
 import com.services.ReportService;
 
 import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/reports")
 public class ReportController {
@@ -38,5 +39,16 @@ public class ReportController {
         reportService.createReport(username, jwt, dto);
 
         return ResponseEntity.ok(Map.of("message", "Report created successfully"));
+    }
+
+    @PostMapping("/report-post")
+    public ResponseEntity<Map<String, String>> reportPost(
+
+            @CookieValue("jwt") String jwt,
+            @RequestBody @Valid CreateReportDTO dto) {
+                System.out.println(dto);
+
+        reportService.reportPost(dto.getReportedPostId(), jwt, dto);
+        return ResponseEntity.ok(Map.of("message", "Post reported successfully"));
     }
 }

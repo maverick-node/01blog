@@ -26,7 +26,7 @@
         
             <div class="create-post-form">
                 <input type="text" [(ngModel)]="newPost.title" placeholder="Post title" class="post-input">
-                <textarea [(ngModel)]="newPost.text" placeholder="Write your post content here..." class="post-textarea"></textarea>
+                <textarea [(ngModel)]="newPost.content" placeholder="Write your post content here..." class="post-textarea"></textarea>
                 
                 
                 <button class="create-btn" (click)="createPost()">Create Post</button>
@@ -72,13 +72,17 @@
                             Your browser does not support the video tag.
                         </video>
                     </div>
-                    <p class="post-content">{{ post.text }}</p>
+                    <p class="post-content">{{ post.content }}</p>
                     <div class="post-actions">
                         <button class="like-btn" (click)="likePost(post.id)">
                             <span *ngIf="likedPosts[post.id]">❤️</span>
                             <span *ngIf="!likedPosts[post.id]">🤍</span>
                             <span class="like-label">Like</span>
                             <span class="like-count" *ngIf="likeCounts[post.id] !== undefined">{{ likeCounts[post.id] }}</span>
+                        </button>
+                        <button *ngIf="username != post.author" class="report-btn" (click)="reportPost(post.id)" title="Report this post">
+                            <span class="report-icon">🚩</span>
+                            <span class="report-label">Report</span>
                         </button>
                     </div>
                     

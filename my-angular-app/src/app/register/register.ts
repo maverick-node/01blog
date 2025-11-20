@@ -48,8 +48,8 @@ export class Register {
         this.errorMessage = '';
       },
       (error) => {
-        console.error('Registration error:', error.error.message);
-        this.errorMessage = error.error?.message || 'Registration failed!';
+        console.log('Registration error:', error.error.error);
+        this.errorMessage = error.error.error || 'Registration failed!';
       }
     );
   }

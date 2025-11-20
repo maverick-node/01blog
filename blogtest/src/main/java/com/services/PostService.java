@@ -39,7 +39,12 @@ public class PostService {
         if (user == null) {
             throw new InvalidPostException("User not found");
         }
-
+        if (dto.getContent() == null || dto.getContent().isEmpty()) {
+            throw new InvalidPostException("Content is required");
+        }
+        if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
+            throw new InvalidPostException("Title is required");
+        }
         PostsStruct post = new PostsStruct();
         post.setAuthor(username);
         post.setTitle(dto.getTitle());

@@ -18,7 +18,7 @@ export class Dashboard {
   token: string = '';
   newPost = {
     title: '',
-    text: '',
+    content: '',
   };
   likedPosts: { [key: number]: boolean } = {};
   likeCounts: { [key: number]: number } = {};
@@ -41,6 +41,8 @@ export class Dashboard {
       (response: any) => {
         this.username = response.username;
         this.userRole = (response.role || 'user').toLowerCase();
+        console.log(this.userRole);
+        
         this.loadPosts();
         return true;
       },
@@ -122,6 +124,27 @@ export class Dashboard {
       },
       () => {
         this.likeCounts[postId] = 0;
+      }
+    );
+  }
+
+  reportPost(postId: number) {
+    //window create prompt to ask for reason
+    const reason = window.prompt('Please enter report reason:', '');
+    if (reason === null) return; // user cancelled
+
+    var objecte ={
+      reportedPostId: postId,
+      reason: reason
+    }
+    const apiReport = 'http://localhost:8080/reports/report-post';
+    this.http.post(apiReport, objecte, { withCredentials: true }).subscribe(
+      (response: any) => {
+        const msg = response?.message || 'Post reported';
+        this.showNotification(msg);
+      },
+      (error: any) => {
+        this.showNotification(error?.error?.message || 'Reporting failed');
       }
     );
   }
@@ -225,4 +248,6 @@ export class Dashboard {
       }
     );
   }
+
+  
 }

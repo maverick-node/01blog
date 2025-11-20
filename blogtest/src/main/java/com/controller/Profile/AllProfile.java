@@ -32,7 +32,7 @@ public class AllProfile {
                     .badRequest()
                     .body(Map.of("message", "Error: Invalid JWT token!"));
         }
-
+        
         List<UserStruct> users = userRepo.findAll();
         List<UserDTOMiddle> allUsers = new ArrayList<>();
         for (UserStruct u : users) {
@@ -40,7 +40,8 @@ public class AllProfile {
                 u.getUsername(),
                 u.getMail(),
                 u.getBio(),
-                u.getAge()
+                u.getAge(),
+                u.getRole()
         ));
     }
 

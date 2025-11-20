@@ -11,6 +11,7 @@ public class JwtService {
             "zone01secretkey_jwt_for_testssss".getBytes()
     );
     public String generateToken(String username) {
+    
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
@@ -20,6 +21,9 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
+            if (token == null || token.isBlank()) {
+        throw new IllegalArgumentException("You need To login or register");
+    }
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .build()

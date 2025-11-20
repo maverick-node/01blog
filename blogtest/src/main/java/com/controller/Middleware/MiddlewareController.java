@@ -29,7 +29,8 @@ public class MiddlewareController {
             user.getUsername(),
             user.getMail(),
             user.getBio(),
-            user.getAge()
+            user.getAge(),
+            user.getRole()
         );
 
         return ResponseEntity.ok(response);

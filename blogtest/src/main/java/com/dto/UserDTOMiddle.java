@@ -17,4 +17,5 @@ public class UserDTOMiddle {
     private String bio;
 
     private int age;
+    private String role;
 }
