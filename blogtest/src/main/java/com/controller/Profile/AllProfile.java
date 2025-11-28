@@ -1,14 +1,19 @@
 package com.controller.Profile;
 
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.Model.UserStruct;
 import com.Repository.UserRepo;
+import com.dto.UserDTOMiddle;
 import com.services.JwtService;
 
+@RestController
 public class AllProfile {
     private final JwtService jwtService;
     private final UserRepo userRepo;
@@ -19,13 +24,27 @@ public class AllProfile {
     }
 
     @GetMapping("/get-users")
-    public ResponseEntity<Map<String, String>> getAllUsers(@CookieValue("jwt") String jwt) {
+    public ResponseEntity<Map<String, Object>> getAllUsers(@CookieValue("jwt") String jwt) {
         String username = jwtService.extractUsername(jwt);
-        if (userRepo.existsByUsername(username)) {
+        System.out.println("Username from JWT: " + username);
+        if (!userRepo.existsByUsername(username)) {
             return ResponseEntity
                     .badRequest()
                     .body(Map.of("message", "Error: Invalid JWT token!"));
         }
-        return ResponseEntity.ok(Map.of("users", userRepo.findAll().toString()));
+
+        List<UserStruct> users = userRepo.findAll();
+        List<UserDTOMiddle> allUsers = new ArrayList<>();
+        for (UserStruct u : users) {
+        allUsers.add(new UserDTOMiddle(
+                u.getUsername(),
+                u.getMail(),
+                u.getBio(),
+                u.getAge()
+        ));
+    }
+
+
+        return ResponseEntity.ok(Map.of("users", allUsers));
     }
 }

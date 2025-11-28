@@ -20,8 +20,7 @@ public class PostsStruct {
     private String title;
     @Column(nullable = false, length = 10000)
     private String content;
-@Column(nullable = false)
+    @Column(nullable = false)
     private String author;
-
 
 }

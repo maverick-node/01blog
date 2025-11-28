@@ -30,36 +30,47 @@ public class Likes {
     }
 
     @PostMapping("/like-post/{postId}")
-    public ResponseEntity<Map<String, String>> likePost(@CookieValue("jwt") String jwt,
-            @PathVariable("postId") String postId) {
-        // Implement your like post logic here
-        int PostId = Integer.parseInt(postId);
+    public ResponseEntity<Map<String, String>> likePost(
+            @CookieValue("jwt") String jwt,
+            @PathVariable("postId") int postId) {
+                System.out.println("Like post request for post ID: " + postId);
         String username = jwtService.extractUsername(jwt);
+
         if (!userRepo.existsByUsername(username)) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
-        int userID = userRepo.findByUsername(username).getId();
-        if (!postRepo.existsById(PostId)) {
+
+        int userId = userRepo.findByUsername(username).getId();
+
+        if (!postRepo.existsById(postId)) {
             return ResponseEntity.status(404).body(Map.of("message", "Post not found"));
         }
-        LikesStruct likesSave = new LikesStruct();
 
-        LikesStruct existingLike = likesRepo.findByPostIdAndUserId(PostId, userID);
+        LikesStruct like = likesRepo.findByPostIdAndUserId(postId, userId);
 
-        if (existingLike.getLiked()) {
-            likesSave.setLiked(false);
-        } else {
-            likesSave.setLiked(true);
+        // If no like exists → create new
+        if (like == null) {
+            like = new LikesStruct();
+            like.setPostId(postId);
+            like.setUserId(userId);
+            like.setLiked(true);
+            likesRepo.save(like);
+
+            return ResponseEntity.ok(Map.of("message", "Liked"));
         }
-        likesSave.setPostId(PostId);
-        likesSave.setUserId(userID);
-        likesRepo.save(likesSave);
 
-        return ResponseEntity.ok(Map.of("message", "Post liked successfully"));
+        // Toggle like
+        like.setLiked(!like.getLiked());
+        likesRepo.save(like);
 
+        if (like.getLiked()) {
+            return ResponseEntity.ok(Map.of("message", "Liked"));
+        } else {
+            return ResponseEntity.ok(Map.of("message", "Unliked"));
+        }
     }
 
-    @GetMapping("/get-like/{post-id}")
+    @GetMapping("/likes/count/{post-id}")
     public ResponseEntity<Map<String, Object>> getLikes(@PathVariable("post-id") String postId,
             @CookieValue("jwt") String jwt) {
         String username = jwtService.extractUsername(jwt);

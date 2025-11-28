@@ -1,0 +1,253 @@
+/* === Global & Reset === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.user-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f9f9fb;
+  min-height: 100vh;
+  color: #1a1a1a;
+}
+
+/* === Header === */
+.user-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(110, 142, 251, 0.3);
+}
+
+.user-meta {
+  flex: 1;
+  min-width: 200px;
+}
+
+.user-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #1a1a1a;
+}
+
+.meta-sub {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+  align-self: center;
+}
+
+/* === Buttons === */
+.btn {
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.follow-btn {
+  background-color: #2563eb;
+  color: white;
+}
+
+.follow-btn:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.follow-btn:disabled {
+  background-color: #10b981;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.report-btn {
+  background-color: transparent;
+  color: #dc2626;
+  border: 2px solid #fecaca;
+}
+
+.report-btn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* === Main Content === */
+.user-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.notification.error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border-left: 4px solid #ef4444;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1);
+}
+
+/* === Sections === */
+section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+section h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+section h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  background: #6e8efb;
+  border-radius: 2px;
+}
+
+.bio {
+  line-height: 1.7;
+  color: #444;
+  font-size: 1rem;
+}
+
+/* === Posts List === */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-item {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background-color: #f8f9ff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.post-item:hover {
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.1);
+}
+
+.post-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1e40af;
+}
+
+.post-content {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.no-posts {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* === Responsive Design === */
+@media (max-width: 640px) {
+  .user-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-actions {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 1.75rem;
+  }
+
+  .user-name {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-container {
+    padding: 0.5rem;
+  }
+
+  section {
+    padding: 1rem;
+  }
+
+  .user-header {
+    padding: 1rem;
+  }
+}

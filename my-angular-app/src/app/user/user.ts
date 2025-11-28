@@ -1,0 +1,168 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-user',
+  imports: [CommonModule, HttpClientModule, FormsModule],
+  templateUrl: './user.html',
+  styleUrls: ['./user.css'],
+})
+export class User {
+  usernameParam: string | null = null;
+  profile: any = { username: '', bio: '', age: null, id: null };
+  posts: any[] = [];
+  errorMessage = '';
+  isFollowing = false;
+  reporting = false;
+  token: any;
+  dbuser: any;
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {}
+
+  middleware() {
+    const apiMiddleware = 'http://localhost:8080/middleware';
+    this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
+      (response: any) => {
+        console.log('Authentication successful:', response.username, this.usernameParam);
+
+        this.token = response.token;
+        this.dbuser = response.username;
+      },
+      (error) => {
+        console.log('Authentication error:', error);
+
+        if (error.status === 401 || error.status === 403) {
+          console.log('Unauthorized - redirecting to login');
+          this.router.navigate(['/login']);
+        } else {
+          console.log('Authentication failed with status:', error.status);
+          this.showNotification('Authentication failed - please refresh the page');
+          this.router.navigate(['/login']);
+        }
+      }
+    );
+  }
+
+  ngOnInit() {
+    this.middleware();
+    this.route.paramMap.subscribe((params) => {
+      this.usernameParam = params.get('username');
+
+      if (this.usernameParam) {
+        this.loadProfile(this.usernameParam);
+      }
+    });
+  }
+
+  loadProfile(username: string) {
+    const api = `http://localhost:8080/profile/user/${username}`;
+    this.http.get(api, { withCredentials: true }).subscribe(
+      (response: any) => {
+        console.log(response);
+        
+        this.profile.username = response.username;
+
+        this.profile.bio = response.bio;
+        this.profile.age = response.age;
+        this.profile.id = response.id;
+        this.posts = response.posts || [];
+        this.checkIfFollowing();
+      },
+      (error) => {
+        console.error('Error loading profile:', error.error);
+        this.showNotification(error.error?.message || 'Loading profile failed');
+      }
+    );
+  }
+
+  checkIfFollowing(): boolean {
+    const apiMiddleware = 'http://localhost:8080/middleware';
+    this.http.get(apiMiddleware, { withCredentials: true }).subscribe((response: any) => {
+      const currentUserId = response.username;
+      const api = `http://localhost:8080/followers/get-follow/${this.profile.username}`;
+      this.http.get(api, { withCredentials: true }).subscribe(
+        (subscriptions: any) => {
+          console.log('suub', subscriptions);
+
+          this.isFollowing = subscriptions.isFollowing;
+        },
+        (error) => {
+          console.error('Error checking subscriptions:', error);
+          return false;
+        }
+      );
+    });
+    return this.isFollowing;
+  }
+
+  follow() {
+    console.log('token', this.token);
+    if (!this.profile.username) {
+      this.showNotification('Profile not loaded');
+      return;
+    }
+
+    var checkfollow = this.checkIfFollowing();
+    console.log(checkfollow);
+    
+    if (checkfollow == true) {
+      this.http.delete(`http://localhost:8080/followers/unfollow/${this.profile.username}`, {
+          withCredentials: true,
+        })
+        .subscribe(
+          (res: any) => {
+            console.log('Unfollow response:', res);
+            this.isFollowing = !this.isFollowing;
+            this.showNotification(res.message || (this.isFollowing ? 'Followed' : 'Unfollowed'));
+          },
+          (err) => {
+            console.error('Unfollow error:', err.error);
+            this.showNotification(err.error?.message || 'Unfollow failed');
+          }
+        );
+      return;
+    }
+
+    const api = `http://localhost:8080/followers/follow/${this.profile.username}`;
+    this.http.post(api, {}, { withCredentials: true }).subscribe(
+      (res: any) => {
+        console.log('Follow response:', res);
+        this.isFollowing = !this.isFollowing;
+        this.showNotification(res.message || (this.isFollowing ? 'Followed' : 'Unfollowed'));
+      },
+      (err) => {
+        console.error('Follow error:', err.error);
+        this.showNotification(err.error?.message || 'Follow failed');
+      }
+    );
+  }
+
+  reportProfile() {
+    
+    const confirmReport = window.prompt('Please enter report reason (optional):', '');
+    if (confirmReport === null) return; // user cancelled
+
+    const api = `http://localhost:8080/reports/create/${this.profile.username}`;
+    const payload = { reason: confirmReport };
+    this.http.post(api, payload, { withCredentials: true }).subscribe(
+      (res: any) => {
+        this.showNotification(res?.message || 'Report submitted');
+      },
+      (err) => {
+        console.error('Report error:', err.error);
+        this.showNotification(err.error?.message || 'Report failed');
+      }
+    );
+  }
+
+  goToPost(postId: number) {
+    this.router.navigate(['/post', postId]);
+  }
+
+  showNotification(message: any) {
+    this.errorMessage = message;
+    setTimeout(() => (this.errorMessage = ''), 4000);
+  }
+}
