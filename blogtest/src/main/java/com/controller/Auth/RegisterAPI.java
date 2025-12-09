@@ -4,6 +4,7 @@ package com.controller.Auth;
 import com.dto.RegisterRequestDTO;
 import com.services.UserService;
 
+import jakarta.validation.Valid;
 
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class RegisterAPI {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> Register(@RequestBody RegisterRequestDTO user) {
+    public ResponseEntity<Map<String, String>> Register(@Valid @RequestBody RegisterRequestDTO user) {
             userService.registerUser(user);
             
         return ResponseEntity

@@ -1,8 +1,10 @@
 package com.controller.Likes;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Model.LikesStruct;
+import com.Model.UserStruct;
 import com.Repository.LikesRepo;
 import com.Repository.PostRepo;
 import com.Repository.UserRepo;
@@ -61,6 +64,32 @@ public class Likes {
         List<LikesStruct> likes = likesRepo.findByPostId(PostId);
         long likeCount = likes.stream().filter(LikesStruct::getLiked).count();
         return ResponseEntity.ok(Map.of("likeCount", likeCount));
+    }
+
+    @GetMapping("/get-all-my-liked-posts")
+    public ResponseEntity<Map<String, Object>> myLikedPosts(@CookieValue("jwt") String jwt) {
+        String username = jwtService.extractUsername(jwt);
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid JWT"));
+        }
+
+        UserStruct user = userRepo.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found"));
+        }
+
+        List<LikesStruct> likes = likesRepo.findAllByUserIdAndLikedTrue(user.getId());
+
+        List<Integer> likedPostIds = likes.stream()
+                .map(like -> like.getPost().getId())
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("likedPosts", likedPostIds);
+
+        return ResponseEntity.ok(response);
     }
 
 }

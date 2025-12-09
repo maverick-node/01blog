@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dto.CreateCommentDTO;
 import com.services.CommentService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping
 public class CommentController {
@@ -23,7 +25,7 @@ public class CommentController {
     }
 
     @PostMapping("/create-comment")
-    public ResponseEntity<?> create(
+    public ResponseEntity<?> create(@Valid 
             @RequestBody CreateCommentDTO dto,
             @CookieValue("jwt") String jwt) {
         System.out.println("Create comment request received: " + dto);

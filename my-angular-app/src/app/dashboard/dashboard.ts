@@ -54,12 +54,13 @@ export class Dashboard {
   newComment: { [key: string]: string } = {};
   posts: any[] = [];
   errorMessage = '';
-previewType:any;
-  constructor(private http: HttpClient, private router: Router) {}
+  previewType: any;
+  postid: any[] = [];
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit() {
     this.middleware();
-    
+    this.loadNotifications()
     this.getToken();
     this.getUsernames();
   }
@@ -72,6 +73,7 @@ previewType:any;
         this.userRole = (response.role || 'user').toLowerCase();
         console.log(this.userRole);
         this.loadPosts();
+        this.loadLikesPosts() 
         return true;
       },
       (error: any) => {
@@ -100,14 +102,21 @@ previewType:any;
       (response: any) => {
         console.log(response);
 
+
         this.posts = response;
         this.posts.forEach((p: any) => {
-          this.likedPosts[p.id] = this.likedPosts[p.id] || false;
+        
           this.likeCounts[p.id] = this.likeCounts[p.id] || 0;
+          this.postid.push(p.id)
 
           this.loadLikeCount(p.id);
         });
+        console.log("postid", this.likeCounts);
+        this.getallcomments()
+
+
       },
+
       (error: any) => {
         this.showNotification(error.error.message);
       }
@@ -179,25 +188,25 @@ previewType:any;
   }
   @ViewChild('usersScroll') usersScroll!: ElementRef;
 
-scrollUsersLeft() {
-  this.usersScroll.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
-}
+  scrollUsersLeft() {
+    this.usersScroll.nativeElement.scrollBy({ left: -200, behavior: 'smooth' });
+  }
 
-scrollUsersRight() {
-  this.usersScroll.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
-}
+  scrollUsersRight() {
+    this.usersScroll.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
+  }
 
 
 
-isMobile = window.innerWidth < 1100;
+  isMobile = window.innerWidth < 1100;
 
-@HostListener('window:resize')
-onResize() {
-  this.isMobile = window.innerWidth < 1100;
-}
-getAvatarUrl(seed: string): string {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-}
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth < 1100;
+  }
+  getAvatarUrl(seed: string): string {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
   showNotification(message: any) {
     this.errorMessage = message;
     setTimeout(() => {
@@ -209,7 +218,7 @@ getAvatarUrl(seed: string): string {
     const apiUsernames = 'http://localhost:8080/get-users';
     this.http.get(apiUsernames, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log("sss",response.users);
+        console.log("sss", response.users);
         //exclude my username from the list
         this.allusernames = response.users
           .map((u: any) => u.username)
@@ -228,39 +237,39 @@ getAvatarUrl(seed: string): string {
     }
     this.router.navigate(['/users', username]);
   }
-createPost() {
-  const formData = new FormData();
+  createPost() {
+    const formData = new FormData();
 
-  // Send title & content as JSON string under "post"
-  formData.append(
-    'post',
-    JSON.stringify({
-      title: this.newPost.title,
-      content: this.newPost.content,
-    })
-  );
+    // Send title & content as JSON string under "post"
+    formData.append(
+      'post',
+      JSON.stringify({
+        title: this.newPost.title,
+        content: this.newPost.content,
+      })
+    );
 
-  // Send ALL selected images (multiple!)
-  if (this.selectedFiles && this.selectedFiles.length > 0) {
-    this.selectedFiles.forEach((file: File) => {
-      formData.append('media', file);  // same name → becomes array in Spring
+    // Send ALL selected images (multiple!)
+    if (this.selectedFiles && this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach((file: File) => {
+        formData.append('media', file);  // same name → becomes array in Spring
+      });
+    }
+
+    const apiCreatePost = 'http://localhost:8080/create-post';
+
+    this.http.post(apiCreatePost, formData, { withCredentials: true }).subscribe({
+      next: () => {
+        this.showNotification('Post created with images!');
+        this.newPost = { title: '', content: '' };
+        this.selectedFiles = [];
+        this.loadPosts();
+      },
+      error: (error: any) => {
+        this.showNotification(error.error?.message || 'Failed to create post');
+      }
     });
   }
-
-  const apiCreatePost = 'http://localhost:8080/create-post';
-
-  this.http.post(apiCreatePost, formData, { withCredentials: true }).subscribe({
-    next: () => {
-      this.showNotification('Post created with images!');
-      this.newPost = { title: '', content: '' };
-      this.selectedFiles = [];
-      this.loadPosts();
-    },
-    error: (error: any) => {
-      this.showNotification(error.error?.message || 'Failed to create post');
-    }
-  });
-}
 
   addComment(postId: string) {
     const commentText = this.newComment[postId];
@@ -295,19 +304,19 @@ createPost() {
       }
     );
   }
-showComments: { [key: string]: boolean } = {};
+  showComments: { [key: string]: boolean } = {};
 
-toggleComments(postId: string | number) {
-  const id = String(postId); // ← THIS IS THE KEY FIX
+  toggleComments(postId: string | number) {
+    const id = String(postId); // ← THIS IS THE KEY FIX
 
-  // Toggle visibility
-  this.showComments[id] = !this.showComments[id];
+    // Toggle visibility
+    this.showComments[id] = !this.showComments[id];
 
-  // Load comments only when opening AND not already loaded
-  if (this.showComments[id] && (!this.comments[id] || this.comments[id].length === 0)) {
-    this.getComments(id);
+    // Load comments only when opening AND not already loaded
+    if (this.showComments[id] && (!this.comments[id] || this.comments[id].length === 0)) {
+      this.getComments(id);
+    }
   }
-}
 
   viewProfile() {
     this.router.navigate(['/profile']);
@@ -384,22 +393,49 @@ toggleComments(postId: string | number) {
   selectedFiles: File[] = [];
 
 
-previewUrl: string | null = null;
+  previewUrl: string | null = null;
 
-openMediaPreview(path: string, type: string) {
-  this.previewUrl = 'http://localhost:8080' + path;
-  this.previewType = type; // 'image/jpeg' or 'video/mp4'
-}
-
-closePreview() {
-  this.previewUrl = null;
-}
-
-
-onFilesSelected(event: any) {
-  const files = event.target.files;
-  if (files.length > 0) {
-    this.selectedFiles = Array.from(files);
+  openMediaPreview(path: string, type: string) {
+    this.previewUrl = 'http://localhost:8080' + path;
+    this.previewType = type; // 'image/jpeg' or 'video/mp4'
   }
-}
+
+  closePreview() {
+    this.previewUrl = null;
+  }
+
+
+  onFilesSelected(event: any) {
+    const files = event.target.files;
+    if (files.length > 0) {
+      this.selectedFiles = Array.from(files);
+    }
+  }
+
+  getallcomments() {
+    for (let index = 0; index < this.postid.length; index++) {
+      this.getComments(this.postid[index])
+    }
+
+  }
+
+  loadLikesPosts() {
+    const api = "http://localhost:8080/get-all-my-liked-posts"
+    this.http.get(api, { withCredentials: true }).subscribe({
+      next: (res: any) => {
+       
+        
+        res.likedPosts.forEach((post:any) => {
+          this.likedPosts[post] = true;
+         
+        });
+           console.log("sssss",res.likedPosts);
+      },
+      error: (err: any) => {
+        console.log(err);
+
+      },
+    
+    })
+  }
 }

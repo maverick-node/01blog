@@ -52,7 +52,7 @@ public class GetPosts {
         return ResponseEntity.ok(mapPostsToDTOs(posts));
     }
 
-    @GetMapping("/get-post{username}")
+    @GetMapping("/get-posts/{username}")
     public ResponseEntity<?> getuserposts(@CookieValue("jwt") String jwt ,   @PathVariable String username){
 
      

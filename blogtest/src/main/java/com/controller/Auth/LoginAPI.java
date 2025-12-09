@@ -15,6 +15,7 @@ import com.dto.LoginRequestDTO;
 import com.services.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class LoginAPI {

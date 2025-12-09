@@ -11,6 +11,8 @@ public interface LikesRepo extends JpaRepository<LikesStruct, Long>{
     List<LikesStruct> findByPostId(Integer postId);
     LikesStruct findByPostIdAndUserId(int i, int q);
     boolean  existsById(Integer id);
+List<LikesStruct> findAllByUserIdAndLikedTrue(int userId);
+
 
 
 }

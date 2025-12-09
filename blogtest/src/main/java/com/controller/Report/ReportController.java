@@ -31,7 +31,7 @@ public class ReportController {
     }
 
     @PostMapping("/create/{username}")
-    public ResponseEntity<Map<String, String>> createReport(
+    public ResponseEntity<Map<String, String>> createReport( @Valid 
             @PathVariable String username,
             @CookieValue("jwt") String jwt,
             @RequestBody @Valid CreateReportDTO dto) {
@@ -42,7 +42,7 @@ public class ReportController {
     }
 
     @PostMapping("/report-post")
-    public ResponseEntity<Map<String, String>> reportPost(
+    public ResponseEntity<Map<String, String>> reportPost( @Valid 
 
             @CookieValue("jwt") String jwt,
             @RequestBody @Valid CreateReportDTO dto) {

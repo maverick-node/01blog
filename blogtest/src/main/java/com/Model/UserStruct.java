@@ -3,7 +3,8 @@ package com.Model;
 import javax.management.Notification;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 @Data
 @Entity
@@ -27,6 +28,8 @@ public class UserStruct {
     private String bio;
 
     @Column(nullable = false)
+     @Min(value = 13, message = "Age must be at least 13")
+    @Max(value = 100, message = "Age must be less than or equal to 100")
     private int age;
 
     @Column(nullable = false)

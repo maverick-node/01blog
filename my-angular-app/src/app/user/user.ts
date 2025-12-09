@@ -15,7 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 @Component({
   selector: 'app-user',
   imports: [CommonModule, HttpClientModule, FormsModule,
-  MatCardModule,
+    MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
@@ -36,7 +36,7 @@ export class User {
   reporting = false;
   token: any;
   dbuser: any;
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {}
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
 
   middleware() {
     const apiMiddleware = 'http://localhost:8080/middleware';
@@ -78,13 +78,14 @@ export class User {
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
         console.log(response);
-        
-        this.profile.username = response.username;
 
+        this.profile.username = response.username;
+        this.profile.email = response.email;
         this.profile.bio = response.bio;
         this.profile.age = response.age;
         this.profile.id = response.id;
-        this.posts = response.posts || [];
+        this.loadposts(username);
+        this.loadFollowersandFollowing(username)
         this.checkIfFollowing();
       },
       (error) => {
@@ -93,7 +94,20 @@ export class User {
       }
     );
   }
+  loadposts(username: string) {
+    const api = `http://localhost:8080/get-posts/${username}`;
+    this.http.get(api, { withCredentials: true }).subscribe(
+      (response: any) => {
+        console.log(response);
+        this.posts = response || [];
+      },
+      (error) => {
+        console.error('Error loading profile:', error.error);
+        this.showNotification(error.error?.message || 'Loading profile failed');
+      }
+    );
 
+  }
   checkIfFollowing(): boolean {
     const apiMiddleware = 'http://localhost:8080/middleware';
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe((response: any) => {
@@ -123,11 +137,11 @@ export class User {
 
     var checkfollow = this.checkIfFollowing();
     console.log(checkfollow);
-    
+
     if (checkfollow == true) {
       this.http.delete(`http://localhost:8080/followers/unfollow/${this.profile.username}`, {
-          withCredentials: true,
-        })
+        withCredentials: true,
+      })
         .subscribe(
           (res: any) => {
             console.log('Unfollow response:', res);
@@ -157,7 +171,7 @@ export class User {
   }
 
   reportProfile() {
-    
+
     const confirmReport = window.prompt('Please enter report reason (optional):', '');
     if (confirmReport === null) return; // user cancelled
 
@@ -182,10 +196,29 @@ export class User {
     this.errorMessage = message;
     setTimeout(() => (this.errorMessage = ''), 4000);
   }
- goBack() {
+  goBack() {
     window.location.href = '/dashboard';
   }
   getAvatarUrl(seed: string): string {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-}
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
+
+  loadFollowersandFollowing(username: string) {
+
+    const api = `http://localhost:8080/followers/follow/count/${username}`;
+    this.http.get(api, { withCredentials: true }).subscribe(
+      (res: any) => {
+        console.log(res);
+        
+        this.profile.followers = res.followers;
+        this.profile.following = res.following;
+
+      },
+      (error) => {
+        console.error('Error checking subscriptions:', error);
+        return false;
+      }
+    );
+  };
+
 }

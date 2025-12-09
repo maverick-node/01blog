@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.services.JwtService;
 import com.services.PostService;
 
+import jakarta.validation.Valid;
+
 @RestController
 
 public class CreatePost {
@@ -34,7 +36,7 @@ public class CreatePost {
     }
 
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> createPost(
+    public ResponseEntity<Map<String, String>> createPost( @Valid 
             @RequestPart("post") String postJson,
             @RequestPart(value = "media", required = false) MultipartFile[] media,
             @CookieValue("jwt") String jwt) throws Exception {

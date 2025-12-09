@@ -35,7 +35,7 @@ import { Notification } from '../notification/notification';
     MatDividerModule,
 
     Notification
-  // your bell popup
+    // your bell popup
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
@@ -46,7 +46,7 @@ export class Profile implements OnInit {
     email: '',
     age: null,
     bio: '',
-    userRole:''
+    userRole: ''
   };
 
   editProfile: any = {};
@@ -56,50 +56,51 @@ export class Profile implements OnInit {
   loading = false;
   isEditing = false;
   errorMessage = '';
-   dbUser : any;
+  dbUser: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
-    middleware() {
+  constructor(private http: HttpClient, private router: Router) { }
+  middleware() {
     const apiMiddleware = 'http://localhost:8080/middleware';
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       (response: any) => {
         console.log(response);
         this.dbUser = response.username;
+        this.loadFollowersandFollowing(response.username)
       },
       (error) => {
         console.log(error.error);
         this.showNotification(error.error.error);
         window.location.href = '/login';
-   
+
       }
     );
   }
 
   async ngOnInit() {
-    
+
     this.middleware();
     this.loadProfile();
 
   }
-getAvatarUrl(seed: string): string {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-}
+  getAvatarUrl(seed: string): string {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
   loadProfile() {
     this.loading = true;
     const apiMiddleware = 'http://localhost:8080/middleware';
-    
+
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       (response: any) => {
         console.log('Profile loaded:', response);
         this.userProfile.username = response.username || 'User';
-     
+
         // For now, set default values since we don't have a full profile API
         this.userProfile.mail = response.mail || 'user@example.com';
         this.userProfile.age = response.age || null;
         this.userProfile.bio = response.bio || 'No bio available';
         this.userProfile.userRole = response.role
         this.loading = false;
-        
+
         this.loadUserPosts();
       },
       (error) => {
@@ -113,7 +114,7 @@ getAvatarUrl(seed: string): string {
     );
   }
 
-   loadUserPosts() {
+  loadUserPosts() {
     if (!this.userProfile.username) {
       console.log('Username not available yet, skipping post loading');
       return;
@@ -124,7 +125,7 @@ getAvatarUrl(seed: string): string {
       (response: any) => {
         console.log('User posts loaded:', response);
         this.userPosts = response;
-      },  
+      },
       (error) => {
         console.error('Error loading posts:', error);
         this.showNotification('Failed to load posts');
@@ -138,7 +139,20 @@ getAvatarUrl(seed: string): string {
   }
 
   saveProfile() {
-    // For now, just simulate saving since we don't have update API
+    console.log(this.editProfile);
+    
+    const api = 'http://localhost:8080/profile/editmyinfo';
+    this.http.put(api, this.editProfile, { withCredentials: true }).subscribe({
+      next: (res: any) => {
+        console.log(res);
+
+      },
+      error: (err: any) => {
+        this.showNotification(err);
+      }
+
+
+    })
     this.userProfile = { ...this.editProfile };
     this.isEditing = false;
     this.showNotification('Profile updated successfully!', 'success');
@@ -160,50 +174,50 @@ getAvatarUrl(seed: string): string {
       this.editPostData = {
         title: post.title,
         content: post.text
-        
+
       };
     }
   }
-savePost(postId: string) {
-  const formData = new FormData();
-  formData.append('title', this.editPostData.title || '');
-  formData.append('content', this.editPostData.content || '');
+  savePost(postId: string) {
+    const formData = new FormData();
+    formData.append('title', this.editPostData.title || '');
+    formData.append('content', this.editPostData.content || '');
 
-  // Send ALL new files (even 10 at once!)
-  if (this.editPostData.newFiles?.length > 0) {
-    this.editPostData.newFiles.forEach((file: File) => {
-      formData.append('file', file); // same name → becomes array in Spring
- 
+    // Send ALL new files (even 10 at once!)
+    if (this.editPostData.newFiles?.length > 0) {
+      this.editPostData.newFiles.forEach((file: File) => {
+        formData.append('file', file); // same name → becomes array in Spring
 
+
+      });
+    }
+
+    // Send IDs to remove
+    this.editPostData.filesToRemove?.forEach((id: number) => {
+      formData.append('removeMediaIds', id.toString());
+    });
+
+    this.http.put(`http://localhost:8080/update-post/${postId}`, formData, {
+      withCredentials: true
+    }).subscribe({
+      next: (res: any) => {
+        // Update local post
+        const idx = this.userPosts.findIndex(p => p.id === postId);
+        if (idx !== -1) {
+          this.userPosts[idx].title = this.editPostData.title;
+          this.userPosts[idx].content = this.editPostData.content;
+          // If backend returns updated media lists
+          this.userPosts[idx].mediaPaths = res.mediaPaths || this.userPosts[idx].mediaPaths;
+          this.userPosts[idx].mediaTypes = res.mediaTypes || this.userPosts[idx].mediaTypes;
+          this.userPosts[idx].mediaIds = res.mediaIds || this.userPosts[idx].mediaIds;
+        }
+        this.editingPostId = null;
+        this.editPostData = { title: '', content: '', currentMedia: [], newFiles: [], filesToRemove: [] };
+        this.showNotification('Post updated!', 'success');
+      },
+      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || 'Error'))
     });
   }
-
-  // Send IDs to remove
-  this.editPostData.filesToRemove?.forEach((id: number) => {
-    formData.append('removeMediaIds', id.toString());
-  });
-
-  this.http.put(`http://localhost:8080/update-post/${postId}`, formData, {
-    withCredentials: true
-  }).subscribe({
-    next: (res: any) => {
-      // Update local post
-      const idx = this.userPosts.findIndex(p => p.id === postId);
-      if (idx !== -1) {
-        this.userPosts[idx].title = this.editPostData.title;
-        this.userPosts[idx].content = this.editPostData.content;
-        // If backend returns updated media lists
-        this.userPosts[idx].mediaPaths = res.mediaPaths || this.userPosts[idx].mediaPaths;
-        this.userPosts[idx].mediaTypes = res.mediaTypes || this.userPosts[idx].mediaTypes;
-        this.userPosts[idx].mediaIds = res.mediaIds || this.userPosts[idx].mediaIds;
-      }
-      this.editingPostId = null;
-      this.editPostData = { title: '', content: '', currentMedia: [], newFiles: [], filesToRemove: [] };
-      this.showNotification('Post updated!', 'success');
-    },
-    error: (err) => this.showNotification('Update failed: ' + (err.error?.message || 'Error'))
-  });
-}
   cancelPostEdit() {
     this.editingPostId = null;
     this.editPostData = {};
@@ -241,76 +255,94 @@ savePost(postId: string) {
       this.errorMessage = '';
     }, 5000);
   }
-// Replace your current methods with these:
+  // Replace your current methods with these:
 
 
-// Remove single file from current media
-removeExistingMedia(index: number) {
-  const fileId = this.editPostData.currentMedia[index].id;
-  this.editPostData.filesToRemove.push(fileId);
-  this.editPostData.currentMedia.splice(index, 1);
-}
+  // Remove single file from current media
+  removeExistingMedia(index: number) {
+    const fileId = this.editPostData.currentMedia[index].id;
+    this.editPostData.filesToRemove.push(fileId);
+    this.editPostData.currentMedia.splice(index, 1);
+  }
 
-// Optional: clear all new files
-clearNewFiles() {
-  this.editPostData.newFiles = [];
-}
+  // Optional: clear all new files
+  clearNewFiles() {
+    this.editPostData.newFiles = [];
+  }
 
 
 
-previewUrl: string | null = null;
-previewType: string | null = null;
+  previewUrl: string | null = null;
+  previewType: string | null = null;
 
-openMediaPreview(path: string, type: string) {
-  this.previewUrl = 'http://localhost:8080' + path;
-  this.previewType = type;
-}
+  openMediaPreview(path: string, type: string) {
+    this.previewUrl = 'http://localhost:8080' + path;
+    this.previewType = type;
+  }
 
-closePreview() {
-  this.previewUrl = null;
-  this.previewType = null;
-}
+  closePreview() {
+    this.previewUrl = null;
+    this.previewType = null;
+  }
 
-// In startEditPost():
-startEditPost(post: any) {
-  this.editingPostId = post.id;
-  this.editPostData = {
-    title: post.title || '',
-    content: post.content || '',
-    currentMedia: (post.mediaPaths || []).map((path: string, i: number) => ({
-      id: post.mediaIds[i],
-      path,
-      type: post.mediaTypes[i]
-    })),
-    newFiles: [] as File[],
-    newFilePreviews: [] as { url: string; type: string; name: string }[],
-    filesToRemove: [] as number[]
-  };
-}
-
-// Real-time preview
-onFilesSelected(event: any) {
-  const files = event.target.files;
-  if (!files?.length) return;
-
-  this.editPostData.newFilePreviews = [];
-  this.editPostData.newFiles = Array.from(files);
-
-  Array.from(files).forEach((file: any) => {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.editPostData.newFilePreviews.push({
-        url: e.target.result,
-        type: file.type,
-        name: file.name
-      });
+  // In startEditPost():
+  startEditPost(post: any) {
+    this.editingPostId = post.id;
+    this.editPostData = {
+      title: post.title || '',
+      content: post.content || '',
+      currentMedia: (post.mediaPaths || []).map((path: string, i: number) => ({
+        id: post.mediaIds[i],
+        path,
+        type: post.mediaTypes[i]
+      })),
+      newFiles: [] as File[],
+      newFilePreviews: [] as { url: string; type: string; name: string }[],
+      filesToRemove: [] as number[]
     };
-    reader.readAsDataURL(file);
-  });
-}
+  }
 
-removeNewFile(index: number) {
-  this.editPostData.newFiles.splice(index, 1);
-  this.editPostData.newFilePreviews.splice(index, 1);
-}
+  // Real-time preview
+  onFilesSelected(event: any) {
+    const files = event.target.files;
+    if (!files?.length) return;
+
+    this.editPostData.newFilePreviews = [];
+    this.editPostData.newFiles = Array.from(files);
+
+    Array.from(files).forEach((file: any) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editPostData.newFilePreviews.push({
+          url: e.target.result,
+          type: file.type,
+          name: file.name
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  removeNewFile(index: number) {
+    this.editPostData.newFiles.splice(index, 1);
+    this.editPostData.newFilePreviews.splice(index, 1);
+  }
+
+  loadFollowersandFollowing(username: string) {
+
+    const api = `http://localhost:8080/followers/follow/count/${username}`;
+    this.http.get(api, { withCredentials: true }).subscribe(
+      (res: any) => {
+        console.log(res);
+
+        this.userProfile.followers = res.followers;
+        this.userProfile.following = res.following;
+
+      },
+      (error) => {
+        console.error('Error checking subscriptions:', error);
+        return false;
+      }
+    );
+  };
 }
