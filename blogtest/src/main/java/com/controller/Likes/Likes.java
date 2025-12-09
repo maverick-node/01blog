@@ -15,6 +15,7 @@ import com.Repository.LikesRepo;
 import com.Repository.PostRepo;
 import com.Repository.UserRepo;
 import com.services.JwtService;
+import com.services.LikesService;
 
 @RestController
 public class Likes {
@@ -22,53 +23,27 @@ public class Likes {
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final JwtService jwtService;
+    private final LikesService likesService;
 
-    public Likes(LikesRepo likesRepo, PostRepo postRepo, UserRepo userRepo, JwtService jwtService) {
+    public Likes(LikesRepo likesRepo, PostRepo postRepo, UserRepo userRepo, JwtService jwtService,
+            LikesService likesService) {
         this.likesRepo = likesRepo;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
+        this.likesService = likesService;
     }
 
     @PostMapping("/like-post/{postId}")
     public ResponseEntity<Map<String, String>> likePost(
             @CookieValue("jwt") String jwt,
             @PathVariable("postId") int postId) {
-                System.out.println("Like post request for post ID: " + postId);
-        String username = jwtService.extractUsername(jwt);
-
-        if (!userRepo.existsByUsername(username)) {
-            return ResponseEntity.status(404).body(Map.of("message", "User not found"));
-        }
-
-        int userId = userRepo.findByUsername(username).getId();
-
-        if (!postRepo.existsById(postId)) {
-            return ResponseEntity.status(404).body(Map.of("message", "Post not found"));
-        }
-
-        LikesStruct like = likesRepo.findByPostIdAndUserId(postId, userId);
-
-        // If no like exists → create new
-        if (like == null) {
-            like = new LikesStruct();
-            like.setPost(postRepo.findById(postId).orElse(null));
-            like.setUser(userRepo.findByUsername(username));
-            like.setLiked(true);
-            likesRepo.save(like);
-
+        System.out.println("Like post request for post ID: " + postId);
+        Boolean liked = likesService.toggleLike(postId, jwt);
+        if (liked == true) {
             return ResponseEntity.ok(Map.of("message", "Liked"));
         }
-
-        // Toggle like
-        like.setLiked(!like.getLiked());
-        likesRepo.save(like);
-
-        if (like.getLiked()) {
-            return ResponseEntity.ok(Map.of("message", "Liked"));
-        } else {
-            return ResponseEntity.ok(Map.of("message", "Unliked"));
-        }
+        return ResponseEntity.ok(Map.of("message", "Unliked"));
     }
 
     @GetMapping("/likes/count/{post-id}")

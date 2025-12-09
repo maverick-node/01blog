@@ -1,4 +1,5 @@
 package com.controller.Comments;
+
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -14,10 +15,9 @@ import com.services.CommentService;
 @RequestMapping
 public class CommentController {
 
-
     private final CommentService commentService;
 
-    public CommentController( CommentService commentService) {
+    public CommentController(CommentService commentService) {
 
         this.commentService = commentService;
     }
@@ -26,7 +26,7 @@ public class CommentController {
     public ResponseEntity<?> create(
             @RequestBody CreateCommentDTO dto,
             @CookieValue("jwt") String jwt) {
-System.out.println("Create comment request received: " + dto);
+        System.out.println("Create comment request received: " + dto);
         commentService.createComment(dto, jwt);
 
         return ResponseEntity.ok(Map.of("message", "Comment created successfully"));

@@ -1,12 +1,17 @@
 package com.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.Exceptions.CommentNotFoundException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.UnauthorizedActionException;
 import com.Model.CommentStruct;
+import com.Model.NotificationStruct;
+import com.Model.UserStruct;
 import com.Repository.CommentRepo;
+import com.Repository.NotificationRepo;
 import com.Repository.PostRepo;
 import com.Repository.UserRepo;
 import com.dto.CreateCommentDTO;
@@ -18,12 +23,17 @@ public class CommentService {
     private final CommentRepo commentRepo;
     private final JwtService jwtService;
     private final UserRepo userRepo;
+    private final IsFollowingService isFollowingService;
+    private final NotificationRepo notificationRepo;
 
-    public CommentService(PostRepo postRepo, CommentRepo commentRepo, JwtService jwtService, UserRepo userRepo) {
+    public CommentService(PostRepo postRepo, CommentRepo commentRepo, JwtService jwtService, UserRepo userRepo,
+            IsFollowingService isFollowingService, NotificationRepo notificationRepo) {
         this.postRepo = postRepo;
         this.commentRepo = commentRepo;
         this.jwtService = jwtService;
         this.userRepo = userRepo;
+        this.isFollowingService = isFollowingService;
+        this.notificationRepo = notificationRepo;
     }
 
     public void deleteComment(Integer commentId, String jwt) {
@@ -64,7 +74,7 @@ public class CommentService {
         commentRepo.save(comment);
     }
 
-    public CommentStruct createComment(CreateCommentDTO dto, String jwt) {
+    public void createComment(CreateCommentDTO dto, String jwt) {
         String username = jwtService.extractUsername(jwt);
         if (username == null || username.isEmpty()) {
             throw new InvalidJwtTokenException("Invalid JWT token");
@@ -83,10 +93,26 @@ public class CommentService {
         comment.setComment(dto.getContent());
         comment.setCreatedAt(dto.getCreatedAt());
 
-        
+        commentRepo.save(comment);
 
+        List<UserStruct> allusers = userRepo.findAll();
 
-        return commentRepo.save(comment);
+        for (UserStruct usernames : allusers) {
+            if (isFollowingService.CheckIfFollow( usernames.getUsername(), username)) {
+                UserStruct recipient = userRepo.findByUsername(usernames.getUsername());
+                if (recipient != null) {
+                    NotificationStruct notif = new NotificationStruct();
+                    notif.setUser(recipient);
+                    notif.setFromUser(userRepo.findByUsername(username));
+                    notif.setType("comment");
+                    notif.setMessage("New comment created");
+                    notif.setCreatedAt(dto.getCreatedAt());
+                    notificationRepo.save(notif);
+                }
+            }
+        }
+        return;
+
     }
 
     private boolean isBanned(String username) {

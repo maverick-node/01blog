@@ -12,6 +12,7 @@ import com.Exceptions.*;
 import com.Model.*;
 import com.Repository.*;
 import com.dto.CreatePostDTO;
+import com.services.*;;
 
 @Service
 @Transactional
@@ -24,24 +25,25 @@ public class PostService {
     private final NotificationRepo notificationRepo;
     private final JwtService jwtService;
     private final FileRepo fileRepo;
+    private final IsFollowingService isFollowingService;
 
     public PostService(PostRepo postRepo,
-                       UserRepo userRepo,
-                       NotificationRepo notificationRepo,
-                       JwtService jwtService,
-                       FileRepo fileRepo) {
+            UserRepo userRepo,
+            NotificationRepo notificationRepo,
+            JwtService jwtService,
+            FileRepo fileRepo, IsFollowingService isFollowingService) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.notificationRepo = notificationRepo;
         this.jwtService = jwtService;
         this.fileRepo = fileRepo;
+        this.isFollowingService = isFollowingService;
     }
 
     // ===================== CREATE POST (MULTIPLE FILES) =====================
     public void createPost(CreatePostDTO dto, MultipartFile[] mediaFiles, String jwt) {
         String username = jwtService.extractUsername(jwt);
         UserStruct user = userRepo.findByUsername(username);
-                
 
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new InvalidPostException("Content is required");
@@ -69,22 +71,29 @@ public class PostService {
 
         postRepo.save(post);
 
-        // Optional: Notification logic (keep if you need it)
-        if (dto.getAuthor() != null && !dto.getAuthor().isBlank() && !user.getUsername().equals(dto.getAuthor())) {
-            UserStruct recipient = userRepo.findByUsername(dto.getAuthor());
-            if (recipient != null) {
-                NotificationStruct notif = new NotificationStruct();
-                notif.setUser(recipient);
-                notif.setFromUser(user);
-                notif.setType("post");
-                notif.setMessage("New post created");
-                notif.setCreatedAt(dto.getCreatedAt());
-                notificationRepo.save(notif);
+        // get all users
+        List<UserStruct> allusers = userRepo.findAll();
+
+        for (UserStruct usernames : allusers) {
+        
+            if (isFollowingService.CheckIfFollow(usernames.getUsername(), user.getUsername())) {
+                UserStruct recipient = userRepo.findByUsername(usernames.getUsername());
+                if (recipient != null) {
+                    NotificationStruct notif = new NotificationStruct();
+                    notif.setUser(recipient);
+                    notif.setFromUser(user);
+                    notif.setType("post");
+                    notif.setMessage("New post created");
+                    notif.setCreatedAt(dto.getCreatedAt());
+                    notificationRepo.save(notif);
+                }
             }
         }
+
     }
 
-    // ===================== UPDATE POST (MULTIPLE FILES + REMOVE) =====================
+    // ===================== UPDATE POST (MULTIPLE FILES + REMOVE)
+    // =====================
     public PostsStruct updatePostWithMultipleMedia(
             Integer postId,
             String title,
@@ -95,8 +104,7 @@ public class PostService {
 
         String username = jwtService.extractUsername(jwt);
         UserStruct currentUser = userRepo.findByUsername(username);
-            System.out.println(Arrays.toString(newFiles));
-
+        System.out.println(Arrays.toString(newFiles));
 
         if (currentUser.isBanned()) {
             throw new UnauthorizedActionException("You are banned");
@@ -126,9 +134,9 @@ public class PostService {
 
         // Add new files
         if (newFiles != null && newFiles.length > 0) {
-            
+
             for (MultipartFile file : newFiles) {
-             
+
                 if (!file.isEmpty()) {
                     saveFileAndLink(post, file);
                 }
@@ -206,10 +214,10 @@ public class PostService {
     // ===================== BAN CHECK =====================
     private boolean isBanned(String username) {
         UserStruct userrepo = userRepo.findByUsername(username);
-        if (userrepo.isBanned()){
+        if (userrepo.isBanned()) {
             return true;
         }
         return false;
-              
+
     }
 }
