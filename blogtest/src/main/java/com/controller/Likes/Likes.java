@@ -1,5 +1,6 @@
 package com.controller.Likes;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -51,8 +52,8 @@ public class Likes {
         // If no like exists → create new
         if (like == null) {
             like = new LikesStruct();
-            like.setPostId(postId);
-            like.setUserId(userId);
+            like.setPost(postRepo.findById(postId).orElse(null));
+            like.setUser(userRepo.findByUsername(username));
             like.setLiked(true);
             likesRepo.save(like);
 
@@ -82,7 +83,8 @@ public class Likes {
         if (!postRepo.existsById(PostId)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Post not created"));
         }
-        int likeCount = likesRepo.countByPostId(PostId);
+        List<LikesStruct> likes = likesRepo.findByPostId(PostId);
+        long likeCount = likes.stream().filter(LikesStruct::getLiked).count();
         return ResponseEntity.ok(Map.of("likeCount", likeCount));
     }
 

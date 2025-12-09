@@ -12,12 +12,14 @@ public class LikesStruct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "post_id", nullable = false)
-    private Integer postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private PostsStruct post;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserStruct user;
 
     @Column(nullable = false)
-    private Boolean liked;  
+    private Boolean liked;
 }

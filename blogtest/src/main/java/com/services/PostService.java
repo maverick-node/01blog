@@ -1,103 +1,215 @@
 package com.services;
 
-import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 
-import com.Exceptions.InvalidJwtTokenException;
-import com.Exceptions.InvalidPostException;
-import com.Exceptions.PostNotFoundException;
-import com.Exceptions.UnauthorizedActionException;
-import com.Model.NotificationStruct;
-import com.Model.PostsStruct;
-import com.Repository.NotificationRepo;
-import com.Repository.PostRepo;
-import com.Repository.UserRepo;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.Exceptions.*;
+import com.Model.*;
+import com.Repository.*;
 import com.dto.CreatePostDTO;
-import com.Model.UserStruct;
+
 @Service
+@Transactional
 public class PostService {
+
+    private static final String UPLOAD_DIR = "uploads/";
 
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final NotificationRepo notificationRepo;
     private final JwtService jwtService;
+    private final FileRepo fileRepo;
 
-    public PostService(PostRepo postRepo, UserRepo userRepo, NotificationRepo notificationRepo, JwtService jwtService) {
+    public PostService(PostRepo postRepo,
+                       UserRepo userRepo,
+                       NotificationRepo notificationRepo,
+                       JwtService jwtService,
+                       FileRepo fileRepo) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.notificationRepo = notificationRepo;
         this.jwtService = jwtService;
+        this.fileRepo = fileRepo;
     }
 
-    public void createPost(CreatePostDTO dto, String jwt) {
-
+    // ===================== CREATE POST (MULTIPLE FILES) =====================
+    public void createPost(CreatePostDTO dto, MultipartFile[] mediaFiles, String jwt) {
         String username = jwtService.extractUsername(jwt);
-        if (username == null) {
-            throw new InvalidPostException("Invalid JWT token");
-        }
-
         UserStruct user = userRepo.findByUsername(username);
-        if (user == null) {
-            throw new InvalidPostException("User not found");
-        }
-        if (dto.getContent() == null || dto.getContent().isEmpty()) {
+                
+
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new InvalidPostException("Content is required");
         }
-        if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
+        if (dto.getTitle() == null || dto.getTitle().isBlank()) {
             throw new InvalidPostException("Title is required");
         }
+        if (user.isBanned()) {
+            throw new UnauthorizedActionException("You are banned from creating posts");
+        }
+
         PostsStruct post = new PostsStruct();
-        post.setAuthor(username);
+        post.setAuthorUser(user);
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
 
+        // Handle multiple media files
+        if (mediaFiles != null && mediaFiles.length > 0) {
+            for (MultipartFile file : mediaFiles) {
+                if (!file.isEmpty()) {
+                    saveFileAndLink(post, file);
+                }
+            }
+        }
+
         postRepo.save(post);
 
-        // Notification (only if needed)
-        NotificationStruct notif = new NotificationStruct();
-        notif.setUserId(user.getId());
-        notif.setFromUserId(user.getId());
-        notif.setType("post");
-        notif.setMessage("New post created");
-
-        notificationRepo.save(notif);
+        // Optional: Notification logic (keep if you need it)
+        if (dto.getAuthor() != null && !dto.getAuthor().isBlank() && !user.getUsername().equals(dto.getAuthor())) {
+            UserStruct recipient = userRepo.findByUsername(dto.getAuthor());
+            if (recipient != null) {
+                NotificationStruct notif = new NotificationStruct();
+                notif.setUser(recipient);
+                notif.setFromUser(user);
+                notif.setType("post");
+                notif.setMessage("New post created");
+                notif.setCreatedAt(dto.getCreatedAt());
+                notificationRepo.save(notif);
+            }
+        }
     }
 
-    //****************.   Delete Post.  *****************/
-      public void deletePost(Integer postId, String jwt) {
+    // ===================== UPDATE POST (MULTIPLE FILES + REMOVE) =====================
+    public PostsStruct updatePostWithMultipleMedia(
+            Integer postId,
+            String title,
+            String content,
+            MultipartFile[] newFiles,
+            List<Integer> removeMediaIds,
+            String jwt) {
+
         String username = jwtService.extractUsername(jwt);
-        if (username == null || username.isEmpty()) {
-            throw new InvalidJwtTokenException("Invalid JWT token");
-        }
+        UserStruct currentUser = userRepo.findByUsername(username);
+            System.out.println(Arrays.toString(newFiles));
 
-        var postOpt = postRepo.findById(postId);
-        if (postOpt.isEmpty()) {
-            throw new PostNotFoundException("Post not found");
-        }
 
-        var post = postOpt.get();
-        if (!post.getAuthor().equals(username)) {
-            throw new UnauthorizedActionException("You are not the author of this post");
-        }
-
-        postRepo.deleteById(postId);
-    }
-    //****************.   Update Post.  *****************/
-     public PostsStruct updatePost(Integer postId, PostsStruct newContent, String jwt) {
-        String username = jwtService.extractUsername(jwt);
-        if (username == null || username.isEmpty()) {
-            throw new InvalidJwtTokenException("Invalid JWT token");
+        if (currentUser.isBanned()) {
+            throw new UnauthorizedActionException("You are banned");
         }
 
         PostsStruct post = postRepo.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
-        if (!post.getAuthor().equals(username)) {
-            throw new UnauthorizedActionException("You are not the author of this post");
+        if (!post.getAuthorUser().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("You can only edit your own posts");
         }
-        post.setId(postId);
-        post.setTitle(newContent.getTitle());
-        post.setContent(newContent.getContent());
+
+        // Update text
+        post.setTitle(title);
+        post.setContent(content);
+
+        // Remove selected files
+        if (removeMediaIds != null && !removeMediaIds.isEmpty()) {
+            post.getMediaFiles().removeIf(file -> {
+                if (removeMediaIds.contains(file.getId())) {
+                    deleteFileFromDisk(file.getFilePath());
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        // Add new files
+        if (newFiles != null && newFiles.length > 0) {
+            
+            for (MultipartFile file : newFiles) {
+             
+                if (!file.isEmpty()) {
+                    saveFileAndLink(post, file);
+                }
+            }
+        }
 
         return postRepo.save(post);
+    }
+
+    // ===================== DELETE POST =====================
+    public void deletePost(Integer postId, String jwt) {
+        String username = jwtService.extractUsername(jwt);
+        if (username == null || username.isEmpty()) {
+            throw new InvalidJwtTokenException("Invalid JWT token");
+        }
+
+        UserStruct user = userRepo.findByUsername(username);
+        if (user.isBanned()) {
+            throw new UnauthorizedActionException("You are banned");
+        }
+
+        PostsStruct post = postRepo.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        if (!post.getAuthorUser().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Not your post");
+        }
+
+        // Delete all media files from disk
+        if (post.getMediaFiles() != null) {
+            post.getMediaFiles().forEach(file -> deleteFileFromDisk(file.getFilePath()));
+        }
+
+        postRepo.delete(post);
+    }
+
+    // ===================== HELPER: Save file & link to post =====================
+    private void saveFileAndLink(PostsStruct post, MultipartFile file) {
+        try {
+            Path uploadDir = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
+            Path filePath = uploadDir.resolve(filename);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            FileStruct fileStruct = new FileStruct();
+            fileStruct.setFileName(file.getOriginalFilename());
+            fileStruct.setFilePath("/uploads/" + filename);
+            fileStruct.setFileType(file.getContentType());
+            fileStruct.setFileSize(file.getSize());
+            fileStruct.setPost(post);
+
+            post.addMediaFile(fileStruct); // uses helper method
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save file: " + e.getMessage());
+        }
+    }
+
+    // ===================== HELPER: Delete file from disk =====================
+    private void deleteFileFromDisk(String filePath) {
+        if (filePath != null && !filePath.isBlank()) {
+            try {
+                Path path = Paths.get(filePath.replaceFirst("^/uploads/", UPLOAD_DIR));
+                Files.deleteIfExists(path);
+            } catch (IOException e) {
+                System.err.println("Failed to delete file: " + filePath);
+            }
+        }
+    }
+
+    // ===================== BAN CHECK =====================
+    private boolean isBanned(String username) {
+        UserStruct userrepo = userRepo.findByUsername(username);
+        if (userrepo.isBanned()){
+            return true;
+        }
+        return false;
+              
     }
 }

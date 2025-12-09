@@ -5,6 +5,7 @@ import { Dashboard } from './dashboard/dashboard';
 import { Profile } from './profile/profile';
 import { Admin } from './admin/admin';
 import { User } from './user/user';
+import { Notification } from './notification/notification';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },

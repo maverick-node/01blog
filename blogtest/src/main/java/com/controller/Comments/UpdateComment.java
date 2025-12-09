@@ -45,7 +45,7 @@ public class UpdateComment {
                     .body(Map.of("message", "Error: Comment not found!"));
         }
         CommentStruct comment = commentOpt.get();
-        if (!comment.getUsername().equals(username)) {
+        if (!comment.getAuthorUser().getUsername().equals(username)) {
             return ResponseEntity
                     .badRequest()
                     .body(Map.of("message", "Error: You are not the author of this comment!"));

@@ -21,13 +21,20 @@ public class AdminController {
 
     @GetMapping("/reports")
     public List<ReportedDTO> getReports(@CookieValue("jwt") String jwt) {
- 
-        return adminService.getAllReportsNotResolved(jwt);
+        List<ReportedDTO> reports = adminService.getAllReportsNotResolved(jwt);
+        if (reports == null || reports.isEmpty()) {
+            throw new RuntimeException("No reports found");
+        }
+        
+        return reports;
     }
  @GetMapping("/reports-resolved")
     public List<ReportedDTO> getReportsResolved(@CookieValue("jwt") String jwt) {
- 
-        return adminService.getAllReportsResolved(jwt);
+        List<ReportedDTO> reportsResolved = adminService.getAllReportsResolved(jwt);
+        if (reportsResolved.isEmpty()) {
+            throw new RuntimeException("No resolved reports found");
+        }
+        return reportsResolved;
     }
     @PostMapping("/resolve-report")
     public MessageResponseDTO resolveReport(@CookieValue("jwt") String jwt, @RequestBody ResolveReportDTO dto) {
@@ -45,5 +52,15 @@ public class AdminController {
     public MessageResponseDTO deletePost(@CookieValue("jwt") String jwt, @PathVariable Integer postId) {
         adminService.deletePost(jwt, postId);
         return new MessageResponseDTO("Post deleted successfully");
+    }
+    @PostMapping("/ban-user/{username}")
+    public MessageResponseDTO banUser(@CookieValue("jwt") String jwt, @PathVariable String username) {
+        adminService.banUserOrDeban(jwt, username);
+        return new MessageResponseDTO("User banned successfully");
+    }
+    @PostMapping("/reports/{id}/resolve")
+    public MessageResponseDTO resolveReport(@CookieValue("jwt") String jwt, @PathVariable Integer id) {
+        adminService.resolveReport(jwt, id);
+        return new MessageResponseDTO("Report resolved successfully");
     }
 }

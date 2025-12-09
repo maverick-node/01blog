@@ -6,39 +6,43 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Model.NotificationStruct;
-
+import com.Repository.UserRepo;
 import com.dto.NotificationDTO;
 
 import com.services.NotificationService;
+
 @RestController
 @RequestMapping("/notifications")
 public class NotificationController {
-
+    private final UserRepo userRepo;
     private final NotificationService notificationService;
 
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, UserRepo userRepo) {
         this.notificationService = notificationService;
+        this.userRepo = userRepo;
     }
 
-    @GetMapping
+    @GetMapping("/get")
     public ResponseEntity<List<NotificationDTO>> getNotifications(@CookieValue("jwt") String jwt) {
         List<NotificationStruct> notifications = notificationService.getNotifications(jwt);
-
+        int username = notifications.get(0).getFromUser().getId();
+        String name = userRepo.findById(username).get().getUsername();
         List<NotificationDTO> response = notifications.stream()
-                .map(n -> new NotificationDTO(n.getId(), n.getType(), n.getMessage(), n.isRead()))
+                .map(n -> new NotificationDTO(name, n.getId(), n.getType(), n.getMessage(), n.isRead(), n.getCreatedAt()))
                 .toList();
 
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/mark-as-read")
-    public ResponseEntity<Map<String, String>> markAsRead(@CookieValue("jwt") String jwt) {
-        notificationService.markAsRead(jwt);
+    @PostMapping("/mark-as-read/{notificationId}")
+    public ResponseEntity<Map<String, String>> markAsRead(@CookieValue("jwt") String jwt, @PathVariable("notificationId") int notificationId) {
+        notificationService.markAsRead(jwt, notificationId);
         return ResponseEntity.ok(Map.of("message", "Notifications marked as read"));
     }
 }

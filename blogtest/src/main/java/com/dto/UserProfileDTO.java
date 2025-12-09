@@ -10,4 +10,6 @@ public class UserProfileDTO {
     private String email;
     private String bio;
     private int age;
+    private boolean isBanned;
+
 }

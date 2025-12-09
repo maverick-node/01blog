@@ -36,7 +36,7 @@ public class NotificationService {
         return notificationRepo.findByUserId(user.getId());
     }
 
-    public void markAsRead(String jwt) {
+    public void markAsRead(String jwt, int notifid) {
         String username = jwtService.extractUsername(jwt);
         if (username == null || username.isEmpty()) {
             throw new InvalidJwtTokenException("Invalid JWT token");
@@ -46,7 +46,8 @@ public class NotificationService {
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
+        // mark notification read by notification id
 
-        notificationRepo.markAsRead(user.getId());
+        notificationRepo.markNotificationAsReadById(notifid);
     }
 }

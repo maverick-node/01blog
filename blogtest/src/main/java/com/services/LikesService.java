@@ -1,5 +1,7 @@
 package com.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.Exceptions.InvalidJwtTokenException;
@@ -29,10 +31,12 @@ public class LikesService {
     public LikeResponseDTO toggleLike(Integer postId, String jwt) {
 
         String username = jwtService.extractUsername(jwt);
-        if (username == null || username.isEmpty()) throw new InvalidJwtTokenException("Invalid JWT");
+        if (username == null || username.isEmpty())
+            throw new InvalidJwtTokenException("Invalid JWT");
 
         var user = userRepo.findByUsername(username);
-        if (user == null) throw new UserNotFoundException("User not found");
+        if (user == null)
+            throw new UserNotFoundException("User not found");
 
         postRepo.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found"));
 
@@ -45,8 +49,8 @@ public class LikesService {
         } else {
             LikesStruct newLike = new LikesStruct();
             newLike.setLiked(true);
-            newLike.setPostId(postId);
-            newLike.setUserId(user.getId());
+            newLike.setPost(postRepo.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found")));
+            newLike.setUser(user);
             likesRepo.save(newLike);
         }
 
@@ -55,12 +59,16 @@ public class LikesService {
 
     public int getLikeCount(Integer postId, String jwt) {
         String username = jwtService.extractUsername(jwt);
-        if (username == null || username.isEmpty()) throw new InvalidJwtTokenException("Invalid JWT");
+        if (username == null || username.isEmpty())
+            throw new InvalidJwtTokenException("Invalid JWT");
 
         var user = userRepo.findByUsername(username);
-        if (user == null) throw new UserNotFoundException("User not found");
+        if (user == null)
+            throw new UserNotFoundException("User not found");
 
-       postRepo.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found"));
-        return likesRepo.countByPostId(postId);
+        postRepo.findById(postId).orElseThrow(() -> new PostNotFoundException("Post not found"));
+        List<LikesStruct> likes = likesRepo.findByPostId(postId);
+        long likeCount = likes.stream().filter(LikesStruct::getLiked).count();
+        return (int) likeCount;
     }
 }

@@ -3,6 +3,7 @@ package com.services;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -17,9 +18,12 @@ public class WebConfig {
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
-                        .maxAge(3600);
+                        .maxAge(3600)
+                        .exposedHeaders("Content-Range", "Accept-Ranges", "Content-Length", "Content-Type");
+
             }
           
         };
     }
+ 
 }

@@ -1,120 +1,351 @@
-<div class="dashboard-container">
-    <header class="dashboard-header">
-        <h1>Dashboard</h1>
-        <div class="user-info">
-            <span class="username">Welcome, {{ username }}!</span>
-            <div class="header-buttons">
+<!-- dashboard.component.html – FINAL 2025 (IMAGES ONLY + CLICK TO ZOOM) -->
+<div class="dashboard-wrapper">
+  <mat-sidenav-container class="sidenav-container" autosize fullscreen>
+    <!-- LEFT SIDEBAR -->
+    <mat-sidenav #sidenav mode="side" opened class="left-sidenav" fixedInViewport>
+      <div class="logo-container">
+        <svg width="56" height="56" viewBox="0 0 200 200" class="logo-svg">
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8b5cf6" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+          <rect x="30" y="30" width="140" height="140" rx="40" fill="url(#grad1)" />
+          <text
+            x="100"
+            y="125"
+            font-size="110"
+            font-weight="bold"
+            fill="white"
+            text-anchor="middle"
+            dominant-baseline="middle"
+          >
+            B
+          </text>
+        </svg>
+        <div class="logo-text">BlogFlow</div>
+      </div>
 
-                <button class="profile-btn" (click)="viewProfile()">Profile</button>
-                <button *ngIf="userRole === 'admin'" class="admin-panel-btn" (click)="goToAdminPanel()">Admin Panel</button>
-                <button class="logout-btn" (click)="logout()">Logout</button>
-                
-            </div>
+      <div class="sidebar-user">
+        <div
+          class="sidebar-avatar"
+          [style.background-image]="'url(' + getAvatarUrl(username) + ')'"
+        ></div>
+        <div class="user-info-text">
+          <div class="username-sidebar">{{ username }}</div>
+          <div class="role-badge" [class.admin]="userRole === 'admin'">
+            {{ userRole === 'admin' ? 'Admin' : 'Member' }}
+          </div>
         </div>
-    </header>
-<br>
-     <app-notification></app-notification>
-    <main class="dashboard-content">
-        <div *ngIf="errorMessage" class="notification error">
-            {{ errorMessage }}
-        </div>
+      </div>
 
-        <section class="create-post-section">
-            <div class="section-header">
-                <h2>Create New Post</h2>
+      <mat-nav-list>
+        <a mat-list-item routerLinkActive="active" [routerLink]="['/dashboard']">
+          <mat-icon class="right">dashboard</mat-icon>
+          <span class="nav-text-right">Dashboard</span>
+        </a>
+        <a mat-list-item (click)="viewProfile()">
+          <mat-icon class="right">person</mat-icon>
+          <span class="nav-text-right">Profile</span>
+        </a>
+        <a mat-list-item *ngIf="userRole === 'admin'" (click)="goToAdminPanel()">
+          <mat-icon class="right">shield</mat-icon>
+          <span class="nav-text-right">Admin</span>
+        </a>
+        <mat-divider></mat-divider>
+        <a mat-list-item (click)="logout()">
+          <mat-icon class="right" color="white">logout</mat-icon>
+          <span class="nav-text-right">Logout</span>
+        </a>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <!-- MAIN CONTENT -->
+    <mat-sidenav-content class="main-content-area">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button mat-icon-button (click)="sidenav.toggle()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <h1>BlogFlow</h1>
+        <button
+          mat-icon-button
+          [matBadge]="unreadCount > 0 ? unreadCount : null"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+          (click)="toggleNotifications()"
+        >
+          <mat-icon>notifications</mat-icon>
+        </button>
+      </header>
+
+      <!-- NOTIFICATION POPUP -->
+      <div class="notification-popup" *ngIf="showPopup">
+        <div class="notifications-dropdown">
+          <div class="notifications-header">
+            <h3>Notifications</h3>
+          </div>
+          <div *ngIf="!notifications || notifications.length === 0" class="no-notifications">
+            <mat-icon>notifications_off</mat-icon>
+            <p>No new notifications</p>
+          </div>
+          <ul class="notifications-list" *ngIf="notifications?.length">
+            <li
+              *ngFor="let n of notifications"
+              class="notification-item"
+              [class.unread]="!n.read"
+              (click)="markRead(n.id)"
+            >
+              <div
+                class="notification-avatar"
+                [style.background-image]="'url(' + getAvatarUrl(n.username) + ')'"
+              ></div>
+              <div class="notification-content">
+                <div class="notification-username">{{ n.username }}</div>
+                <div class="notification-message">{{ n.message }}</div>
+                <div class="timestamp">{{ n.timestamp || 'Just now' }}</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- HORIZONTAL USERS BAR -->
+      <div class="users-horizontal-bar">
+        <button mat-icon-button (click)="scrollUsersLeft()" class="scroll-btn left">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <div class="users-scroll-container" #usersScroll>
+          <div class="user-bubble" *ngFor="let user of allusernames" (click)="goToUser(user)">
+            <div
+              class="user-avatar-circle"
+              [style.background-image]="'url(' + getAvatarUrl(user) + ')'"
+            >
+              <mat-icon class="online-dot">circle</mat-icon>
             </div>
-        
+            <span class="username-label">{{ user }}</span>
+          </div>
+        </div>
+        <button mat-icon-button (click)="scrollUsersRight()" class="scroll-btn right">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- SCROLLABLE FEED -->
+      <div class="scrollable-feed">
+        <main class="page-content">
+          <!-- Error -->
+          <div *ngIf="errorMessage" class="notification error">{{ errorMessage }}</div>
+
+          <!-- CREATE POST -->
+          <!-- CREATE POST -->
+          <section class="create-post-section">
+            <h2>Create New Post</h2>
             <div class="create-post-form">
-                <input type="text" [(ngModel)]="newPost.title" placeholder="Post title" class="post-input">
-                <textarea [(ngModel)]="newPost.content" placeholder="Write your post content here..." class="post-textarea"></textarea>
-                
-                
-                <button class="create-btn" (click)="createPost()">Create Post</button>
-            </div>
-        </section>
+              <input
+                type="text"
+                [(ngModel)]="newPost.title"
+                placeholder="Title..."
+                class="post-input"
+              />
+              <textarea
+                [(ngModel)]="newPost.content"
+                placeholder="Share something awesome..."
+                class="post-textarea"
+              ></textarea>
 
-        <!-- All Usernames -->
-        <section class="usernames-section">
-            <div class="section-header">
-                <h2>All Usernames</h2>
-                <button class="load-btn" (click)="getUsernames()">Load Usernames</button>
-            </div>
+              <!-- THIS IS THE ONLY CHANGE -->
+              <input
+                type="file"
+                #fileInput
+                multiple
+                (change)="onFilesSelected($event)"
+                accept="image/*,video/*,video/webm,video/ogg"
+                style="display: none"
+              />
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="fileInput.click()"
+                style="margin: 12px 0"
+              >
+                <mat-icon>add_photo_alternate</mat-icon>
+                {{
+                  selectedFiles.length > 0
+                    ? selectedFiles.length + ' images selected'
+                    : 'Add images (up to 10)'
+                }}
+              </button>
+              <!-- END OF CHANGE -->
 
-            <div class="usernames-list" *ngIf="allusernames && allusernames.length > 0">
-                <ul>
-                    <li *ngFor="let name of allusernames">
-                        <button class="username-chip" (click)="goToUser(name)">{{ name }}</button>
-                    </li>
-                </ul>
+              <button mat-raised-button color="primary" (click)="createPost()">
+                <mat-icon>add_circle</mat-icon> Publish
+              </button>
             </div>
+          </section>
 
-            <div class="no-usernames" *ngIf="!allusernames || allusernames.length === 0">
-                <p>No usernames loaded. Click "Load Usernames" to fetch.</p>
-            </div>
-        </section>
+          <!-- POSTS WITH SHOW/HIDE COMMENTS -->
+          <section class="posts-section">
+            <div class="posts-list" *ngIf="posts.length; else noPosts">
+              <mat-card class="post-card" *ngFor="let post of posts">
+                <mat-card-header>
+                  <div
+                    mat-card-avatar
+                    class="avatar-icon"
+                    [style.background-image]="'url(' + getAvatarUrl(post.author) + ')'"
+                  ></div>
+                  <mat-card-title>{{ post.title }}</mat-card-title>
+                  <mat-card-subtitle
+                    >{{ post.author }} •
+                    {{ post.createdAt | date : 'mediumDate' }}</mat-card-subtitle
+                  >
+                </mat-card-header>
 
- 
+                <mat-card-content>
+                  <p class="post-content">{{ post.content }}</p>
 
-        <section class="posts-section">
-            <div class="section-header">
-                <h2>Your Posts</h2>
-                <button class="load-btn" (click)="loadPosts()">Load Posts</button>
-            </div>
-            
-            <div class="posts-list" *ngIf="posts && posts.length > 0">
-                <div class="post-item" *ngFor="let post of posts">
-                    <h4 class="post-author">{{ post.author }}</h4>
-                    <h3 class="post-title">{{ post.title }}</h3>
-                    <div class="post-media" *ngIf="post.mediaUrl">
-                        <img *ngIf="post.mediaType && post.mediaType.startsWith('image')" [src]="'http://localhost:8080' + post.mediaUrl" alt="post media">
-                        <video *ngIf="post.mediaType && post.mediaType.startsWith('video')" controls>
-                            <source [src]="'http://localhost:8080' + post.mediaUrl" [type]="post.mediaType">
-                            Your browser does not support the video tag.
+                  <!-- MULTIPLE IMAGES GRID – CLICK TO FULL SCREEN -->
+                  <!-- MULTIPLE MEDIA GRID – IMAGES + VIDEOS + CLICK TO FULL SCREEN -->
+                  <div class="media-grid" *ngIf="post.mediaPaths?.length > 0">
+                    <div
+                      class="media-item"
+                      *ngFor="let path of post.mediaPaths; let i = index"
+                      (click)="openMediaPreview(path, post.mediaTypes[i])"
+                    >
+                      <!-- Show IMAGE -->
+                      <img
+                        *ngIf="post.mediaTypes[i]?.startsWith('image')"
+                        [src]="'http://localhost:8080' + path"
+                        alt="Post image"
+                        class="post-media"
+                      />
+
+                      <!-- Show VIDEO with play button overlay -->
+                      <div class="video-container" *ngIf="post.mediaTypes[i]?.startsWith('video')">
+                        <video
+                          [src]="'http://localhost:8080' + path"
+                          class="post-media"
+                          preload="metadata"
+                        >
+                          <source
+                            [src]="'http://localhost:8080' + path"
+                            [type]="post.mediaTypes[i]"
+                          />
                         </video>
+                        <div class="play-overlay">
+                          <mat-icon>play_circle</mat-icon>
+                        </div>
+                      </div>
                     </div>
-                    <p class="post-content">{{ post.content }}</p>
-                    <div class="post-actions">
-                        <button class="like-btn" (click)="likePost(post.id)">
-                            <span *ngIf="likedPosts[post.id]">❤️</span>
-                            <span *ngIf="!likedPosts[post.id]">🤍</span>
-                            <span class="like-label">Like</span>
-                            <span class="like-count" *ngIf="likeCounts[post.id] !== undefined">{{ likeCounts[post.id] }}</span>
-                        </button>
-                        <button *ngIf="username != post.author" class="report-btn" (click)="reportPost(post.id)" title="Report this post">
-                            <span class="report-icon">🚩</span>
-                            <span class="report-label">Report</span>
-                        </button>
+                  </div>
+                </mat-card-content>
+
+                <!-- ACTIONS -->
+                <mat-card-actions class="post-actions">
+                  <!-- LIKE BUTTON – FILLED HEART WHEN LIKED -->
+                  <!-- SIMPLE LIKE BUTTON – FILLED RED HEART WHEN LIKED -->
+                  <button mat-icon-button (click)="likePost(post.id)">
+                    <mat-icon [style.color]="likedPosts[post.id] ? '#e11d48' : '#666'">
+                      {{ likedPosts[post.id] ? 'favorite' : 'favorite_border' }}
+                    </mat-icon>
+                    <span class="action-count">{{ likeCounts[post.id] || 0 }}</span>
+                  </button>
+
+                  <!-- SHOW/HIDE COMMENTS BUTTON -->
+                  <button
+                    mat-button
+                    color="primary"
+                    (click)="toggleComments(post.id)"
+                    class="toggle-comments-btn"
+                  >
+                    <mat-icon>{{
+                      showComments[post.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+                    }}</mat-icon>
+                    {{ (comments[post.id] || []).length }} Comment{{
+                      (comments[post.id] || []).length !== 1 ? 's' : ''
+                    }}
+                  </button>
+
+                  <span class="spacer"></span>
+
+                  <button
+                    *ngIf="username !== post.author"
+                    mat-icon-button
+                    color="warn"
+                    (click)="reportPost(post.id)"
+                  >
+                    <mat-icon>flag</mat-icon>
+                  </button>
+                </mat-card-actions>
+
+                <mat-divider></mat-divider>
+
+                <!-- COMMENTS SECTION – COLLAPSIBLE -->
+                <div class="comments-section" *ngIf="showComments[post.id]">
+                  <div class="comment-input-row">
+                    <mat-form-field appearance="outline" class="comment-field">
+                      <textarea
+                        matInput
+                        rows="2"
+                        [(ngModel)]="newComment[post.id]"
+                        placeholder="Add a comment..."
+                      ></textarea>
+                    </mat-form-field>
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="addComment(post.id)"
+                      [disabled]="!newComment[post.id]?.trim()"
+                    >
+                      <mat-icon>send</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="comments-list">
+                    <div class="comment-item" *ngFor="let c of comments[post.id]">
+                      <div
+                        class="comment-avatar"
+                        [style.background-image]="'url(' + getAvatarUrl(c.username) + ')'"
+                      ></div>
+                      <div class="comment-body">
+                        <strong>{{ c.username }}</strong>
+                        <p>{{ c.comment }}</p>
+                        <small>{{ c.createdAt | date : 'short' }}</small>
+                      </div>
                     </div>
-                    
-                    <!-- Comments Section -->
-                    <div class="comments-section">
-                        <div class="comments-header">
-                            <h5 class="comments-title">Comments</h5>
-                            <button class="load-comments-btn" (click)="getComments(post.id)">Load Comments</button>
-                        </div>
-                        
-                        <div class="add-comment">
-                            <textarea [(ngModel)]="newComment[post.id]" placeholder="Add a comment..." class="comment-textarea"></textarea>
-                            <button class="add-comment-btn" (click)="addComment(post.id)" [disabled]="!newComment[post.id]">Add Comment</button>
-                        </div>
-                        
-                        <div class="comments-list" *ngIf="comments[post.id] && comments[post.id].length > 0">
-                            <div class="comment-item" *ngFor="let comment of comments[post.id]">
-                                <div class="comment-author">{{ comment.username }}</div>
-                                <div class="comment-text">{{ comment.comment }}</div>
-                                <div class="comment-date">{{ comment.createdAt }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="no-comments" *ngIf="!comments[post.id] || comments[post.id].length === 0">
-                            <p>No comments yet. Be the first to comment!</p>
-                        </div>
-                    </div>
+                  </div>
                 </div>
+              </mat-card>
             </div>
-            <div class="no-posts" *ngIf="!posts || posts.length === 0">
-                <p>No posts available. Click "Load Posts" to fetch your posts.</p>
-            </div>
-        </section>
-    </main>
+
+            <ng-template #noPosts>
+              <div class="no-data">
+                <mat-icon>info</mat-icon>
+                <p>No posts yet. Start posting!</p>
+              </div>
+            </ng-template>
+          </section>
+        </main>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+
+  <!-- FULL SCREEN IMAGE PREVIEW (Facebook Style) -->
+  <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
+    <div class="media-preview-container" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview" (click)="closePreview()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <img [src]="previewUrl" *ngIf="previewType?.startsWith('image')" class="full-media" />
+      <video
+        [src]="previewUrl"
+        *ngIf="previewType?.startsWith('video')"
+        class="full-media"
+        controls
+        autoplay
+        loop
+      ></video>
+    </div>
+  </div>
 </div>

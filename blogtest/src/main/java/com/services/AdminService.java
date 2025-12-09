@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.springframework.stereotype.Service;
-
 
 import com.Exceptions.ReportNotFoundException;
 import com.Exceptions.UnauthorizedActionException;
@@ -19,7 +17,6 @@ import com.dto.ReportedDTO;
 
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 public class AdminService {
 
@@ -27,12 +24,13 @@ public class AdminService {
     private final UserRepo userRepo;
     private final PostRepo postRepo;
     private final ReportRepo reportRepo;
-
-    public AdminService(JwtService jwtService, UserRepo userRepo, PostRepo postRepo, ReportRepo reportRepo) {
+    private final com.Repository.NotificationRepo notificationRepository;
+    public AdminService(JwtService jwtService, UserRepo userRepo, PostRepo postRepo, ReportRepo reportRepo, com.Repository.NotificationRepo notificationRepository) {
         this.jwtService = jwtService;
         this.userRepo = userRepo;
         this.postRepo = postRepo;
         this.reportRepo = reportRepo;
+        this.notificationRepository = notificationRepository;
 
     }
 
@@ -58,9 +56,9 @@ public class AdminService {
             dto.setReason(r.getReason());
 
             // Reporter
-            if (r.getReporterId() != null) {
+            if (r.getReporter() != null) {
                 dto.setReporterName(
-                        userRepo.findById(r.getReporterId())
+                        userRepo.findById(r.getReporter().getId())
                                 .map(UserStruct::getUsername)
                                 .orElse("Unknown"));
             } else {
@@ -68,15 +66,15 @@ public class AdminService {
             }
 
             // Target User
-            if (r.getTargetUsername() != null) {
-                dto.setTargetUserName(r.getTargetUsername());
+            if (r.getTargetUser() != null) {
+                dto.setTargetUserName(r.getTargetUser().getUsername());
             } else {
                 dto.setTargetUserName("Unknown");
             }
 
             // Post
             dto.setReportedPostId(
-                    r.getReportedPostId() != null ? r.getReportedPostId() : 0);
+                    r.getReportedPost() != null ? r.getReportedPost().getId() : 0);
 
             dto.setCreatedAt(r.getCreatedAt());
 
@@ -93,15 +91,17 @@ public class AdminService {
             throw new ReportNotFoundException("Report not found");
         }
         report.setResolved(true);
-                report.setCreatedAt(LocalDateTime.now());
+        report.setCreatedAt(LocalDateTime.now());
         reportRepo.save(report);
     }
-@Transactional
+
+    @Transactional
     public void deleteUser(String jwt, String username) {
         checkAdmin(jwt);
         if (!userRepo.existsByUsername(username)) {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
+      
         userRepo.deleteByUsername(username);
     }
 
@@ -132,9 +132,9 @@ public class AdminService {
             dto.setReason(r.getReason());
 
             // Reporter
-            if (r.getReporterId() != null) {
+            if (r.getReporter() != null) {
                 dto.setReporterName(
-                        userRepo.findById(r.getReporterId())
+                        userRepo.findById(r.getReporter().getId())
                                 .map(UserStruct::getUsername)
                                 .orElse("Unknown"));
             } else {
@@ -142,15 +142,15 @@ public class AdminService {
             }
 
             // Target User
-            if (r.getTargetUsername() != null) {
-                dto.setTargetUserName(r.getTargetUsername());
+            if (r.getTargetUser() != null) {
+                dto.setTargetUserName(r.getTargetUser().getUsername());
             } else {
                 dto.setTargetUserName("Unknown");
             }
 
             // Post
             dto.setReportedPostId(
-                    r.getReportedPostId() != null ? r.getReportedPostId() : 0);
+                    r.getReportedPost() != null ? r.getReportedPost().getId() : 0);
 
             dto.setCreatedAt(r.getCreatedAt());
 
@@ -160,6 +160,22 @@ public class AdminService {
         System.out.println(dtos.get(0));
 
         return dtos;
+    }
+
+    public void banUserOrDeban(String jwt, String username) {
+        checkAdmin(jwt);
+        UserStruct user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new com.Exceptions.UserNotFoundException("User not found");
+        }
+        if (user.isBanned()) {
+            user.setBanned(false);
+            userRepo.save(user);
+            return;
+        }
+
+        user.setBanned(true);
+        userRepo.save(user);
     }
 
 }

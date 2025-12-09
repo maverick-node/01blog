@@ -30,7 +30,8 @@ public class MiddlewareController {
             user.getMail(),
             user.getBio(),
             user.getAge(),
-            user.getRole()
+            user.getRole(),
+            user.isBanned()
         );
 
         return ResponseEntity.ok(response);

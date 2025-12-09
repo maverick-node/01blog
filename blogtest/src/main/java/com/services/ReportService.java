@@ -52,10 +52,10 @@ public class ReportService {
         }
 
         ReportStruct report = new ReportStruct();
-        report.setReporterId(reporter.getId());
+        report.setReporter(reporter);
         Optional<UserStruct> username = userRepo.findById(targetUser.getId());
         UserStruct getuser = username.get();
-        report.setTargetUsername(getuser.getUsername());
+        report.setTargetUser(getuser);
         report.setReason(dto.getReason());
 
         reportRepo.save(report);
@@ -69,14 +69,14 @@ public class ReportService {
 
         var reporter = userRepo.findByUsername(reporterUsername);
         Optional<PostsStruct> postOwner = postRepo.findById(postId);
-        var reporteduser = postOwner.get().getAuthor();
+        var reporteduser = postOwner.get().getAuthorUser().getUsername();
         if (reporterUsername.equals(reporteduser)) {
             throw new UnauthorizedActionException("You cannot report your own post");
         }
         ReportStruct report = new ReportStruct();
-        report.setTargetUsername(reporteduser);
-        report.setReporterId(reporter.getId());
-        report.setReportedPostId(postId);
+        report.setTargetUser(postOwner.get().getAuthorUser());
+        report.setReporter(reporter);
+        report.setReportedPost(postOwner.get());
         report.setReason(dto.getReason());
 
         reportRepo.save(report);

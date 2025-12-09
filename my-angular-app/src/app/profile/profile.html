@@ -1,124 +1,276 @@
-<div class="profile-container">
-    <!-- Header Section -->
-    <header class="profile-header">
-        <div class="header-content">
-       
-            <button class="back-btn" (click)="goBack()">← Back to Dashboard</button>
-            <h1>User Profile</h1>
-        </div>
-    </header>
-     <app-notification></app-notification>
-    <!-- Main Profile Content -->
-    <main class="profile-content">
-        <div *ngIf="errorMessage" class="notification error">
-            {{ errorMessage }}
-        </div>
+<!-- profile.component.html – FINAL 2025 MASTERPIECE -->
+<div class="profile-wrapper">
 
-        <!-- Loading State -->
-        <div *ngIf="loading" class="loading">
-            <p>Loading profile...</p>
-        </div>
+  <!-- HEADER -->
+  <header class="profile-header">
+    <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Back to Dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>User Profile</h1>
+    <div class="header-spacer"></div>
+  </header>
 
-        <!-- Profile Information -->
-        <div *ngIf="!loading" class="profile-sections">
-            <!-- User Info Section -->
-            <section class="user-info-section">
-                <div class="section-header">
-                    <h2>Personal Information</h2>
-                    <button class="edit-btn" (click)="toggleEdit()" *ngIf="!isEditing">Edit Profile</button>
-                    <div class="edit-actions" *ngIf="isEditing">
-                        <button class="save-btn" (click)="saveProfile()">Save</button>
-                        <button class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+  <app-notification></app-notification>
+
+  <!-- MAIN -->
+  <main class="profile-content">
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="error-alert">
+      <mat-icon>error_outline</mat-icon>
+      {{ errorMessage }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading your profile...</p>
+    </div>
+
+    <!-- PROFILE LOADED -->
+    <div *ngIf="!loading" class="profile-body">
+
+      <!-- USER CARD -->
+      <mat-card class="user-card" appearance="outlined">
+        <mat-card-content class="user-card-content">
+          <div class="avatar-section">
+            <div class="avatar-large"
+                 [style.background-image]="'url(' + getAvatarUrl(userProfile.username) + ')'">
+            </div>
+            <h2>@{{ userProfile.username }}</h2>
+            <p class="user-role" *ngIf="userProfile.userRole === 'admin'">Administrator</p>
+          </div>
+
+          <div class="user-stats">
+            <div class="stat">
+              <strong>{{ userPosts.length }}</strong>
+              <span>Posts</span>
+            </div>
+            <div class="stat">
+              <strong>{{ userProfile.followers || 0 }}</strong>
+              <span>Followers</span>
+            </div>
+            <div class="stat">
+              <strong>{{ userProfile.following || 0 }}</strong>
+              <span>Following</span>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary" (click)="toggleEdit()" *ngIf="!isEditing">
+            <mat-icon>edit</mat-icon> Edit Profile
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- PERSONAL INFO -->
+      <mat-card class="info-card" appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>person</mat-icon> Personal Information
+          </mat-card-title>
+          <div class="card-actions" *ngIf="isEditing">
+            <button mat-flat-button color="primary" (click)="saveProfile()">
+              <mat-icon>save</mat-icon> Save Changes
+            </button>
+            <button mat-button (click)="cancelEdit()">Cancel</button>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="info-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Username</mat-label>
+              <input matInput [value]="userProfile.username" [readonly]="true">
+              <mat-icon matSuffix>verified_user</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput
+                     [value]="isEditing ? editProfile.mail : userProfile.mail"
+                     (input)="isEditing && (editProfile.mail = $any($event.target).value)"
+                     [readonly]="!isEditing"
+                     type="email">
+              <mat-icon matSuffix>mail</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Age</mat-label>
+              <input matInput type="number"
+                     [value]="isEditing ? editProfile.age : userProfile.age"
+                     (input)="isEditing && (editProfile.age = +$any($event.target).value)"
+                     [readonly]="!isEditing">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="bio-field">
+              <mat-label>Bio</mat-label>
+              <textarea matInput rows="4"
+                        [value]="isEditing ? editProfile.bio : userProfile.bio"
+                        (input)="isEditing && (editProfile.bio = $any($event.target).value)"
+                        [readonly]="!isEditing"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- MY POSTS -->
+      <mat-card class="posts-card" appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>article</mat-icon> My Posts ({{ userPosts.length }})
+          </mat-card-title>
+          <button mat-icon-button (click)="loadUserPosts()" matTooltip="Refresh">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+
+          <!-- EMPTY STATE -->
+          <div *ngIf="userPosts.length === 0" class="empty-state">
+            <mat-icon class="big-icon">post_add</mat-icon>
+            <h3>No posts yet</h3>
+            <p>Start sharing your thoughts!</p>
+            <button mat-raised-button color="primary" (click)="goToDashboard()">
+              <mat-icon>add</mat-icon> Create First Post
+            </button>
+          </div>
+
+          <!-- POSTS GRID -->
+          <div class="posts-grid" *ngIf="userPosts.length > 0">
+            <mat-card class="post-item" *ngFor="let post of userPosts" appearance="outlined">
+
+              <!-- VIEW MODE -->
+              <div *ngIf="editingPostId !== post.id">
+
+                <mat-card-header>
+                  <mat-card-title class="post-title">{{ post.title || 'Untitled' }}</mat-card-title>
+                  <mat-card-subtitle>{{ post.createdAt | date:'mediumDate' }}</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <p class="post-preview">
+                    {{ post.content | slice:0:150 }}{{ post.content.length > 150 ? '...' : '' }}
+                  </p>
+
+                  <!-- CLICKABLE MEDIA GRID -->
+                  <div class="media-grid" *ngIf="post.mediaPaths?.length > 0">
+                    <div class="media-item"
+                         *ngFor="let path of post.mediaPaths; let i = index"
+                         (click)="openMediaPreview(path, post.mediaTypes[i])">
+                      <img *ngIf="post.mediaTypes[i]?.startsWith('image')"
+                           [src]="'http://localhost:8080' + path"
+                           alt="Post image" />
+                      <video *ngIf="post.mediaTypes[i]?.startsWith('video')">
+                        <source [src]="'http://localhost:8080' + path" [type]="post.mediaTypes[i]">
+                      </video>
+                      <div class="play-icon" *ngIf="post.mediaTypes[i]?.startsWith('video')">
+                        <mat-icon>play_circle</mat-icon>
+                      </div>
                     </div>
-                </div>
+                  </div>
+                </mat-card-content>
 
-                <div class="user-info-grid">
-                    <!-- Username -->
-                    <div class="info-item">
-                        <label class="info-label">Username</label>
-                        <div *ngIf="!isEditing" class="info-value">{{ userProfile.username }}</div>
-                        <input *ngIf="isEditing" [(ngModel)]="editProfile.username" class="info-input" type="text">
+                <mat-card-actions>
+                  <button mat-stroked-button color="primary" (click)="startEditPost(post)">
+                    <mat-icon>edit</mat-icon> Edit
+                  </button>
+                  <button mat-stroked-button color="warn" (click)="deletePost(post.id)">
+                    <mat-icon>delete</mat-icon> Delete
+                  </button>
+                </mat-card-actions>
+              </div>
+
+              <!-- EDIT MODE -->
+              <div *ngIf="editingPostId === post.id" class="edit-mode">
+
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Title</mat-label>
+                      <input matInput [(ngModel)]="editPostData.title" placeholder="Post title">
+                    </mat-form-field>
+                  </mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Content</mat-label>
+                    <textarea matInput rows="5" [(ngModel)]="editPostData.content"></textarea>
+                  </mat-form-field>
+
+                  <!-- CURRENT MEDIA -->
+                  <div class="current-media-section" *ngIf="editPostData.currentMedia?.length > 0">
+                    <p><strong>Current media:</strong></p>
+                    <div class="media-grid">
+                      <div class="media-item removable" *ngFor="let file of editPostData.currentMedia; let i = index">
+                        <img *ngIf="file.type.startsWith('image')" [src]="'http://localhost:8080' + file.path" />
+                        <video *ngIf="file.type.startsWith('video')" controls>
+                          <source [src]="'http://localhost:8080' + file.path" [type]="file.type">
+                        </video>
+                        <button mat-icon-button color="warn" class="remove-btn"
+                                (click)="removeExistingMedia(i)">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
                     </div>
+                  </div>
 
-                    <!-- Email -->
-                    <div class="info-item">
-                        <label class="info-label">Email</label>
-                        <div *ngIf="!isEditing" class="info-value">{{ userProfile.email }}</div>
-                        <input *ngIf="isEditing" [(ngModel)]="editProfile.mail" class="info-input" type="email">
-                    </div>
+                  <!-- NEW FILES – REAL-TIME PREVIEW -->
+                  <div class="file-upload-section">
+                    <input type="file" #fileInput multiple (change)="onFilesSelected($event)"
+                           accept="image/*,video/*" style="display:none" />
 
-                    <!-- Age -->
-                    <div class="info-item">
-                        <label class="info-label">Age</label>
-                        <div *ngIf="!isEditing" class="info-value">{{ userProfile.age || 'Not specified' }}</div>
-                        <input *ngIf="isEditing" [(ngModel)]="editProfile.age" class="info-input" type="number" min="1" max="150">
-                    </div>
+                    <button mat-stroked-button (click)="fileInput.click()" class="upload-btn">
+                      <mat-icon>photo_library</mat-icon>
+                      {{ editPostData.newFilePreviews.length > 0 
+                         ? editPostData.newFilePreviews.length + ' selected' 
+                         : 'Add photos/videos' }}
+                    </button>
 
-                    <!-- Bio -->
-                    <div class="info-item bio-item">
-                        <label class="info-label">Bio</label>
-                        <div *ngIf="!isEditing" class="info-value bio-value">{{ userProfile.bio || 'No bio available' }}</div>
-                        <textarea *ngIf="isEditing" [(ngModel)]="editProfile.bio" class="info-textarea" placeholder="Tell us about yourself..."></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- My Posts Section -->
-            <section class="my-posts-section">
-                <div class="section-header">
-                    <h2>My Posts</h2>
-                    <button class="load-posts-btn" (click)="loadUserPosts()">Refresh Posts</button>
-                </div>
-
-                <!-- Posts Stats -->
-                <div class="posts-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">{{ userPosts.length }}</span>
-                        <span class="stat-label">Total Posts</span>
-                    </div>
-                </div>
-
-                <!-- Posts List -->
-                <div class="posts-list" *ngIf="userPosts && userPosts.length > 0">
-                    <div class="post-card" *ngFor="let post of userPosts">
-                        <!-- Normal Post View -->
-                        <div *ngIf="editingPostId !== post.id">
-                            <div class="post-header">
-                                <h3 class="post-title">{{ post.title }}</h3>
-                                <span class="post-date">{{ post.createdAt | date:'short' }}</span>
-                            </div>
-<p class="post-excerpt">
-  {{ post.content ? (post.content | slice:0:150) : '' }}
-  {{ post.content && post.content.length > 150 ? '...' : '' }}
-</p>
-                            <div class="post-actions">
-                         
-                                <button class="edit-post-btn" (click)="editPost(post.id)">Edit</button>
-                                <button class="delete-btn" (click)="deletePost(post.id)">Delete</button>
-                            </div>
+                    <!-- INSTANT PREVIEW OF NEW FILES -->
+                    <div class="new-media-preview" *ngIf="editPostData.newFilePreviews.length > 0">
+                      <p><strong>New media:</strong></p>
+                      <div class="media-grid">
+                        <div class="media-item removable" *ngFor="let preview of editPostData.newFilePreviews; let i = index">
+                          <img *ngIf="preview.type.startsWith('image')" [src]="preview.url" />
+                          <video *ngIf="preview.type.startsWith('video')" [src]="preview.url" controls></video>
+                          <button mat-icon-button color="warn" class="remove-btn"
+                                  (click)="removeNewFile(i)">
+                            <mat-icon>close</mat-icon>
+                          </button>
                         </div>
-
-                        <!-- Edit Post View -->
-                        <div *ngIf="editingPostId === post.id" class="edit-post-form">
-                            <div class="post-header">
-                                <input type="text" [(ngModel)]="editPostData.title" class="edit-title-input" placeholder="Post Title">
-                                <span class="post-date">{{ post.createdAt | date:'short' }}</span>
-                            </div>
-                            <textarea [(ngModel)]="editPostData.content" class="edit-text-textarea" placeholder="Write your post content..."></textarea>
-                            <div class="edit-post-actions">
-                                <button class="save-btn" (click)="savePost(post.id)">Save</button>
-                                <button class="cancel-btn" (click)="cancelPostEdit()">Cancel</button>
-                            </div>
-                        </div>
+                      </div>
                     </div>
-                </div>
+                  </div>
+                </mat-card-content>
 
-                <!-- No Posts State -->
-                <div class="no-posts" *ngIf="!userPosts || userPosts.length === 0">
-                    <p>You haven't created any posts yet.</p>
-                    <button class="create-post-btn" (click)="goToDashboard()">Create Your First Post</button>
-                </div>
-            </section>
-        </div>
-    </main>
+                <mat-card-actions>
+                  <button mat-flat-button color="primary" (click)="savePost(post.id)">
+                    <mat-icon>save</mat-icon> Save Changes
+                  </button>
+                  <button mat-button (click)="cancelPostEdit()">Cancel</button>
+                </mat-card-actions>
+              </div>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </main>
+
+  <!-- FULL SCREEN MEDIA PREVIEW -->
+  <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
+    <div class="media-preview-container" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview" (click)="closePreview()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <img [src]="previewUrl" *ngIf="previewType?.startsWith('image')" class="full-media" />
+      
+      <video [src]="previewUrl" *ngIf="previewType?.startsWith('video')" 
+             class="full-media" controls autoplay loop></video>
+    </div>
+  </div>
 </div>

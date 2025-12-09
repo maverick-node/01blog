@@ -4,8 +4,11 @@ import java.util.Map;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dto.LoginRequestDTO;
@@ -13,7 +16,7 @@ import com.services.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@RestController
+@Controller
 public class LoginAPI {
 
     private final AuthService authService;

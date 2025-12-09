@@ -35,6 +35,7 @@ public class ProfileService {
                 user.getMail(),
                 user.getBio(),
                 user.getAge()
+                , user.isBanned()
         );
     }
 }

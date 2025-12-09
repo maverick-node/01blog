@@ -2,10 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-admin',
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule,CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,        // ← ADD THIS LINE
+    MatTableModule,       // ← Also add this for mat-table
+    MatTabsModule,        // ← For mat-tab-group
+    MatChipsModule,       // ← For mat-chip (optional)
+    MatTooltipModule,],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
@@ -17,26 +33,30 @@ export class Admin {
   errorMessage = '';
   reportssolved: any[] = [];
   private token: string = '';
+  bannedUsersCount: number = 0;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, public router: Router) {}
 
   ngOnInit(): void {
     this.checkAuthentication();
   }
-
+getBanText(targetUserName: string): string {
+  const user = this.users.find(u => u.username === targetUserName);
+  return user?.banned ? 'Unban' : 'Ban';
+}
   // Derived lists for template (do not duplicate source of truth)
   get reportedUsers() {
     return (this.reports || []).filter((r: any) => r.reportedPostId == 0);
   }
 
   get reportedPosts() {
- 
-    
-    return (this.reports || []).filter((r: any) => r.reportedPostId !== 0 && r.reportedPostId !== null);
+    return (this.reports || []).filter(
+      (r: any) => r.reportedPostId !== 0 && r.reportedPostId !== null
+    );
   }
 
   get solvedReports() {
-    return (this.reportssolved || []);
+    return this.reportssolved || [];
   }
 
   get unsolvedReports() {
@@ -51,13 +71,12 @@ export class Admin {
     return (this.users || []).length;
   }
 
-
   getsolvedreports() {
     const api = 'http://localhost:8080/admin/reports-resolved';
     this.http.get<any[]>(api, { withCredentials: true }).subscribe(
       (response) => {
         console.log(response);
-        
+
         this.reportssolved = response || [];
       },
       (err) => {
@@ -81,6 +100,8 @@ export class Admin {
           this.loadPosts();
           this.loadReports();
           this.getsolvedreports();
+   
+          
         }
       },
       (error) => {
@@ -88,14 +109,29 @@ export class Admin {
       }
     );
   }
-
+  banUser(username: string) {
+    if (!confirm('Are you sure you want to ban this user?')) return;
+    this.http
+      .post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          alert('User banned successfully');
+        },
+        error: (err) => {
+          console.error('Ban user failed:', err);
+          this.errorMessage = err.error?.message || 'Failed to ban user';
+        },
+      });
+  }
   loadUsers() {
     this.http
       .get<{ users: any[] }>('http://localhost:8080/get-users', { withCredentials: true })
       .subscribe({
         next: (res) => {
-          console.log(res.users);
+   
           this.users = res.users || [];
+                        
+          this.bannedUsersCount = this.users.filter(u => u.banned).length;
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Failed to load users';
@@ -147,19 +183,21 @@ export class Admin {
   }
 
   resolveReport(id: number) {
-    this.http.post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true }).subscribe({
-      next: (res: any) => {
-        // mark report resolved locally (keep in list so it appears under solved reports)
-        const idx = this.reports.findIndex((r) => r.id === id);
-        if (idx !== -1) {
-          this.reports[idx].resolved = true;
-        }
-      },
-      error: (err: any) => {
-        console.error('Resolve report failed:', err);
-        this.errorMessage = err.error?.message || 'Failed to resolve report';
-      },
-    });
+    this.http
+      .post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
+      .subscribe({
+        next: (res: any) => {
+          // mark report resolved locally (keep in list so it appears under solved reports)
+          const idx = this.reports.findIndex((r) => r.id === id);
+          if (idx !== -1) {
+            this.reports[idx].resolved = true;
+          }
+        },
+        error: (err: any) => {
+          console.error('Resolve report failed:', err);
+          this.errorMessage = err.error?.message || 'Failed to resolve report';
+        },
+      });
   }
 
   actionOnUser(targetUsername: string) {
@@ -179,4 +217,16 @@ export class Admin {
       },
     });
   }
+  hidePost(postId: number) {
+  if (confirm('Hide this post? It will no longer be visible to users.')) {
+    this.http.post(`http://localhost:8080/admin/hide-post/${postId}`, {}, { withCredentials: true })
+      .subscribe({
+        next: () => {
+
+          this.loadPosts();
+        },
+        error: () => this.errorMessage ='Failed to hide post'
+      });
+  }
+}
 }

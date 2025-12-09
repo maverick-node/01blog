@@ -12,10 +12,11 @@ import lombok.NoArgsConstructor;
 public class UserDTOMiddle {
     private String username;
    
-    private String email;
+    private String mail;
 
     private String bio;
-
+   
     private int age;
     private String role;
+     private boolean isBanned;
 }

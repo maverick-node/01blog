@@ -10,7 +10,7 @@ import { Renderer2 } from '@angular/core';
   templateUrl: './notification.html',
   styleUrl: './notification.css'
 })
-export class Notification implements OnInit {
+export class Notification {
   showPopup = false;
   notifications: any[] = [];
   unreadCount = 0;
@@ -22,29 +22,12 @@ export class Notification implements OnInit {
   ngOnInit() {
     this.getToken();
     this.loadNotifications();
-    // Move host element to document.body so fixed-position popup won't be clipped
-    // by transformed/stacking-context parents (ensures overlay over whole app).
+
    
   
-    setInterval(() => {
-      if (!this.showPopup) {
-        this.loadNotifications();
-      }
-    }, 30000);
   }
 
-  ngOnDestroy() {
-    // Clean up: remove host from body when component is destroyed
-    try {
-      if (typeof document !== 'undefined' && this.el && this.el.nativeElement) {
-        if (this.el.nativeElement.parentNode === document.body) {
-          this.renderer.removeChild(document.body, this.el.nativeElement);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
+ 
 
   getToken() {
     const apiMiddleware = 'http://localhost:8080/middleware';
@@ -75,11 +58,13 @@ export class Notification implements OnInit {
     }
 
     this.loading = true;
-    const api = 'http://localhost:8080/notifications';
+    const api = 'http://localhost:8080/notifications/get';
     this.http.get(api, { 
-      headers: { 'Authorization': `Bearer ${this.token}` }
+      withCredentials: true
     }).subscribe(
       (response: any) => {
+        console.log("sadfas", response);
+        
         this.notifications = response;
         this.unreadCount = this.notifications.filter(n => !n.read).length;
         this.loading = false;
@@ -94,16 +79,11 @@ export class Notification implements OnInit {
   markAsRead() {
     console.log("markAsRead called (frontend)");
     // ensure we have a token before calling the backend
-    if (!this.token) {
-      this.getToken();
-      // retry shortly after token fetch
-      setTimeout(() => this.markAsRead(), 400);
-      return;
-    }
+    
 
-    const api = `http://localhost:8080/notifications/read`;
+    const api = `http://localhost:8080/notifications/mark-as-read`;
     // backend exposes GET /notifications/read to mark all as read
-    this.http.get(api, { headers: { 'Authorization': `Bearer ${this.token}` } }).subscribe(
+    this.http.post(api, {}, { withCredentials: true }).subscribe(
       (response: any) => {
 
         this.notifications = this.notifications.map(n => ({ ...n, read: true }));

@@ -1,5 +1,6 @@
 package com.controller.Comments;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.events.Comment;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Model.CommentStruct;
 import com.Repository.CommentRepo;
+import com.dto.CommentsDTO;
+import com.dto.CreateCommentDTO;
 import com.services.JwtService;
 
 @RestController
@@ -32,7 +35,18 @@ public class GetComments {
                                 .badRequest()
                                 .body(Map.of("message", "Error: Invalid JWT token Login please!"));
                 }
-         
-                return ResponseEntity.ok(Map.of("comments", commentRepo.findAllByPostId(postId)));
+         List<CommentStruct> comments = commentRepo.findAllByPostId(postId);
+         List<CommentsDTO> commentDTOs = new java.util.ArrayList<>();
+         for (CommentStruct comment : comments) {
+               CommentsDTO dto = new CommentsDTO();
+               
+               dto.setPostId(comment.getPost().getId());
+               dto.setComment(comment.getComment());
+               dto.setUsername(comment.getAuthorUser().getUsername());
+               dto.setCreatedAt(comment.getCreatedAt());
+                 commentDTOs.add(dto);
+
+         }
+                return ResponseEntity.ok(Map.of("comments", commentDTOs));
         }
 }

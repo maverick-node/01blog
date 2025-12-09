@@ -53,14 +53,14 @@ public class FollowersService {
         }
         // Save follower
         FollowersStruct follower = new FollowersStruct();
-        follower.setSubscriberId(currentUser.getId());
-        follower.setTargetId(targetUser.getId());
+        follower.setSubscriber(currentUser);
+        follower.setTarget(targetUser);
         followersRepo.save(follower);
 
         // Save notification
         NotificationStruct notification = new NotificationStruct();
-        notification.setUserId(targetUser.getId());
-        notification.setFromUserId(currentUser.getId());
+        notification.setUser(targetUser);
+        notification.setFromUser(currentUser);
         notification.setType("follow");
         notification.setMessage("New follower added");
         notificationRepo.save(notification);

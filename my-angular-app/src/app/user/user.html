@@ -1,52 +1,132 @@
-<div class="user-container">
-  <header class="user-header">
-    <!-- Avatar -->
-    <div class="avatar">
-      {{ (profile.username || 'U')[0].toUpperCase() }}
-    </div>
+<!-- user.component.html – 2025 ELITE USER PROFILE -->
+<div class="user-profile-wrapper">
 
-    <!-- User Meta -->
-    <div class="user-meta">
-      <h2 class="user-name">{{ profile.username || 'User' }}</h2>
-      <div class="meta-sub">
-        <span *ngIf="profile.age">{{ profile.age }} years old</span>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="user-actions">
-      <button class="btn follow-btn" (click)="follow()">
-        {{ isFollowing ? '✓ Following' : '+ Follow' }}
-      </button>
-      <button class="btn report-btn" (click)="reportProfile()">
-        ⚠ Report
-      </button>
-    </div>
+  <!-- HEADER -->
+  <header class="profile-header">
+    <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Back">
+      <mat-icon>arrow_back_ios_new</mat-icon>
+    </button>
+    <h1>@{{ profile.username || 'Loading...' }}</h1>
+    <div class="header-spacer"></div>
   </header>
 
-  <main class="user-main">
-    <div *ngIf="errorMessage" class="notification error">{{ errorMessage }}</div>
+  <!-- MAIN CONTENT -->
+  <main class="profile-content">
 
-    <section class="profile-info">
-      <h3>About</h3>
-      <p class="bio">{{ profile.bio || 'No bio available.' }}</p>
-    </section>
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="error-alert">
+      <mat-icon>error_outline</mat-icon>
+      {{ errorMessage }}
+    </div>
 
-    <section class="user-posts">
-      <div class="section-header">
-        <h3>Posts by {{ profile.username }}</h3>
-      </div>
+    <!-- PROFILE CARD -->
+    <mat-card class="hero-card" appearance="outlined">
+      <mat-card-content class="hero-content">
 
-      <div *ngIf="posts && posts.length > 0" class="posts-list">
-        <div class="post-item" *ngFor="let post of posts" (click)="goToPost(post.id)">
-          <h4 class="post-title">{{ post.title }}</h4>
-          <p class="post-content">{{ post.text }}</p>
+        <!-- Avatar + Username -->
+        <div class="top-section">
+          <div class="avatar-large"
+               [style.background-image]="'url(' + getAvatarUrl(profile.username) + ')'">
+          </div>
+          <div class="user-info">
+            <h2 class="username">@{{ profile.username }}</h2>
+            <p class="bio" *ngIf="profile.bio">{{ profile.bio }}</p>
+            <p class="no-bio" *ngIf="!profile.bio">No bio yet</p>
+          </div>
         </div>
-      </div>
 
-      <div *ngIf="!posts || posts.length === 0" class="no-posts">
-        <p>No posts from this user yet.</p>
-      </div>
-    </section>
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="value">{{ posts.length }}</div>
+            <div class="label">Posts</div>
+          </div>
+          <div class="stat">
+            <div class="value">{{ profile.followers || 0 }}</div>
+            <div class="label">Followers</div>
+          </div>
+          <div class="stat">
+            <div class="value">{{ profile.following || 0 }}</div>
+            <div class="label">Following</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button mat-raised-button 
+                  [color]="isFollowing ? 'warn' : 'primary'"
+                  (click)="follow()"
+                  class="follow-btn">
+            <mat-icon>{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
+            {{ isFollowing ? 'Unfollow' : 'Follow' }}
+          </button>
+
+          <button mat-stroked-button color="warn" (click)="reportProfile()" class="report-btn">
+            <mat-icon>flag</mat-icon>
+            Report Profile
+          </button>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="info-grid">
+          <div class="info-item">
+            <mat-icon>cake</mat-icon>
+            <span *ngIf="profile.age">Age {{ profile.age }}</span>
+            <span *ngIf="!profile.age" class="muted">Age not set</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>alternate_email</mat-icon>
+            <span class="muted">Private email</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- POSTS SECTION -->
+    <mat-card class="posts-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>grid_on</mat-icon>
+          Posts
+        </mat-card-title>
+        <mat-card-subtitle>{{ posts.length }} posts</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div *ngIf="posts.length === 0" class="empty-posts">
+          <mat-icon class="big-icon">mood_bad</mat-icon>
+          <p>No posts yet</p>
+        </div>
+
+        <!-- POSTS GRID -->
+        <div class="posts-grid" *ngIf="posts.length > 0">
+          <div class="post-item" *ngFor="let post of posts" (click)="goToPost(post.id)">
+            <div class="post-media-container" *ngIf="post.mediaPaths?.length > 0">
+              <img *ngIf="post.mediaTypes[0]?.startsWith('image')"
+                   [src]="'http://localhost:8080' + post.mediaPaths[0]"
+                   class="post-thumb" />
+              <video *ngIf="post.mediaTypes[0]?.startsWith('video')"
+                     class="post-thumb"
+                     preload="metadata">
+                <source [src]="'http://localhost:8080' + post.mediaPaths[0]" [type]="post.mediaTypes[0]">
+              </video>
+              <div class="play-overlay" *ngIf="post.mediaTypes[0]?.startsWith('video')">
+                <mat-icon>play_circle</mat-icon>
+              </div>
+              <div class="media-count" *ngIf="post.mediaPaths.length > 1">
+                <mat-icon>collections</mat-icon>
+                {{ post.mediaPaths.length }}
+              </div>
+            </div>
+
+            <div class="post-info">
+              <h3>{{ post.title || 'Untitled' }}</h3>
+              <p>{{ post.content | slice:0:100 }}{{ post.content.length > 100 ? '...' : '' }}</p>
+              <small class="date">{{ post.createdAt | date:'mediumDate' }}</small>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </main>
 </div>

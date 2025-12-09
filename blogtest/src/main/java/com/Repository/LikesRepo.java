@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface LikesRepo extends JpaRepository<LikesStruct, Long>{
-    Integer countByPostId(int s);
+    List<LikesStruct> findByPostId(Integer postId);
     LikesStruct findByPostIdAndUserId(int i, int q);
     boolean  existsById(Integer id);
 

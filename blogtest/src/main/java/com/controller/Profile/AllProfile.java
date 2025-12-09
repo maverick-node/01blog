@@ -41,7 +41,9 @@ public class AllProfile {
                 u.getMail(),
                 u.getBio(),
                 u.getAge(),
-                u.getRole()
+                u.getRole(),
+                u.isBanned()
+
         ));
     }
 
