@@ -3,6 +3,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+
+import com.Exceptions.UserNotFoundException;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 @Service
@@ -22,7 +25,7 @@ public class JwtService {
 
     public String extractUsername(String token) {
             if (token == null || token.isBlank()) {
-        throw new IllegalArgumentException("You need To login or register");
+        throw new UserNotFoundException("You need To login or register");
     }
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)

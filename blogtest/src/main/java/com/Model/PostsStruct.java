@@ -26,7 +26,8 @@ public class PostsStruct {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
+    @Column(nullable = false)
+    private boolean hidden;
     // Author
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author", nullable = false)
@@ -36,6 +37,7 @@ public class PostsStruct {
     // Likes
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LikesStruct> likes = new ArrayList<>();
+    // hide
 
     // Comments
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,42 +48,38 @@ public class PostsStruct {
     private List<ReportStruct> reports = new ArrayList<>();
 
     // MULTIPLE MEDIA FILES
-    @OneToMany(
-        mappedBy = "post",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
-    )
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FileStruct> mediaFiles = new ArrayList<>();
 
     // HELPER METHODS – keep your frontend working!
     public List<String> getMediaPaths() {
         return mediaFiles != null
-            ? mediaFiles.stream()
+                ? mediaFiles.stream()
                         .map(FileStruct::getFilePath)
                         .toList()
-            : List.of();
+                : List.of();
     }
 
     public List<String> getMediaTypes() {
         return mediaFiles != null
-            ? mediaFiles.stream()
+                ? mediaFiles.stream()
                         .map(FileStruct::getFileType)
                         .toList()
-            : List.of();
+                : List.of();
     }
 
     public List<Integer> getMediaIds() {
         return mediaFiles != null
-            ? mediaFiles.stream()
+                ? mediaFiles.stream()
                         .map(FileStruct::getId)
                         .toList()
-            : List.of();
+                : List.of();
     }
 
     // Helper to add file (maintains both sides of relationship)
     public void addMediaFile(FileStruct file) {
-        if (mediaFiles == null) mediaFiles = new ArrayList<>();
+        if (mediaFiles == null)
+            mediaFiles = new ArrayList<>();
         mediaFiles.add(file);
         file.setPost(this);
     }
@@ -97,5 +95,6 @@ public class PostsStruct {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+            this.hidden = false;
     }
 }

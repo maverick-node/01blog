@@ -21,7 +21,7 @@ public class UserServiceMiddle {
     public UserStruct getUserFromJwt(String jwt) {
         String username = jwtService.extractUsername(jwt);
         if (username == null || username.isEmpty()) {
-            throw new InvalidJwtTokenException("Invalid JWT token");
+            throw new UserNotFoundException("Invalid JWT token");
         }
 
         UserStruct user = userRepo.getUserByUsername(username);

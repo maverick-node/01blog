@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Model.NotificationStruct;
+import com.Model.UserStruct;
 import com.Repository.UserRepo;
 import com.dto.NotificationDTO;
 
@@ -31,17 +32,29 @@ public class NotificationController {
     @GetMapping("/get")
     public ResponseEntity<List<NotificationDTO>> getNotifications(@CookieValue("jwt") String jwt) {
         List<NotificationStruct> notifications = notificationService.getNotifications(jwt);
-        int username = notifications.get(0).getFromUser().getId();
-        String name = userRepo.findById(username).get().getUsername();
+
         List<NotificationDTO> response = notifications.stream()
-                .map(n -> new NotificationDTO(name, n.getId(), n.getType(), n.getMessage(), n.isRead(), n.getCreatedAt()))
+                .map(n -> {
+                    String fromUsername = n.getFromUser() != null ? n.getFromUser().getUsername() : "Unknown";
+                    String toUsername = n.getUser() != null ? n.getUser().getUsername() : "Unknown";
+
+                    return new NotificationDTO(
+                            fromUsername,
+                            n.getId(),
+                            n.getType(),
+                            n.getMessage(),
+                            n.isRead(),
+                            n.getCreatedAt(),
+                            toUsername);
+                })
                 .toList();
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/mark-as-read/{notificationId}")
-    public ResponseEntity<Map<String, String>> markAsRead(@CookieValue("jwt") String jwt, @PathVariable("notificationId") int notificationId) {
+    public ResponseEntity<Map<String, String>> markAsRead(@CookieValue("jwt") String jwt,
+            @PathVariable("notificationId") int notificationId) {
         notificationService.markAsRead(jwt, notificationId);
         return ResponseEntity.ok(Map.of("message", "Notifications marked as read"));
     }

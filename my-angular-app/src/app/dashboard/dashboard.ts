@@ -16,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-dashboard',
   imports: [
+
     CommonModule,
     FormsModule,
     MatCardModule,
@@ -29,7 +30,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSidenavModule,
     MatListModule,
     MatBadgeModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -48,6 +49,12 @@ export class Dashboard {
     title: '',
     content: '',
   };
+
+  showReportBox = false;
+currentPostId: number | null = null;
+
+  reportingPostId: number | null = null;
+  reportReason: string = '';
   likedPosts: { [key: number]: boolean } = {};
   likeCounts: { [key: number]: number } = {};
   comments: { [key: string]: any[] } = {};
@@ -56,11 +63,11 @@ export class Dashboard {
   errorMessage = '';
   previewType: any;
   postid: any[] = [];
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
     this.middleware();
-    this.loadNotifications()
+    this.loadNotifications();
     this.getToken();
     this.getUsernames();
   }
@@ -73,7 +80,7 @@ export class Dashboard {
         this.userRole = (response.role || 'user').toLowerCase();
         console.log(this.userRole);
         this.loadPosts();
-        this.loadLikesPosts() 
+        this.loadLikesPosts();
         return true;
       },
       (error: any) => {
@@ -102,19 +109,15 @@ export class Dashboard {
       (response: any) => {
         console.log(response);
 
-
         this.posts = response;
         this.posts.forEach((p: any) => {
-        
           this.likeCounts[p.id] = this.likeCounts[p.id] || 0;
-          this.postid.push(p.id)
+          this.postid.push(p.id);
 
           this.loadLikeCount(p.id);
         });
-        console.log("postid", this.likeCounts);
-        this.getallcomments()
-
-
+        console.log('postid', this.likeCounts);
+        this.getallcomments();
       },
 
       (error: any) => {
@@ -196,8 +199,6 @@ export class Dashboard {
     this.usersScroll.nativeElement.scrollBy({ left: 200, behavior: 'smooth' });
   }
 
-
-
   isMobile = window.innerWidth < 1100;
 
   @HostListener('window:resize')
@@ -218,14 +219,14 @@ export class Dashboard {
     const apiUsernames = 'http://localhost:8080/get-users';
     this.http.get(apiUsernames, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log("sss", response.users);
+        console.log('sss', response.users);
         //exclude my username from the list
         this.allusernames = response.users
           .map((u: any) => u.username)
           .filter((username: string) => username !== this.username);
       },
       (error: any) => {
-        this.showNotification(error.error?.message || 'Loading usernames failed!');
+        this.showNotification(error.error?.error || 'Loading usernames failed!');
       }
     );
   }
@@ -252,7 +253,7 @@ export class Dashboard {
     // Send ALL selected images (multiple!)
     if (this.selectedFiles && this.selectedFiles.length > 0) {
       this.selectedFiles.forEach((file: File) => {
-        formData.append('media', file);  // same name → becomes array in Spring
+        formData.append('media', file); // same name → becomes array in Spring
       });
     }
 
@@ -260,14 +261,14 @@ export class Dashboard {
 
     this.http.post(apiCreatePost, formData, { withCredentials: true }).subscribe({
       next: () => {
-        this.showNotification('Post created with images!');
+        this.showNotification('Post created !');
         this.newPost = { title: '', content: '' };
         this.selectedFiles = [];
         this.loadPosts();
       },
       error: (error: any) => {
         this.showNotification(error.error?.message || 'Failed to create post');
-      }
+      },
     });
   }
 
@@ -296,11 +297,10 @@ export class Dashboard {
     const apiGetComments = `http://localhost:8080/posts/${postId}/comments`;
     this.http.get(apiGetComments, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log(response);
         this.comments[postId] = response.comments;
       },
       (error: any) => {
-        this.showNotification(error.error?.message || 'Loading comments failed!');
+        this.showNotification(error.error?.error || 'Loading comments failed!');
       }
     );
   }
@@ -312,10 +312,8 @@ export class Dashboard {
     // Toggle visibility
     this.showComments[id] = !this.showComments[id];
 
-    // Load comments only when opening AND not already loaded
-    if (this.showComments[id] && (!this.comments[id] || this.comments[id].length === 0)) {
-      this.getComments(id);
-    }
+    
+    
   }
 
   viewProfile() {
@@ -360,6 +358,8 @@ export class Dashboard {
           console.log('sadfas', response);
 
           this.notifications = response;
+          console.log("noooo",response);
+          
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
         (error: any) => {
@@ -392,7 +392,6 @@ export class Dashboard {
   }
   selectedFiles: File[] = [];
 
-
   previewUrl: string | null = null;
 
   openMediaPreview(path: string, type: string) {
@@ -404,7 +403,6 @@ export class Dashboard {
     this.previewUrl = null;
   }
 
-
   onFilesSelected(event: any) {
     const files = event.target.files;
     if (files.length > 0) {
@@ -414,28 +412,50 @@ export class Dashboard {
 
   getallcomments() {
     for (let index = 0; index < this.postid.length; index++) {
-      this.getComments(this.postid[index])
+      this.getComments(this.postid[index]);
     }
-
   }
 
   loadLikesPosts() {
-    const api = "http://localhost:8080/get-all-my-liked-posts"
+    const api = 'http://localhost:8080/get-all-my-liked-posts';
     this.http.get(api, { withCredentials: true }).subscribe({
       next: (res: any) => {
-       
-        
-        res.likedPosts.forEach((post:any) => {
+        res.likedPosts.forEach((post: any) => {
           this.likedPosts[post] = true;
-         
         });
-           console.log("sssss",res.likedPosts);
+        console.log('sssss', res.likedPosts);
       },
       error: (err: any) => {
         console.log(err);
-
       },
-    
-    })
+    });
   }
+openReportBox(postId: number) {
+  this.currentPostId = postId;
+  this.reportReason = '';
+  this.showReportBox = true;
+}
+
+sendReport() {
+  if (!this.currentPostId) return;
+
+  const payload = {
+    reportedPostId: this.currentPostId,
+    reason: this.reportReason || 'No reason provided'
+  };
+
+  this.http.post('http://localhost:8080/reports/report-post', payload, {
+    withCredentials: true
+  }).subscribe({
+    next: () => {
+      this.showNotification('Post reported successfully');
+      this.showReportBox = false;
+      this.currentPostId = null;
+      this.reportReason = '';
+    },
+    error: () => {
+      this.showNotification('Failed to report post');
+    }
+  });
+}
 }

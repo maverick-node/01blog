@@ -63,4 +63,14 @@ public class AdminController {
         adminService.resolveReport(jwt, id);
         return new MessageResponseDTO("Report resolved successfully");
     }
+      @PostMapping("/reports/hide/{id}")
+    public MessageResponseDTO hidePost(@CookieValue("jwt") String jwt, @PathVariable Integer id, @RequestBody String reports) {
+        adminService.hidePost(jwt, id, reports);
+        return new MessageResponseDTO("Report resolved successfully");
+    }
+        @PostMapping("/reports/unhide/{id}")
+    public MessageResponseDTO unhidePost(@CookieValue("jwt") String jwt, @PathVariable Integer id, @RequestBody String reports) {
+        adminService.unhidePost(jwt, id, reports);
+        return new MessageResponseDTO("Report resolved successfully");
+    }
 }

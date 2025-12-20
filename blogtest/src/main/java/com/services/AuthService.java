@@ -29,12 +29,13 @@ public class AuthService {
         if (user == null) {
             throw new UserNotFoundException("Username not found");
         }
-        if (user.isBanned()) {
-            throw new InvalidCredentialsException("You are  banned");
-            
-        }
+       
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Incorrect password");
+        }
+         if (user.isBanned()) {
+            throw new InvalidCredentialsException("You are  banned");
+            
         }
 
         return jwtService.generateToken(user.getUsername());

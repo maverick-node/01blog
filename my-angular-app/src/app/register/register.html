@@ -1,37 +1,82 @@
-<div class="form">
-  <form (ngSubmit)="register()">
-    <h1>Register</h1>
-    <input
-      type="text"
-      name="username"
-      placeholder="Username"
-      [(ngModel)]="user.username"
-      required
-    />
-    <input type="email" name="mail" placeholder="mail" [(ngModel)]="user.mail" required />
+<div class="register-wrapper">
+  <div class="bg-animation"></div>
 
-    <input
-      type="password"
-      name="password"
-      placeholder="Password"
-      [(ngModel)]="user.password"
-      required
-    />
+  <!-- COMPACT & BEAUTIFUL CARD -->
+  <mat-card class="register-card" appearance="outlined">
+    <mat-card-content class="register-content">
 
-    <input type="number" name="age" placeholder="Age" [(ngModel)]="user.age" required />
+      <!-- LOGO — SMALLER & CLEANER -->
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 100 100" width="72" height="72">
+            <defs>
+              <linearGradient id="regGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#8b5cf6" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="44" fill="white" stroke="url(#regGrad)" stroke-width="3"/>
+            <path d="M28 38 L50 50 L72 38 M28 62 L50 50 L72 62" 
+                  stroke="url(#regGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="8" fill="url(#regGrad)"/>
+          </svg>
+        </div>
+        <h1>Join BlogFlow</h1>
+        <p class="tagline">Create your account</p>
+      </div>
 
-    <textarea name="bio" placeholder="Bio" [(ngModel)]="user.bio" rows="3"></textarea>
+      <form (ngSubmit)="register()" class="register-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput [(ngModel)]="user.username" name="username" required />
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
 
-    <button type="submit">Register</button>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="user.mail" name="mail" type="email" required />
+          <mat-icon matSuffix>alternate_email</mat-icon>
+        </mat-form-field>
 
-    <!-- Notification -->
-    <div *ngIf="errorMessage" class="notification">
-      {{ errorMessage }}
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [(ngModel)]="user.password" name="password" type="password" required />
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Age</mat-label>
+            <input matInput [(ngModel)]="user.age" name="age" type="number" min="13" required />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Bio (optional)</mat-label>
+            <textarea matInput [(ngModel)]="user.bio" name="bio" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" class="register-btn">
+          <mat-icon>person_add</mat-icon>
+          Create Account
+        </button>
+      </form>
+
+      <div class="login-link">
+        <p>Already have an account?</p>
+        <a routerLink="/login" class="login-text">Sign in</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- TOAST -->
+  <div class="toast-container">
+    <div *ngIf="errorMessage" class="toast error" [class.show]="errorMessage">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage }}</span>
+      <button mat-icon-button (click)="errorMessage = ''">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
-
-    <p class="text">
-      Already have an account?
-      <a href="/login" class="login-link">Login</a>
-    </p>
-  </form>
+  </div>
 </div>

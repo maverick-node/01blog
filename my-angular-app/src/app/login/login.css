@@ -1,95 +1,221 @@
-.form {
+/* LOGIN 2025 – PURE WHITE, CLEAN, ELEGANT */
+.login-wrapper {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;  /* horizontally center */
-  align-items: center;      /* vertically center */
-  height: 100vh;            /* full viewport height */
-  background-color: #f4f4f4; /* light background */
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+  background: #f8fafc;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-form{
-      flex-direction: column;
-    display: flex;
-    gap:18px;
-    padding: 30px;
-  border-radius: 12px;
-  background-color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
+/* Pure white background */
+.bg-white {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #dbeafe, #c7d2fe);
+  background-size: 400% 400%;
+  animation: _ngcontent-ng-c1371942906_gradientMove 18s ease infinite;
+  opacity: 0.4;
 }
 
-input {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+/* LOGIN CARD — SNOW WHITE & MODERN */
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 32px !important;
+  background: white;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  border: none !important;
+  overflow: hidden;
+  z-index: 10;
+  position: relative;
 }
 
-/* Button */
-button {
-  padding: 10px;
-  font-size: 16px;
-  color: white;
-  background-color: #007bff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-h1 {
-  margin-bottom: 20px;
-  font-size: 2rem;
-  color: #333;
+.login-content {
+  padding: 3.5rem 2.8rem !important;
   text-align: center;
-  letter-spacing: 1px;
-  font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-
 }
-/* Style for the paragraph */
-.text {
+
+/* MODERN WHITE LOGO */
+.logo {
+  margin-bottom: 2.5rem;
+}
+
+.logo-icon {
+  display: inline-block;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  border-radius: 28px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.logo h1 {
+  font-size: 3.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+  letter-spacing: -1.5px;
+}
+
+.tagline {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 1rem 0 0;
+  font-weight: 500;
+}
+
+/* FORM */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin: 2.5rem 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Material fields — clean white style */
+mat-form-field {
+  font-size: 1.05rem;
+}
+
+.mat-mdc-form-field-outline {
+  color: #cbd5e1 !important;
+}
+
+.mat-mdc-form-field-focus .mat-mdc-form-field-outline-thick {
+  color: #6366f1 !important;
+}
+
+.mat-mdc-input-element {
+  color: #1e293b !important;
+}
+
+.mat-mdc-form-field-label {
+  color: #64748b !important;
+}
+
+.mat-mdc-form-field-focus .mat-mdc-form-field-label {
+  color: #6366f1 !important;
+}
+
+/* LOGIN BUTTON */
+.login-btn {
+  height: 58px !important;
+  border-radius: 50px !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3) !important;
+  margin-top: 1rem;
+}
+
+.login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* BOTTOM TEXT */
+.bottom-text {
+  margin-top: 2.5rem;
+  color: #64748b;
+}
+
+.bottom-text p {
+  margin: 0 0 0.8rem;
   font-size: 1rem;
-  color: #333;
-  font-weight: 400;
-  text-align: center;
-  margin-top: 20px;
 }
 
-/* Style for the "Register" link */
 .register-link {
-  color: #007bff;
+  color: #6366f1;
   font-weight: 600;
   text-decoration: none;
-  padding: 0 5px;
-  transition: color 0.3s ease, text-decoration 0.3s ease;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
-/* Hover effect for "Register" link */
 .register-link:hover {
-  color: #0056b3;
+  color: #4f46e5;
   text-decoration: underline;
 }
 
-/* Focus effect (for accessibility) */
-.register-link:focus {
-  outline: 2px solid #ffcc00;
+/* TOAST — WHITE & CLEAN */
+.toast-container {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  width: 90%;
+  max-width: 420px;
 }
 
-
-.notification {
-
-  color: black;
-  padding: 10px;
-
-  border-radius: 4px;
-  font-size: 14px;
-  text-align: center;
+.toast {
+  background: white;
+  color: #1e293b;
+  padding: 1.2rem 1.6rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-left: 5px solid #ef4444;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.4s ease;
 }
 
-/* Show notification */
-.notification.show {
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-icon {
+  color: #ef4444;
+  font-size: 20px;
+}
+
+.toast-content strong {
   display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+.toast-content p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.close-toast {
+  margin-left: auto;
+  color: #64748b;
+}
+
+.close-toast:hover {
+  color: #1e293b;
+  background: #f1f5f9;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .login-content {
+    padding: 2.5rem 2rem !important;
+  }
+
+  .logo h1 {
+    font-size: 2.8rem;
+  }
+
+  .login-btn {
+    height: 54px !important;
+  }
 }

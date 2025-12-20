@@ -2,6 +2,7 @@ package com.services;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
@@ -74,19 +75,15 @@ public class PostService {
         // get all users
         List<UserStruct> allusers = userRepo.findAll();
 
-        for (UserStruct usernames : allusers) {
-        
-            if (isFollowingService.CheckIfFollow(usernames.getUsername(), user.getUsername())) {
-                UserStruct recipient = userRepo.findByUsername(usernames.getUsername());
-                if (recipient != null) {
-                    NotificationStruct notif = new NotificationStruct();
-                    notif.setUser(recipient);
-                    notif.setFromUser(user);
-                    notif.setType("post");
-                    notif.setMessage("New post created");
-                    notif.setCreatedAt(dto.getCreatedAt());
-                    notificationRepo.save(notif);
-                }
+        for (UserStruct u : allusers) {
+            if (isFollowingService.CheckIfFollow(u.getUsername(), user.getUsername())) { // u follows creator
+                NotificationStruct notif = new NotificationStruct();
+                notif.setUser(u); // recipient
+                notif.setFromUser(user); // creator
+                notif.setType("post");
+                notif.setMessage("New post created by " + user.getUsername());
+                notif.setCreatedAt(LocalDateTime.now());
+                notificationRepo.save(notif);
             }
         }
 

@@ -1,4 +1,4 @@
-package com.services;
+package com.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,19 +11,27 @@ public class WebConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
+              @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                // Map /uploads/** URLs to the local "uploads" folder
+                registry.addResourceHandler("/uploads/**")
+                        .addResourceLocations("file:uploads/");
+       
+            }
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200") 
+                        .allowedOrigins("http://localhost:4200")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
-                        .maxAge(3600)
-                        .exposedHeaders("Content-Range", "Accept-Ranges", "Content-Length", "Content-Type");
+                        .maxAge(3600);
+                        
 
             }
+
           
         };
     }
- 
+
 }

@@ -36,6 +36,9 @@ public class AllProfile {
         List<UserStruct> users = userRepo.findAll();
         List<UserDTOMiddle> allUsers = new ArrayList<>();
         for (UserStruct u : users) {
+            if (u.getUsername().equals(username)){
+                continue;
+            }
         allUsers.add(new UserDTOMiddle(
                 u.getUsername(),
                 u.getMail(),

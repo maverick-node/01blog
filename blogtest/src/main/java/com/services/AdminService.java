@@ -3,11 +3,13 @@ package com.services;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.Exceptions.ReportNotFoundException;
 import com.Exceptions.UnauthorizedActionException;
+import com.Model.PostsStruct;
 import com.Model.ReportStruct;
 import com.Model.UserStruct;
 import com.Repository.PostRepo;
@@ -25,7 +27,9 @@ public class AdminService {
     private final PostRepo postRepo;
     private final ReportRepo reportRepo;
     private final com.Repository.NotificationRepo notificationRepository;
-    public AdminService(JwtService jwtService, UserRepo userRepo, PostRepo postRepo, ReportRepo reportRepo, com.Repository.NotificationRepo notificationRepository) {
+
+    public AdminService(JwtService jwtService, UserRepo userRepo, PostRepo postRepo, ReportRepo reportRepo,
+            com.Repository.NotificationRepo notificationRepository) {
         this.jwtService = jwtService;
         this.userRepo = userRepo;
         this.postRepo = postRepo;
@@ -101,7 +105,7 @@ public class AdminService {
         if (!userRepo.existsByUsername(username)) {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
-      
+
         userRepo.deleteByUsername(username);
     }
 
@@ -176,6 +180,45 @@ public class AdminService {
 
         user.setBanned(true);
         userRepo.save(user);
+    }
+
+    public void hidePost(String jwt, Integer postId, String reports) {
+        checkAdmin(jwt);
+        if (!postRepo.existsById(postId)) {
+            throw new ReportNotFoundException("Post not found");
+        }
+        Optional<PostsStruct> optionalPost = postRepo.findById(postId);
+
+        var solved = reportRepo.findByReportedPostId(postId);
+  
+        PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
+        if (reports.equals("reports")) {
+            solved.setResolved(true);
+              reportRepo.save(solved);
+        }
+                post.setHidden(true);
+        postRepo.save(post);
+    
+    }
+
+    public void unhidePost(String jwt, Integer postId, String reports) {
+        System.out.println("==========="+ reports);
+        checkAdmin(jwt);
+        if (!postRepo.existsById(postId)) {
+            throw new ReportNotFoundException("Post not found");
+        }
+        Optional<PostsStruct> optionalPost = postRepo.findById(postId);
+
+        var solved = reportRepo.findByReportedPostId(postId);
+        if (reports.equals("reports")) {
+            solved.setResolved(true);
+              reportRepo.save(solved);
+        }
+
+        PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setHidden(false);
+        postRepo.save(post);
+
     }
 
 }

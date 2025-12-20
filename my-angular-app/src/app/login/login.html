@@ -1,18 +1,69 @@
-<div class="form">
-  <form (ngSubmit)="login()">
-    <h1>Login</h1>
-    <input [(ngModel)]="user.email" name="email" type="text" placeholder="email" />
-    <input [(ngModel)]="user.password" name="password" placeholder="password" type="password" />
-    <button type="submit">Submit</button>
-    <p class="text">
-      If you don't have an account,
-      <a href="/register" class="register">Register</a>
-    </p>
+<div class="login-wrapper">
+  <!-- Clean white background -->
+  <div class="bg-white"></div>
 
-    <div class="notification">
-    {{ errorMessage }}
+  <!-- LOGIN CARD — PURE WHITE & ELEGANT -->
+  <mat-card class="login-card" appearance="outlined">
+    <mat-card-content class="login-content">
+
+      <!-- MODERN WHITE LOGO -->
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 100 100" width="88" height="88">
+            <defs>
+              <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#8b5cf6" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="44" fill="white" stroke="url(#whiteGrad)" stroke-width="3"/>
+            <path d="M28 38 L50 50 L72 38 M28 62 L50 50 L72 62" 
+                  stroke="url(#whiteGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="16" fill="url(#whiteGrad)" opacity="0.2"/>
+            <circle cx="50" cy="50" r="8" fill="url(#whiteGrad)"/>
+          </svg>
+        </div>
+        <h1>BlogFlow</h1>
+        <p class="tagline">Your story starts here</p>
+      </div>
+
+      <form (ngSubmit)="login()" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email address</mat-label>
+          <input matInput [(ngModel)]="user.email" name="email" type="email" required />
+          <mat-icon matSuffix>mail</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [(ngModel)]="user.password" name="password" type="password" required />
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="login-btn">
+          <mat-icon>login</mat-icon>
+          Sign In
+        </button>
+      </form>
+
+      <div class="bottom-text">
+        <p>New to BlogFlow?</p>
+        <a routerLink="/register" class="register-link">Create your account</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- WHITE-STYLE TOAST -->
+  <div class="toast-container">
+    <div *ngIf="errorMessage" class="toast error" [class.show]="errorMessage">
+      <mat-icon class="toast-icon">error</mat-icon>
+      <div class="toast-content">
+        <strong>Login failed</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
-  </form>
-
-  
 </div>

@@ -15,4 +15,5 @@ public class NotificationDTO {
     private String message;
     private boolean read;
     private LocalDateTime timestamp;
+     private String fromuser;
 }

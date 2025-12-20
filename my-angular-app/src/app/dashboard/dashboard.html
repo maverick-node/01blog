@@ -1,6 +1,7 @@
-<!-- dashboard.component.html – FINAL 2025 (IMAGES ONLY + CLICK TO ZOOM) -->
+<!-- dashboard.component.html – FINAL 2025 (GLOBAL REPORT BOX FIXED) -->
 <div class="dashboard-wrapper">
   <mat-sidenav-container class="sidenav-container" autosize fullscreen>
+
     <!-- LEFT SIDEBAR -->
     <mat-sidenav #sidenav mode="side" opened class="left-sidenav" fixedInViewport>
       <div class="logo-container">
@@ -135,10 +136,21 @@
       <!-- SCROLLABLE FEED -->
       <div class="scrollable-feed">
         <main class="page-content">
-          <!-- Error -->
-          <div *ngIf="errorMessage" class="notification error">{{ errorMessage }}</div>
-
-          <!-- CREATE POST -->
+          <!-- FLOATING TOAST NOTIFICATIONS – ALWAYS VISIBLE WHEN SCROLLING -->
+          <div class="toast-container">
+            <div
+              *ngIf="errorMessage"
+              class="toast-notification error"
+              [class.show]="errorMessage"
+              (click)="errorMessage = ''"
+            >
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ errorMessage }}</span>
+              <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
           <!-- CREATE POST -->
           <section class="create-post-section">
             <h2>Create New Post</h2>
@@ -154,14 +166,12 @@
                 placeholder="Share something awesome..."
                 class="post-textarea"
               ></textarea>
-
-              <!-- THIS IS THE ONLY CHANGE -->
               <input
                 type="file"
                 #fileInput
                 multiple
                 (change)="onFilesSelected($event)"
-                accept="image/*,video/*,video/webm,video/ogg"
+                accept="image/*,video/*"
                 style="display: none"
               />
               <button
@@ -171,21 +181,15 @@
                 style="margin: 12px 0"
               >
                 <mat-icon>add_photo_alternate</mat-icon>
-                {{
-                  selectedFiles.length > 0
-                    ? selectedFiles.length + ' images selected'
-                    : 'Add images (up to 10)'
-                }}
+                {{ selectedFiles.length > 0 ? selectedFiles.length + ' selected' : 'Add media' }}
               </button>
-              <!-- END OF CHANGE -->
-
               <button mat-raised-button color="primary" (click)="createPost()">
                 <mat-icon>add_circle</mat-icon> Publish
               </button>
             </div>
           </section>
 
-          <!-- POSTS WITH SHOW/HIDE COMMENTS -->
+          <!-- POSTS -->
           <section class="posts-section">
             <div class="posts-list" *ngIf="posts.length; else noPosts">
               <mat-card class="post-card" *ngFor="let post of posts">
@@ -205,37 +209,24 @@
                 <mat-card-content>
                   <p class="post-content">{{ post.content }}</p>
 
-                  <!-- MULTIPLE IMAGES GRID – CLICK TO FULL SCREEN -->
-                  <!-- MULTIPLE MEDIA GRID – IMAGES + VIDEOS + CLICK TO FULL SCREEN -->
                   <div class="media-grid" *ngIf="post.mediaPaths?.length > 0">
                     <div
                       class="media-item"
                       *ngFor="let path of post.mediaPaths; let i = index"
                       (click)="openMediaPreview(path, post.mediaTypes[i])"
                     >
-                      <!-- Show IMAGE -->
                       <img
                         *ngIf="post.mediaTypes[i]?.startsWith('image')"
                         [src]="'http://localhost:8080' + path"
-                        alt="Post image"
                         class="post-media"
                       />
-
-                      <!-- Show VIDEO with play button overlay -->
                       <div class="video-container" *ngIf="post.mediaTypes[i]?.startsWith('video')">
                         <video
                           [src]="'http://localhost:8080' + path"
                           class="post-media"
                           preload="metadata"
-                        >
-                          <source
-                            [src]="'http://localhost:8080' + path"
-                            [type]="post.mediaTypes[i]"
-                          />
-                        </video>
-                        <div class="play-overlay">
-                          <mat-icon>play_circle</mat-icon>
-                        </div>
+                        ></video>
+                        <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
                       </div>
                     </div>
                   </div>
@@ -243,8 +234,6 @@
 
                 <!-- ACTIONS -->
                 <mat-card-actions class="post-actions">
-                  <!-- LIKE BUTTON – FILLED HEART WHEN LIKED -->
-                  <!-- SIMPLE LIKE BUTTON – FILLED RED HEART WHEN LIKED -->
                   <button mat-icon-button (click)="likePost(post.id)">
                     <mat-icon [style.color]="likedPosts[post.id] ? '#e11d48' : '#666'">
                       {{ likedPosts[post.id] ? 'favorite' : 'favorite_border' }}
@@ -252,28 +241,21 @@
                     <span class="action-count">{{ likeCounts[post.id] || 0 }}</span>
                   </button>
 
-                  <!-- SHOW/HIDE COMMENTS BUTTON -->
-                  <button
-                    mat-button
-                    color="primary"
-                    (click)="toggleComments(post.id)"
-                    class="toggle-comments-btn"
-                  >
+                  <button mat-button color="primary" (click)="toggleComments(post.id)">
                     <mat-icon>{{
                       showComments[post.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
                     }}</mat-icon>
-                    {{ (comments[post.id] || []).length }} Comment{{
-                      (comments[post.id] || []).length !== 1 ? 's' : ''
-                    }}
+                    {{ (comments[post.id] || []).length }} Comments
                   </button>
 
                   <span class="spacer"></span>
 
+                  <!-- REPORT BUTTON -->
                   <button
                     *ngIf="username !== post.author"
                     mat-icon-button
                     color="warn"
-                    (click)="reportPost(post.id)"
+                    (click)="openReportBox(post.id)"
                   >
                     <mat-icon>flag</mat-icon>
                   </button>
@@ -281,7 +263,7 @@
 
                 <mat-divider></mat-divider>
 
-                <!-- COMMENTS SECTION – COLLAPSIBLE -->
+                <!-- COMMENTS -->
                 <div class="comments-section" *ngIf="showComments[post.id]">
                   <div class="comment-input-row">
                     <mat-form-field appearance="outline" class="comment-field">
@@ -331,21 +313,51 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 
-  <!-- FULL SCREEN IMAGE PREVIEW (Facebook Style) -->
+  <!-- FULL SCREEN MEDIA PREVIEW -->
   <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
     <div class="media-preview-container" (click)="$event.stopPropagation()">
       <button mat-icon-button class="close-preview" (click)="closePreview()">
         <mat-icon>close</mat-icon>
       </button>
-      <img [src]="previewUrl" *ngIf="previewType?.startsWith('image')" class="full-media" />
+      <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl"  class="full-media" />
       <video
+       *ngIf="previewType?.startsWith('video')"
         [src]="previewUrl"
-        *ngIf="previewType?.startsWith('video')"
+       
         class="full-media"
         controls
         autoplay
         loop
+          crossorigin="anonymous">
+
       ></video>
+    </div>
+  </div>
+
+  <!-- GLOBAL REPORT BOX – ALWAYS CENTERED & VISIBLE -->
+  <div class="global-report-overlay" *ngIf="showReportBox" (click)="showReportBox = false">
+    <div class="global-report-box" (click)="$event.stopPropagation()">
+      <div class="report-header">
+        <mat-icon color="warn">warning</mat-icon>
+        <h3>Report Post #{{ currentPostId }}</h3>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Reason (optional)</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          [(ngModel)]="reportReason"
+          placeholder="Why are you reporting this post?"
+        ></textarea>
+      </mat-form-field>
+
+      <div class="report-actions">
+        <button mat-button (click)="showReportBox = false">Cancel</button>
+        <button mat-raised-button color="warn" (click)="sendReport()">
+          <mat-icon>flag</mat-icon> Report Post
+        </button>
+      </div>
     </div>
   </div>
 </div>

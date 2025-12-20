@@ -6,21 +6,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.Model.NotificationStruct;
-import com.Model.PostsStruct;
-import com.Model.UserStruct;
-import com.Repository.NotificationRepo;
-import com.Repository.PostRepo;
-import com.Repository.UserRepo;
 import com.dto.CreatePostDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.services.JwtService;
 import com.services.PostService;
 
 import jakarta.validation.Valid;
@@ -36,15 +28,16 @@ public class CreatePost {
     }
 
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> createPost( @Valid 
-            @RequestPart("post") String postJson,
+    public ResponseEntity<Map<String, String>> createPost(@Valid @RequestPart("post") String postJson,
             @RequestPart(value = "media", required = false) MultipartFile[] media,
+            
             @CookieValue("jwt") String jwt) throws Exception {
 
         ObjectMapper mapper = new ObjectMapper();
         CreatePostDTO postDto = mapper.readValue(postJson, CreatePostDTO.class);
 
-        // Validate media: only images allowed
+        final long MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+
         if (media != null && media.length > 0) {
             for (MultipartFile file : media) {
                 if (file != null && !file.isEmpty()) {
@@ -55,6 +48,13 @@ public class CreatePost {
                                 .body(Map.of("error", "Only images and videos are allowed! File rejected: "
                                         + file.getOriginalFilename()));
                     }
+
+                    // Check file size
+                    if (file.getSize() > MAX_FILE_SIZE) {
+                        return ResponseEntity.badRequest()
+                                .body(Map.of("message", "File too large! Max 4MB allowed: "
+                                        + file.getOriginalFilename()));
+                    }
                 }
             }
         }
@@ -63,4 +63,5 @@ public class CreatePost {
 
         return ResponseEntity.ok(Map.of("message", "Post created successfully"));
     }
+
 }

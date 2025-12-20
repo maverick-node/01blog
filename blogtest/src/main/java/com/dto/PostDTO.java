@@ -11,6 +11,7 @@ public class PostDTO {
     private String content;
     private LocalDateTime createdAt;
     private String author;
+    private boolean hidden = false; 
 
     // MULTIPLE MEDIA SUPPORT
     private List<String> mediaPaths = new ArrayList<>();
@@ -48,4 +49,6 @@ public class PostDTO {
     public void setMediaIds(List<Integer> mediaIds) { 
         this.mediaIds = mediaIds != null ? mediaIds : new ArrayList<>(); 
     }
+     public boolean isHidden() { return hidden; }
+    public void setHidden(boolean hidden) { this.hidden = hidden; }
 }

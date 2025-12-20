@@ -1,5 +1,6 @@
 package com.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -95,20 +96,17 @@ public class CommentService {
 
         commentRepo.save(comment);
 
-        List<UserStruct> allusers = userRepo.findAll();
+        List<UserStruct> allUsers = userRepo.findAll();
 
-        for (UserStruct usernames : allusers) {
-            if (isFollowingService.CheckIfFollow( usernames.getUsername(), username)) {
-                UserStruct recipient = userRepo.findByUsername(usernames.getUsername());
-                if (recipient != null) {
-                    NotificationStruct notif = new NotificationStruct();
-                    notif.setUser(recipient);
-                    notif.setFromUser(userRepo.findByUsername(username));
-                    notif.setType("comment");
-                    notif.setMessage("New comment created");
-                    notif.setCreatedAt(dto.getCreatedAt());
-                    notificationRepo.save(notif);
-                }
+        for (UserStruct u : allUsers) {
+            if (isFollowingService.CheckIfFollow(u.getUsername(), username)) { // u follows commenter
+                NotificationStruct notif = new NotificationStruct();
+                notif.setUser(u); // recipient
+                notif.setFromUser(comment.getAuthorUser()); // commenter
+                notif.setType("comment");
+                notif.setMessage("New comment created by " + username);
+                notif.setCreatedAt(LocalDateTime.now());
+                notificationRepo.save(notif);
             }
         }
         return;

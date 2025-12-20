@@ -2,9 +2,25 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-register',
-  imports: [FormsModule,HttpClientModule],
+  imports: [FormsModule,HttpClientModule,CommonModule,
+        MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    RouterLink
+  ],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
@@ -44,7 +60,7 @@ export class Register {
     this.http.post(apiRegister, this.user).subscribe(
       (response: any) => {
         console.log('Registration success:', response);
-        window.location.href = '/dashboard';
+        window.location.href = '/login';
         this.errorMessage = '';
       },
       (error) => {

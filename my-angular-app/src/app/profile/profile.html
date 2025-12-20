@@ -16,10 +16,18 @@
   <main class="profile-content">
 
     <!-- ERROR -->
-    <div *ngIf="errorMessage" class="error-alert">
-      <mat-icon>error_outline</mat-icon>
-      {{ errorMessage }}
-    </div>
+  <!-- FLOATING TOAST NOTIFICATIONS – ALWAYS VISIBLE WHEN SCROLLING -->
+<div class="toast-container">
+  <div *ngIf="errorMessage" class="toast-notification error" 
+       [class.show]="errorMessage" 
+       (click)="errorMessage = ''">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+    <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
 
     <!-- LOADING -->
     <div *ngIf="loading" class="loading-state">

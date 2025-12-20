@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -13,220 +13,250 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-admin',
-  imports: [CommonModule, HttpClientModule,CommonModule,
+  standalone: true,
+  imports: [
+    CommonModule,
     FormsModule,
     MatCardModule,
     MatButtonModule,
-    MatIconModule,        // ← ADD THIS LINE
-    MatTableModule,       // ← Also add this for mat-table
-    MatTabsModule,        // ← For mat-tab-group
-    MatChipsModule,       // ← For mat-chip (optional)
-    MatTooltipModule,],
+    HttpClientModule,
+    MatIconModule,
+    MatTableModule,
+    MatTabsModule,
+    MatChipsModule,
+    MatTooltipModule
+  ],
   templateUrl: './admin.html',
-  styleUrl: './admin.css',
+  styleUrl: './admin.css'
 })
 export class Admin {
   users: any[] = [];
   posts: any[] = [];
   reports: any[] = [];
-  loading = false;
-  errorMessage = '';
   reportssolved: any[] = [];
-  private token: string = '';
-  bannedUsersCount: number = 0;
+  errorMessage = '';
+
+  confirmDialog = {
+    show: false,
+    title: '',
+    message: '',
+    color: 'warn' as 'primary' | 'accent' | 'warn',
+    icon: '',
+    confirmText: '',
+    action: () => {}
+  };
 
   constructor(private http: HttpClient, public router: Router) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.checkAuthentication();
-  }
-getBanText(targetUserName: string): string {
-  const user = this.users.find(u => u.username === targetUserName);
-  return user?.banned ? 'Unban' : 'Ban';
-}
-  // Derived lists for template (do not duplicate source of truth)
-  get reportedUsers() {
-    return (this.reports || []).filter((r: any) => r.reportedPostId == 0);
-  }
-
-  get reportedPosts() {
-    return (this.reports || []).filter(
-      (r: any) => r.reportedPostId !== 0 && r.reportedPostId !== null
-    );
-  }
-
-  get solvedReports() {
-    return this.reportssolved || [];
-  }
-
-  get unsolvedReports() {
-    return (this.reports || []).filter((r: any) => !r.resolved);
-  }
-
-  get postsCount() {
-    return (this.posts || []).length;
-  }
-
-  get usersCount() {
-    return (this.users || []).length;
-  }
-
-  getsolvedreports() {
-    const api = 'http://localhost:8080/admin/reports-resolved';
-    this.http.get<any[]>(api, { withCredentials: true }).subscribe(
-      (response) => {
-        console.log(response);
-
-        this.reportssolved = response || [];
-      },
-      (err) => {
-        console.error('Load solved reports failed:', err);
-        this.errorMessage = err.error?.message || 'Failed to load solved reports';
-      }
-    );
   }
 
   checkAuthentication() {
-    const apiMiddleware = 'http://localhost:8080/middleware';
-    this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      (response: any) => {
-        console.log('User already authenticated:', response);
-        this.token = response.token || '';
-        if (response.role?.toLowerCase() !== 'admin') {
-          console.log('Access denied - redirecting to dashboard');
+    this.http.get('http://localhost:8080/middleware', { withCredentials: true }).subscribe({
+      next: (res: any) => {
+        if (res.role?.toLowerCase() !== 'admin') {
           this.router.navigate(['/dashboard']);
         } else {
           this.loadUsers();
           this.loadPosts();
           this.loadReports();
           this.getsolvedreports();
-   
-          
+       
+       
         }
       },
-      (error) => {
-        console.log('User not authenticated:', error.error);
-      }
-    );
+      error: () => {}
+    });
   }
-  banUser(username: string) {
-    if (!confirm('Are you sure you want to ban this user?')) return;
-    this.http
-      .post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          alert('User banned successfully');
-        },
-        error: (err) => {
-          console.error('Ban user failed:', err);
-          this.errorMessage = err.error?.message || 'Failed to ban user';
-        },
-      });
-  }
+
+  // GETTERS
+  get reportedUsers() { return this.reports.filter(r => !r.reportedPostId); }
+  get reportedPosts() { return this.reports.filter(r => r.reportedPostId); }
+  get solvedReports() { return this.reportssolved; }
+  get unsolvedReports() { return this.reports.filter(r => !r.resolved); }
+  get postsCount() { return this.posts.length; }
+  get usersCount() { return this.users.length|| 0; }
+  get bannedUsersCount() { return this.users.filter(u => u.banned).length; }
+
   loadUsers() {
-    this.http
-      .get<{ users: any[] }>('http://localhost:8080/get-users', { withCredentials: true })
-      .subscribe({
-        next: (res) => {
-   
-          this.users = res.users || [];
-                        
-          this.bannedUsersCount = this.users.filter(u => u.banned).length;
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Failed to load users';
-        },
-      });
+    this.http.get<any>('http://localhost:8080/get-users', { withCredentials: true })
+      .subscribe(res => this.users = res.users || []);
+  }
+
+  loadPosts() {
+    this.http.get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
+      .subscribe(res => this.posts = res || []);
   }
 
   loadReports() {
-    this.http.get<any>('http://localhost:8080/admin/reports', { withCredentials: true }).subscribe(
-      (res) => {
-        console.log(res);
-        this.reports = res || [];
+    this.http.get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
+      .subscribe(res => this.reports = res || []);
+         
+  }
+
+  getsolvedreports() {
+    this.http.get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
+      .subscribe({
+        
+        next:(res) => {
+             console.log(res);
+          this.reportssolved = res || []
+        }
+   
+      
+      });
+         
+  }
+
+  showNotification(message: string) {
+    this.errorMessage = message;
+    setTimeout(() => this.errorMessage = '', 4000);
+  }
+
+  // CONFIRM DIALOG SYSTEM
+confirmAction(
+  title: string,
+  message: string,
+  action: () => void,
+  color: 'primary' | 'accent' | 'warn' = 'warn',
+  icon = 'check'
+) {
+  this.confirmDialog = {
+    show: true,
+    title,
+    message,
+    color,
+    icon,
+    confirmText: color === 'warn' ? 'Confirm' : 'Yes',
+    action: () => {
+      action();                    // Run the actual action
+      this.confirmDialog.show = false;  // THIS LINE CLOSES THE DIALOG
+    }
+  };
+}
+
+  // USER ACTIONS
+  confirmUserAction(username: string, action: 'ban' | 'unban' | 'delete') {
+    const titles = {
+      ban: 'Ban User',
+      unban: 'Unban User',
+      delete: 'Delete User'
+    };
+    const messages = {
+      ban: `Are you sure you want to ban @${username}?`,
+      unban: `Are you sure you want to unban @${username}?`,
+      delete: `Permanently delete @${username}? This cannot be undone.`
+    };
+    const icons = {
+      ban: 'block',
+      unban: 'lock_open',
+      delete: 'delete'
+    };
+
+    this.confirmAction(
+      titles[action],
+      messages[action],
+      () => {
+        if (action === 'delete') this.deleteUser(username);
+        else this.banUser(username);
       },
-      (err) => {
-        console.error('Load reports failed:', err);
-        this.errorMessage = err.error?.error || 'Failed to load reports';
-      }
+      action === 'delete' ? 'warn' : 'warn',
+      icons[action]
     );
   }
 
-  deleteUser(username: string) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    this.http
-      .delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })
+  banUser(username: string) {
+    this.http.post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
-          this.users = this.users.filter((u) => u.username !== username);
+          const user = this.users.find(u => u.username === username);
+          if (user) user.banned = !user.banned;
+          this.showNotification(user?.banned ? 'User banned' : 'User unbanned');
         },
-        error: (err) => {
-          console.error('Delete user failed:', err);
-          this.errorMessage = err.error?.message || 'Failed to delete user';
-        },
+        error: () => this.showNotification('Action failed')
       });
   }
 
-  deletePost(id: number) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-    this.http
-      .delete(`http://localhost:8080/admin/delete-post/${id}`, { withCredentials: true })
+  deleteUser(username: string) {
+    this.http.delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })
       .subscribe({
         next: () => {
-          this.posts = this.posts.filter((p) => p.id !== id);
+          this.users = this.users.filter(u => u.username !== username);
+          this.showNotification('User deleted');
         },
-        error: (err) => {
-          console.error('Delete post failed:', err);
-          this.errorMessage = err.error?.message || 'Failed to delete post';
+        error: () => this.showNotification('Delete failed')
+      });
+  }
+
+  // POST ACTIONS
+  confirmDeletePost(postId: number) {
+    this.confirmAction(
+      'Delete Post',
+      'Are you sure you want to delete this post permanently?',
+      () => this.deletePost(postId),
+      'warn',
+      'delete'
+    );
+  }
+
+  confirmResolveReport(reportId: number) {
+    this.confirmAction(
+      'Mark as Solved',
+      'Mark this report as resolved?',
+      () => this.resolveReport(reportId),
+      'primary',
+      'check_circle'
+    );
+  }
+
+  confirmToggleVisibility(postId: number, isHidden: boolean, reports : string) {
+    this.confirmAction(
+      isHidden ? 'Unhide Post' : 'Hide Post',
+      isHidden
+        ? 'Make this post visible to everyone again?'
+        : 'Hide this post from all users?',
+      () => this.togglePostVisibility(postId, isHidden, reports),
+      isHidden ? 'primary' : 'accent',
+      isHidden ? 'visibility' : 'visibility_off'
+    );
+  }
+
+  togglePostVisibility(postId: number, currentlyHidden: boolean , reports:string) {
+    const endpoint = currentlyHidden
+      ? `http://localhost:8080/admin/reports/unhide/${postId}`
+      : `http://localhost:8080/admin/reports/hide/${postId}`;
+
+    this.http.post(endpoint, reports, { withCredentials: true,  headers: { 'Content-Type': 'text/plain' }  }).subscribe({
+      next: () => {
+        const post = this.posts.find(p => p.id === postId);
+        if (post) post.hidden = !currentlyHidden;
+        this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
+      },
+      error: () => this.showNotification('Failed')
+    });
+  }
+
+  deletePost(id: number) {
+    this.http.delete(`http://localhost:8080/admin/delete-post/${id}`, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          this.posts = this.posts.filter(p => p.id !== id);
+          this.showNotification('Post deleted');
         },
+        error: () => this.showNotification('Delete failed')
       });
   }
 
   resolveReport(id: number) {
-    this.http
-      .post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
-      .subscribe({
-        next: (res: any) => {
-          // mark report resolved locally (keep in list so it appears under solved reports)
-          const idx = this.reports.findIndex((r) => r.id === id);
-          if (idx !== -1) {
-            this.reports[idx].resolved = true;
-          }
-        },
-        error: (err: any) => {
-          console.error('Resolve report failed:', err);
-          this.errorMessage = err.error?.message || 'Failed to resolve report';
-        },
-      });
-  }
-
-  actionOnUser(targetUsername: string) {
-    console.log(targetUsername);
-
-    if (!targetUsername) return;
-    if (!confirm('Are you sure you want to take action on this user (delete)?')) return;
-    this.deleteUser(targetUsername);
-  }
-
-  loadPosts() {
-    this.http.get<any[]>('http://localhost:8080/get-posts', { withCredentials: true }).subscribe({
-      next: (res) => (this.posts = res || []),
-      error: (err) => {
-        console.error('Load posts failed:', err);
-        this.errorMessage = err.error?.message || 'Failed to load posts';
-      },
-    });
-  }
-  hidePost(postId: number) {
-  if (confirm('Hide this post? It will no longer be visible to users.')) {
-    this.http.post(`http://localhost:8080/admin/hide-post/${postId}`, {}, { withCredentials: true })
+    this.http.post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
-
-          this.loadPosts();
+          const r = this.reports.find(x => x.id === id);
+          if (r) r.resolved = true;
+          this.showNotification('Report resolved');
         },
-        error: () => this.errorMessage ='Failed to hide post'
+        error: () => this.showNotification('Failed')
       });
   }
-}
 }
