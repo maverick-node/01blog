@@ -30,7 +30,7 @@ public class CreatePost {
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> createPost(@Valid @RequestPart("post") String postJson,
             @RequestPart(value = "media", required = false) MultipartFile[] media,
-            
+
             @CookieValue("jwt") String jwt) throws Exception {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -64,4 +64,7 @@ public class CreatePost {
         return ResponseEntity.ok(Map.of("message", "Post created successfully"));
     }
 
+
+
+    
 }

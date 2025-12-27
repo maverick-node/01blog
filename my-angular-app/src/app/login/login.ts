@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
@@ -9,85 +9,79 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule } from '@angular/common';
-import { catchError, of } from 'rxjs';
+
+import { AuthService } from '../services/auth.service';
+
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    HttpClientModule,
+    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule,
-    RouterLink
+    MatTooltipModule
   ],
   templateUrl: './login.html',
-  styleUrls: ['./login.css'],
-  
+  styleUrls: ['./login.css']
 })
-export class Login {
+export class Login implements OnInit {
+
   user = {
     email: '',
-    password: '',
+    password: ''
   };
 
   errorMessage = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.checkAuthentication();
   }
 
-
-checkAuthentication() {
-  this.http.get('http://localhost:8080/middleware', {
-    withCredentials: true,
-    observe: 'response' // Full response including status and headers
-  }).subscribe({
-    next: (response) => {
-      if (response.status === 200) {
-        this.router.navigate(['/dashboard']);
-      } else {
-        // Handle non-200 status codes (e.g., 404)
-        this.router.navigate(['/login']);
-      }
-    },
-    error: (err) => {
-   
-    }
-  });
-}
-
-
-
-
-  login() {
-    this.http
-      .post('http://localhost:8080/login', this.user, {
-        withCredentials: true,
-      })
-      
-      .subscribe({
-        
-        next: () => {
+  
+  checkAuthentication(): void {
+    this.authService.checkAuthentication().subscribe({
+      next: (res) => {
+        if (res.status === 200) {
           this.router.navigate(['/dashboard']);
-        },
-        error: (err: any) => {
-    
-          this.showNotification(err.error?.error || 'Login failed. Please try again.');
-        },
-      });
+        }
+      },
+      error: () => {
+       
+        this.showNotification('Please log in to continue.');
+      }
+    });
   }
 
-  showNotification(message: string, duration: number = 5000) {
+
+  login(): void {
+    this.authService.login(this.user).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.showNotification(
+          err.error?.error || 'Login failed. Please try again.'
+        );
+      }
+    });
+  }
+
+  /**
+   * Show error message
+   */
+  showNotification(message: string, duration: number = 5000): void {
     this.errorMessage = message;
 
-    // Auto hide after duration
     setTimeout(() => {
       this.errorMessage = '';
     }, duration);

@@ -66,7 +66,7 @@
   <mat-card class="section-card">
     <mat-card-header>
       <mat-card-title><mat-icon>people</mat-icon> All Users</mat-card-title>
-      <mat-card-subtitle>{{ users?.length || 0 }} users</mat-card-subtitle>
+      <mat-card-subtitle>{{ users.length || 0 }} users</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <table mat-table [dataSource]="users" class="mat-elevation-z2">
@@ -244,7 +244,7 @@
   <mat-card class="section-card">
     <mat-card-header>
       <mat-card-title><mat-icon>article</mat-icon> All Posts</mat-card-title>
-      <mat-card-subtitle>{{ posts?.length || 0 }} posts</mat-card-subtitle>
+      <mat-card-subtitle>{{ posts.length || 0 }} posts</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <table mat-table [dataSource]="posts" class="mat-elevation-z2">

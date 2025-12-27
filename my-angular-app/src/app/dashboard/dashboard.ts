@@ -16,7 +16,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-dashboard',
   imports: [
-
     CommonModule,
     FormsModule,
     MatCardModule,
@@ -51,7 +50,7 @@ export class Dashboard {
   };
 
   showReportBox = false;
-currentPostId: number | null = null;
+  currentPostId: number | null = null;
 
   reportingPostId: number | null = null;
   reportReason: string = '';
@@ -109,7 +108,9 @@ currentPostId: number | null = null;
       (response: any) => {
         console.log(response);
 
-        this.posts = response;
+        this.posts = response.sort(
+          (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         this.posts.forEach((p: any) => {
           this.likeCounts[p.id] = this.likeCounts[p.id] || 0;
           this.postid.push(p.id);
@@ -311,9 +312,6 @@ currentPostId: number | null = null;
 
     // Toggle visibility
     this.showComments[id] = !this.showComments[id];
-
-    
-    
   }
 
   viewProfile() {
@@ -357,9 +355,12 @@ currentPostId: number | null = null;
         (response: any) => {
           console.log('sadfas', response);
 
-          this.notifications = response;
-          console.log("noooo",response);
-          
+          this.notifications = response.sort(
+            (a: any, b: any) =>new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+
+          );
+  
+
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
         (error: any) => {
@@ -430,32 +431,34 @@ currentPostId: number | null = null;
       },
     });
   }
-openReportBox(postId: number) {
-  this.currentPostId = postId;
-  this.reportReason = '';
-  this.showReportBox = true;
-}
+  openReportBox(postId: number) {
+    this.currentPostId = postId;
+    this.reportReason = '';
+    this.showReportBox = true;
+  }
 
-sendReport() {
-  if (!this.currentPostId) return;
+  sendReport() {
+    if (!this.currentPostId) return;
 
-  const payload = {
-    reportedPostId: this.currentPostId,
-    reason: this.reportReason || 'No reason provided'
-  };
+    const payload = {
+      reportedPostId: this.currentPostId,
+      reason: this.reportReason || 'No reason provided',
+    };
 
-  this.http.post('http://localhost:8080/reports/report-post', payload, {
-    withCredentials: true
-  }).subscribe({
-    next: () => {
-      this.showNotification('Post reported successfully');
-      this.showReportBox = false;
-      this.currentPostId = null;
-      this.reportReason = '';
-    },
-    error: () => {
-      this.showNotification('Failed to report post');
-    }
-  });
-}
+    this.http
+      .post('http://localhost:8080/reports/report-post', payload, {
+        withCredentials: true,
+      })
+      .subscribe({
+        next: () => {
+          this.showNotification('Post reported successfully');
+          this.showReportBox = false;
+          this.currentPostId = null;
+          this.reportReason = '';
+        },
+        error: () => {
+          this.showNotification('Failed to report post');
+        },
+      });
+  }
 }

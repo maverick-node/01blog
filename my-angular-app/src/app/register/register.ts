@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,25 +9,28 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+
+import { AuthService, RegisterUser } from '../services/auth.service';
+
 @Component({
   selector: 'app-register',
-  imports: [FormsModule,HttpClientModule,CommonModule,
-        MatCardModule,
+  standalone: true,
+  imports: [
+    FormsModule,
+    CommonModule,
+    RouterLink,
+    MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule,
-    RouterLink
+    MatTooltipModule
   ],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
+export class Register implements OnInit {
 
-
-export class Register {
   user = {
     username: '',
     mail: '',
@@ -34,39 +38,60 @@ export class Register {
     age: null as number | null,
     bio: ''
   };
+
   errorMessage = '';
 
-  constructor(private http: HttpClient) {}
-  ngOnInit() {
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
     this.checkAuthentication();
-
   }
 
-  checkAuthentication() {
-    const apiMiddleware = 'http://localhost:8080/middleware';
-    this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      (response: any) => {
-        console.log('User already authenticated:', response);
-        window.location.href = '/dashboard';
+  checkAuthentication(): void {
+    this.authService.checkAuthentication().subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
       },
-      (error) => {
-        console.log('User not authenticated:', error.error);
-        
+      error: () => {
+
       }
-    );
+    });
   }
-  register() {
-    const apiRegister = 'http://localhost:8080/register';
-    this.http.post(apiRegister, this.user).subscribe(
-      (response: any) => {
-        console.log('Registration success:', response);
-        window.location.href = '/login';
+
+  register(): void {
+    // validate required fields
+    if (!this.user.username || !this.user.mail || !this.user.password) {
+      this.showNotification('Please fill all required fields.');
+      return;
+    }
+
+    // create payload compatible with RegisterUser
+    const userToSend: RegisterUser = {
+      username: this.user.username,
+      mail: this.user.mail,
+      password: this.user.password,
+      age: this.user.age ?? 18, 
+      bio: this.user.bio
+    };
+
+    this.authService.register(userToSend).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
         this.errorMessage = '';
       },
-      (error) => {
-        console.log('Registration error:', error.error.error);
-        this.errorMessage = error.error.error || 'Registration failed!';
+      error: (err) => {
+        console.log(err);
+        
+        this.showNotification(err.error.error || 'Registration failed!');
       }
-    );
+    });
+  }
+
+  showNotification(message: string, duration: number = 5000): void {
+    this.errorMessage = message;
+    setTimeout(() => (this.errorMessage = ''), duration);
   }
 }
