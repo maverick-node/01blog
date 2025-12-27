@@ -9,6 +9,7 @@ import com.Exceptions.UserNotFoundException;
 import com.Model.NotificationStruct;
 import com.Repository.NotificationRepo;
 import com.Repository.UserRepo;
+
 @Service
 public class NotificationService {
 
@@ -46,8 +47,19 @@ public class NotificationService {
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
-        // mark notification read by notification id
 
-        notificationRepo.markNotificationAsReadById(notifid);
+        var notification = notificationRepo.findById(notifid)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        if (!notification.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (notification.isRead()) {
+            notificationRepo.markAsUnread(notifid);
+        } else {
+            notificationRepo.markNotificationAsReadById(notifid);
+        }
+
     }
 }

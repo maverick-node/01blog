@@ -62,7 +62,7 @@ export class Dashboard {
   errorMessage = '';
   previewType: any;
   postid: any[] = [];
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit() {
     this.middleware();
@@ -356,10 +356,10 @@ export class Dashboard {
           console.log('sadfas', response);
 
           this.notifications = response.sort(
-            (a: any, b: any) =>new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
 
           );
-  
+
 
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
@@ -373,11 +373,11 @@ export class Dashboard {
       .post(`http://localhost:8080/notifications/mark-as-read/${id}`, {}, { withCredentials: true })
       .subscribe({
         next: (res) => {
-          console.log(res);
-
           const notif = this.notifications.find((n) => n.id === id);
-          if (notif) notif.read = true;
-
+        
+          if (notif) {
+            notif.read = !notif.read; // toggle the read status
+          }
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
         error: (err: any) => console.error('Failed to mark as read', err),

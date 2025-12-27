@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.Exceptions.ReportNotFoundException;
@@ -48,9 +49,12 @@ public class AdminService {
 
     public List<ReportedDTO> getAllReportsNotResolved(String jwt) {
         checkAdmin(jwt);
-        List<ReportStruct> reports = reportRepo.findAll();
-        System.out.println(reports);
         List<ReportedDTO> dtos = new ArrayList<>();
+        List<ReportStruct> reports = reportRepo.findAll();
+        if (reports.isEmpty()) {
+            return dtos;
+        }
+        System.out.println(reports);
         for (ReportStruct r : reports) {
             if (r.isResolved()) {
                 continue;
@@ -84,7 +88,6 @@ public class AdminService {
 
             dtos.add(dto);
         }
-        System.out.println(dtos.get(0));
         return dtos;
     }
 
@@ -111,22 +114,35 @@ public class AdminService {
 
     public void deletePost(String jwt, Integer postId) {
         checkAdmin(jwt);
+
+        // Check if the post exists
         if (!postRepo.existsById(postId)) {
             throw new ReportNotFoundException("Post not found");
         }
+
+        ReportStruct reports = reportRepo.findByReportedPostId(postId);
+
+        if (reports != null) {
+
+            reports.setResolved(true); 
+            reports.setCreatedAt(LocalDateTime.now()); 
+
+            reportRepo.save(reports);
+        }
+        
         postRepo.deleteById(postId);
-        var solved = reportRepo.findByReportedPostId(postId);
-        solved.setResolved(true);
-        solved.setCreatedAt(LocalDateTime.now());
-        reportRepo.save(solved);
 
     }
 
     public List<ReportedDTO> getAllReportsResolved(String jwt) {
         checkAdmin(jwt);
-        List<ReportStruct> reports = reportRepo.findAll();
-        System.out.println(reports);
         List<ReportedDTO> dtos = new ArrayList<>();
+
+        List<ReportStruct> reports = reportRepo.findAll();
+
+        if (reports.isEmpty()) {
+            return dtos;
+        }
         for (ReportStruct r : reports) {
             if (!r.isResolved()) {
                 continue;
@@ -161,8 +177,6 @@ public class AdminService {
             dtos.add(dto);
         }
 
-        System.out.println(dtos.get(0));
-
         return dtos;
     }
 
@@ -190,19 +204,19 @@ public class AdminService {
         Optional<PostsStruct> optionalPost = postRepo.findById(postId);
 
         var solved = reportRepo.findByReportedPostId(postId);
-  
+
         PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
         if (reports.equals("reports")) {
             solved.setResolved(true);
-              reportRepo.save(solved);
+            reportRepo.save(solved);
         }
-                post.setHidden(true);
+        post.setHidden(true);
         postRepo.save(post);
-    
+
     }
 
     public void unhidePost(String jwt, Integer postId, String reports) {
-        System.out.println("==========="+ reports);
+        System.out.println("===========" + reports);
         checkAdmin(jwt);
         if (!postRepo.existsById(postId)) {
             throw new ReportNotFoundException("Post not found");
@@ -212,7 +226,7 @@ public class AdminService {
         var solved = reportRepo.findByReportedPostId(postId);
         if (reports.equals("reports")) {
             solved.setResolved(true);
-              reportRepo.save(solved);
+            reportRepo.save(solved);
         }
 
         PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));

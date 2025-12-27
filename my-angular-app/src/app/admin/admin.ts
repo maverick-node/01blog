@@ -91,21 +91,13 @@ export class Admin {
 
   loadReports() {
     this.http.get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
-      .subscribe(res => this.reports = res || []);
+      .subscribe(res =>this.reports = res || []);
          
   }
 
   getsolvedreports() {
     this.http.get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
-      .subscribe({
-        
-        next:(res) => {
-             console.log(res);
-          this.reportssolved = res || []
-        }
-   
-      
-      });
+      .subscribe(res =>this.reportssolved = res || []);
          
   }
 

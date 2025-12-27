@@ -262,6 +262,7 @@ background: url('/image.png') center/cover no-repeat fixed;
     color: #1e293b;
     margin: 1.2rem 0;
     padding: 0 0.5rem;
+    word-break: break-all;
   }
 
 

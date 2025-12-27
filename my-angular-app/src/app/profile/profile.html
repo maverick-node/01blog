@@ -10,7 +10,6 @@
     <div class="header-spacer"></div>
   </header>
 
-  <app-notification></app-notification>
 
   <!-- MAIN -->
   <main class="profile-content">
@@ -97,8 +96,8 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Email</mat-label>
               <input matInput
-                     [value]="isEditing ? editProfile.mail : userProfile.mail"
-                     (input)="isEditing && (editProfile.mail = $any($event.target).value)"
+                     [value]="isEditing ? editProfile.email : userProfile.email"
+                     (input)="isEditing && (editProfile.email = $any($event.target).value)"
                      [readonly]="!isEditing"
                      type="email">
               <mat-icon matSuffix>mail</mat-icon>

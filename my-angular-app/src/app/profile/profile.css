@@ -38,6 +38,7 @@
   margin-bottom: 2rem;
   border-radius: 20px;
   overflow: hidden;
+  word-break: break-all;
 }
 
 .user-card-content {
@@ -165,10 +166,12 @@
   font-weight: 500;
 }
 .media-grid {
-  display: grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 12px;
   margin: 16px 0;
 }
+
 
 .media-item {
   position: relative;

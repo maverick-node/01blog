@@ -22,7 +22,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Set<String> excludedPaths = Set.of("/login", "/logout");
 
     // Default rate limit per request
-    private final int MAX_REQUESTS = 10;        // max requests per window
+    private final int MAX_REQUESTS = 20;        // max requests per window
     private final long WINDOW_MILLIS = 60_000; // 1 minute
 
     // Map: userKey -> requestKey -> request info

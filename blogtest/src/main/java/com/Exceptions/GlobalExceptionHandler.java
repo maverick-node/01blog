@@ -2,6 +2,8 @@ package com.Exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -9,6 +11,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -64,10 +67,27 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(429).body(body);
     }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .header("Access-Control-Allow-Origin", "http://localhost:4200")
                 .body(Map.of("error", "One or more files exceed the maximum allowed size of 4MB"));
     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Validation failed");
+
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.put("error",error.getField() +" : "+ error.getDefaultMessage());
+        }
+
+        response.put("fields", fieldErrors);
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
 }

@@ -182,11 +182,13 @@
   background: white;
   box-shadow: 0 12px 40px rgba(0,0,0,0.08);
   margin-bottom: 2rem;
+  
 }
 
 mat-card-header {
   padding: 2rem !important;
   background: #f8fafc;
+  word-break: break-all;
 }
 
 mat-card-title {
@@ -196,12 +198,14 @@ mat-card-title {
   font-size: 2rem !important;
   font-weight: 700;
   color: #1e293b;
+  word-break: break-all;
 }
 
 mat-card-subtitle {
   color: #64748b !important;
   font-size: 1.1rem;
   margin-top: 0.5rem;
+  
 }
 
 /* POSTS GRID – CLEAN & MODERN */
@@ -300,6 +304,7 @@ mat-card-subtitle {
   margin: 0 0 1rem;
   color: #475569;
   line-height: 1.6;
+  word-break: break-all;
   font-size: 1rem;
 }
 

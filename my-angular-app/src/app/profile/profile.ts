@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { ProfileService } from '../services/profile.service';
-import { Notification } from '../notification/notification';
 
 // Material
 import { MatCardModule } from '@angular/material/card';
@@ -32,7 +31,7 @@ import { MatDividerModule } from '@angular/material/divider';
     MatTooltipModule,
     MatDividerModule,
 
-    Notification,
+
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
@@ -92,7 +91,7 @@ export class Profile implements OnInit {
     this.loading = true;
 
     this.userProfile.username = response.username || 'User';
-    this.userProfile.mail = response.mail || 'user@example.com';
+    this.userProfile.email = response.mail || 'user@example.com';
     this.userProfile.age = response.age || null;
     this.userProfile.bio = response.bio || 'No bio available';
     this.userProfile.userRole = response.role;
@@ -108,7 +107,7 @@ export class Profile implements OnInit {
         this.isEditing = false;
         this.showNotification('Profile updated successfully!', 'success');
       },
-      error: (err) => this.showNotification(err),
+      error: (err) => this.showNotification(err.error.fields.error),
     });
   }
 

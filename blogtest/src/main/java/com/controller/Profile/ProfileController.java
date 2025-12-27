@@ -15,6 +15,8 @@ import com.dto.UserProfileDTO;
 
 import com.services.ProfileService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/profile")
 public class ProfileController {
@@ -36,8 +38,9 @@ public class ProfileController {
     }
 
     @PutMapping("/editmyinfo")
-    public ResponseEntity<Map<String, String>> editmyinfo(@RequestBody UserProfileDTO info,
+    public ResponseEntity<Map<String, String>> editmyinfo(@Valid @RequestBody UserProfileDTO info,
             @CookieValue("jwt") String jwt) {
+                System.out.println("=========================="+ info);
         return profileService.editmyinfo(info, jwt);
     }
 }

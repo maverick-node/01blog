@@ -11,6 +11,8 @@ import com.Model.UserStruct;
 import com.Repository.UserRepo;
 import com.dto.UserProfileDTO;
 
+import jakarta.validation.Valid;
+
 @Service
 public class ProfileService {
 
@@ -43,18 +45,18 @@ public class ProfileService {
                 user.getAge(), user.isBanned());
     }
 
-    public ResponseEntity<Map<String, String>> editmyinfo(UserProfileDTO info, String jwt) {
+    public ResponseEntity<Map<String, String>> editmyinfo(@Valid UserProfileDTO info, String jwt) {
 
-        // Extract username from JWT
+
         String username = jwtService.extractUsername(jwt);
 
-        // Find user
+    
         UserStruct user = userRepo.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
 
-        // Update fields if provided
+
         if (info.getAge() != 0 ) {
             user.setAge(info.getAge()); 
         }

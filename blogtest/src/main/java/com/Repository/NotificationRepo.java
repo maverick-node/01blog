@@ -10,23 +10,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.Model.NotificationStruct;
 
-public interface NotificationRepo  extends JpaRepository<NotificationStruct, Integer> {
+public interface NotificationRepo extends JpaRepository<NotificationStruct, Integer> {
    @Modifying
-    @Query("UPDATE NotificationStruct n SET n.read = true WHERE n.id = :id")
-    void markAsRead(@Param("id") Integer id);
+   @Query("UPDATE NotificationStruct n SET n.read = true WHERE n.id = :id")
+   void markAsRead(@Param("id") Integer id);
+
    List<NotificationStruct> findByUserId(Integer userId);
 
-@Transactional
-@Modifying
+   @Transactional
+   @Modifying
    @Query("UPDATE NotificationStruct n SET n.read = true WHERE n.id = :notificationId")
    void markNotificationAsReadById(@Param("notificationId") Integer notificationId);
+
    @Transactional
-@Modifying
-@Query("DELETE FROM NotificationStruct n WHERE n.fromUser.id = :userId")
+   @Modifying
+   @Query("DELETE FROM NotificationStruct n WHERE n.fromUser.id = :userId")
    void deleteByUserId(@Param("userId") Integer userId);
 
-@Modifying
-@Query("DELETE FROM NotificationStruct n WHERE n.fromUser.id = :userId")
+   @Modifying
+   @Query("DELETE FROM NotificationStruct n WHERE n.fromUser.id = :userId")
    void deleteByFromUserId(@Param("userId") Integer userId);
-   
+
+   @Modifying
+   @Transactional
+   @Query("UPDATE NotificationStruct n SET n.read = false WHERE n.id = :id")
+   void markAsUnread(@Param("id") Integer id);
+
 }

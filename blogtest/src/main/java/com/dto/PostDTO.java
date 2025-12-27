@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
+
 public class PostDTO {
 
     private Integer id;
+    @Size(max = 50, message = "Title cannot exceed 100 characters")
     private String title;
     private String content;
     private LocalDateTime createdAt;
