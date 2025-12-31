@@ -11,15 +11,23 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { ProfileService } from '../services/profile.service';
 
 @Component({
   selector: 'app-user',
   standalone: true,
   imports: [
-    CommonModule, HttpClientModule, FormsModule,
-    MatCardModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatProgressSpinnerModule,
-    MatTooltipModule, MatDividerModule
+    CommonModule,
+    HttpClientModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatDividerModule,
   ],
   templateUrl: './user.html',
   styleUrls: ['./user.css'],
@@ -35,13 +43,20 @@ export class User {
   showReportProfileBox = false;
   reportProfileReason = '';
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {}
-
+  constructor(
+    private route: ActivatedRoute,
+    private http: HttpClient,
+    private router: Router,
+    private profileService: ProfileService
+  ) {}
   ngOnInit() {
     this.middleware();
+
     this.route.paramMap.subscribe((params) => {
       this.usernameParam = params.get('username');
+
       if (this.usernameParam) {
+        this.loadFollowersandFollowing(this.usernameParam);
         this.loadProfile(this.usernameParam);
       }
     });
@@ -63,17 +78,16 @@ export class User {
     const api = `http://localhost:8080/profile/user/${username}`;
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
+        console.log('sadsadas', response);
 
-        
         this.profile = {
           username: response.username,
           email: response.email,
           bio: response.bio,
           age: response.age,
           id: response.id,
-          followers: response.followers || 0,
-          following: response.following || 0
         };
+
         this.loadposts(username);
         this.checkIfFollowing();
       },
@@ -85,56 +99,59 @@ export class User {
 
   loadposts(username: string) {
     const api = `http://localhost:8080/get-posts/${username}`;
-    this.http.get(api, { withCredentials: true }).subscribe(
-      (response: any) => {
-        this.posts = response || [];
-      }
-    );
+    this.http.get(api, { withCredentials: true }).subscribe((response: any) => {
+      this.posts = response || [];
+    });
   }
 
   checkIfFollowing() {
     const api = `http://localhost:8080/followers/get-follow/${this.profile.username}`;
-    this.http.get(api, { withCredentials: true }).subscribe(
-      (res: any) => {
-        this.isFollowing = res.isFollowing === true;
-      }
-    );
-  }
-
-follow() {
-  if (this.isFollowing) {
-    this.http.delete(`http://localhost:8080/followers/unfollow/${this.profile.username}`, {
-      withCredentials: true
-    }).subscribe({
-      next: () => {
-        this.isFollowing = false;
-        this.profile.followers--;
-        this.showNotification('Unfollowed');
-      },
-      error: (error) => {
-        // Show backend error message if available
-        const msg = error?.error?.message || 'Something went wrong while unfollowing';
-        this.showNotification(msg);
-      }
-    });
-  } else {
-    this.http.post(`http://localhost:8080/followers/follow/${this.profile.username}`, {}, {
-      withCredentials: true
-    }).subscribe({
-      next: () => {
-        this.isFollowing = true;
-        this.profile.followers++;
-        this.showNotification('Now following');
-      },
-      error: (error) => {
-        // Show backend error message if available
-        const msg = error?.error?.message || 'Something went wrong while following';
-        this.showNotification(msg);
-      }
+    this.http.get(api, { withCredentials: true }).subscribe((res: any) => {
+      this.isFollowing = res.isFollowing === true;
     });
   }
-}
 
+  follow() {
+    if (this.isFollowing) {
+      this.http
+        .delete(`http://localhost:8080/followers/unfollow/${this.profile.username}`, {
+          withCredentials: true,
+        })
+        .subscribe({
+          next: () => {
+            this.isFollowing = false;
+            this.profile.followers--;
+            this.showNotification('Unfollowed');
+          },
+          error: (error) => {
+            // Show backend error message if available
+            const msg = error?.error?.message || 'Something went wrong while unfollowing';
+            this.showNotification(msg);
+          },
+        });
+    } else {
+      this.http
+        .post(
+          `http://localhost:8080/followers/follow/${this.profile.username}`,
+          {},
+          {
+            withCredentials: true,
+          }
+        )
+        .subscribe({
+          next: () => {
+            this.isFollowing = true;
+            this.profile.followers++;
+            this.showNotification('Now following');
+          },
+          error: (error) => {
+            // Show backend error message if available
+            const msg = error?.error?.message || 'Something went wrong while following';
+            this.showNotification(msg);
+          },
+        });
+    }
+  }
 
   // REPORT PROFILE – BEAUTIFUL GLOBAL BOX
   reportProfile() {
@@ -143,17 +160,19 @@ follow() {
   }
 
   sendProfileReport() {
-    const payload = { reason: this.reportProfileReason || 'No reason provided' };
+    const payload = { reason: this.reportProfileReason };
 
-    this.http.post(`http://localhost:8080/reports/create/${this.profile.username}`, payload, {
-      withCredentials: true
-    }).subscribe({
-      next: () => {
-        this.showNotification('Profile reported');
-        this.showReportProfileBox = false;
-      },
-      error: () => this.showNotification('Report failed')
-    });
+    this.http
+      .post(`http://localhost:8080/reports/create/${this.profile.username}`, payload, {
+        withCredentials: true,
+      })
+      .subscribe({
+        next: () => {
+          this.showNotification('Profile reported');
+          this.showReportProfileBox = false;
+        },
+        error: () => this.showNotification('Report failed'),
+      });
   }
 
   goToPost(postId: number) {
@@ -162,7 +181,7 @@ follow() {
 
   showNotification(message: string) {
     this.errorMessage = message;
-    setTimeout(() => this.errorMessage = '', 4000);
+    setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
   goBack() {
@@ -171,5 +190,31 @@ follow() {
 
   getAvatarUrl(seed: string): string {
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
+  loadFollowersandFollowing(username: string) {
+    this.profileService.getFollowersAndFollowing(username).subscribe((res: any) => {
+      this.profile.followers = res.followers || 0;
+      this.profile.following = res.following || 0;
+    });
+  }
+  // Add these properties to your User component
+  selectedPost: any = null;
+  previewUrl: string | null = null;
+  previewType: string | null = null;
+
+  // Add this method
+  viewPost(post: any) {
+    this.selectedPost = post;
+  }
+
+  // Add these methods for full media preview
+  openMediaPreview(url: string, type: string) {
+    this.previewUrl = url;
+    this.previewType = type;
+  }
+
+  closePreview() {
+    this.previewUrl = null;
+    this.previewType = null;
   }
 }

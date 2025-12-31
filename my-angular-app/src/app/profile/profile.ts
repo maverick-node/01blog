@@ -159,10 +159,9 @@ export class Profile implements OnInit {
   }
 
   deletePost(postId: string) {
-    if (!confirm('Are you sure?')) return;
-
     this.profileService.deletePost(postId).subscribe({
       next: () => {
+       
         this.userPosts = this.userPosts.filter((p) => p.id !== postId);
         this.showNotification('Post deleted successfully!', 'success');
       },
@@ -255,4 +254,23 @@ export class Profile implements OnInit {
     this.editPostData.newFiles.splice(index, 1);
     this.editPostData.newFilePreviews.splice(index, 1);
   }
+  showDeleteBox = false;
+currentPostId: number | null = null;
+
+// Open the delete modal
+openDeleteBox(postId: number) {
+  this.currentPostId = postId;
+  this.showDeleteBox = true;
 }
+
+// Confirm deletion
+confirmDeletePost() {
+  if (this.currentPostId !== null) {
+    this.deletePost(this.currentPostId+"");
+    this.showDeleteBox = false;
+    this.currentPostId = null;
+  }
+}
+
+}
+

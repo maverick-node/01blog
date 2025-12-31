@@ -56,8 +56,10 @@ export class Login implements OnInit {
         }
       },
       error: () => {
-       
-        this.showNotification('Please log in to continue.');
+       if (this.router.url !== '/login'){
+
+         this.showNotification('Please log in to continue.');
+       }
       }
     });
   }

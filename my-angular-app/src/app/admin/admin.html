@@ -1,6 +1,5 @@
-<!-- admin.component.html – FINAL 2025 ADMIN PANEL – NO ERRORS -->
+<!-- admin.component.html – FINAL 2025 ADMIN PANEL – PURE PREVIEW MODAL (NO ACTIONS INSIDE) -->
 <div class="admin-wrapper">
-
   <!-- HEADER -->
   <header class="admin-header">
     <h1>Admin Panel</h1>
@@ -31,33 +30,45 @@
   <!-- SUMMARY CARDS -->
   <div class="stats-grid">
     <mat-card class="stat-card purple">
-      <mat-card-content><div class="stat-icon"><mat-icon>block</mat-icon></div>
-        <div class="stat-info"><div class="stat-label">Banned Users</div>
-          <div class="stat-value">{{ bannedUsersCount }}</div></div>
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>block</mat-icon></div>
+        <div class="stat-info">
+          <div class="stat-label">Banned Users</div>
+          <div class="stat-value">{{ bannedUsersCount }}</div>
+        </div>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="stat-card blue">
-      <mat-card-content><div class="stat-icon"><mat-icon>article</mat-icon></div>
-        <div class="stat-info"><div class="stat-label">Total Posts</div>
-          <div class="stat-value">{{ postsCount }}</div></div>
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>article</mat-icon></div>
+        <div class="stat-info">
+          <div class="stat-label">Total Posts</div>
+          <div class="stat-value">{{ postsCount }}</div>
+        </div>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="stat-card green">
-      <mat-card-content><div class="stat-icon"><mat-icon>people</mat-icon></div>
-        <div class="stat-info"><div class="stat-label">Total Users</div>
-          <div class="stat-value">{{ usersCount }}</div></div>
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>people</mat-icon></div>
+        <div class="stat-info">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value">{{ usersCount }}</div>
+        </div>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="stat-card orange">
-      <mat-card-content><div class="stat-icon"><mat-icon>flag</mat-icon></div>
-        <div class="stat-info"><div class="stat-label">Reports</div>
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>flag</mat-icon></div>
+        <div class="stat-info">
+          <div class="stat-label">Reports</div>
           <div class="report">
             <span class="pending">Pending: {{ unsolvedReports.length }}</span>
             <span class="done">Solved: {{ solvedReports.length }}</span>
-          </div></div>
+          </div>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>
@@ -69,46 +80,106 @@
       <mat-card-subtitle>{{ users.length || 0 }} users</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <table mat-table [dataSource]="users" class="mat-elevation-z2">
+      <!-- Desktop Table -->
+      <table mat-table [dataSource]="users" class="desktop-table mat-elevation-z2">
         <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef> ID </th>
-          <td mat-cell *matCellDef="let i = index"> {{ i + 1 }} </td>
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let i = index">{{ i + 1 }}</td>
         </ng-container>
         <ng-container matColumnDef="username">
-          <th mat-header-cell *matHeaderCellDef> Username </th>
-          <td mat-cell *matCellDef="let user"> {{ user.username }} </td>
+          <th mat-header-cell *matHeaderCellDef>Username</th>
+          <td mat-cell *matCellDef="let user">
+            <a (click)="goToProfile(user.username)" class="username-link">{{ user.username }}</a>
+          </td>
         </ng-container>
         <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef> Email </th>
-          <td mat-cell *matCellDef="let user"> {{ user.mail }} </td>
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.mail }}</td>
         </ng-container>
         <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef> Role </th>
+          <th mat-header-cell *matHeaderCellDef>Role</th>
           <td mat-cell *matCellDef="let user">
             <span class="role-chip" [class.admin]="user.role === 'admin'">{{ user.role }}</span>
           </td>
         </ng-container>
         <ng-container matColumnDef="age">
-          <th mat-header-cell *matHeaderCellDef> Age </th>
-          <td mat-cell *matCellDef="let user"> {{ user.age || '-' }} </td>
+          <th mat-header-cell *matHeaderCellDef>Age</th>
+          <td mat-cell *matCellDef="let user">{{ user.age || '-' }}</td>
         </ng-container>
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let user">
-            <button mat-icon-button [color]="user.banned ? 'warn' : 'primary'"
-                    (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')"
-                    matTooltip="{{ user.banned ? 'Unban' : 'Ban' }} user">
+            <button
+              mat-icon-button
+              [color]="user.banned ? 'warn' : 'primary'"
+              (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')"
+              matTooltip="{{ user.banned ? 'Unban' : 'Ban' }} user"
+            >
               <mat-icon>{{ user.banned ? 'lock_open' : 'lock' }}</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="confirmUserAction(user.username, 'delete')" matTooltip="Delete user">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="confirmUserAction(user.username, 'delete')"
+              matTooltip="Delete user"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="['id','username','email','role','age','actions']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['id','username','email','role','age','actions']"></tr>
+        <tr
+          mat-header-row
+          *matHeaderRowDef="['id', 'username', 'email', 'role', 'age', 'actions']"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: ['id', 'username', 'email', 'role', 'age', 'actions']"
+        ></tr>
       </table>
+
+      <!-- Mobile Cards -->
+      <div class="mobile-table-cards">
+        <div class="mobile-card" *ngFor="let user of users; let i = index">
+          <div class="mobile-card-header">
+            <div class="mobile-card-title">
+              #{{ i + 1 }} –
+              <a (click)="goToProfile(user.username)" class="username-link">{{ user.username }}</a>
+            </div>
+            <div class="mobile-card-actions">
+              <button
+                mat-icon-button
+                [color]="user.banned ? 'warn' : 'primary'"
+                (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')"
+              >
+                <mat-icon>{{ user.banned ? 'lock_open' : 'lock' }}</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="confirmUserAction(user.username, 'delete')"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Email</span><span class="mobile-value">{{ user.mail }}</span>
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Role</span>
+            <span class="mobile-value"
+              ><span class="role-chip" [class.admin]="user.role === 'admin'">{{
+                user.role
+              }}</span></span
+            >
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Age</span
+            ><span class="mobile-value">{{ user.age || '-' }}</span>
+          </div>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 
@@ -121,177 +192,416 @@
 
     <mat-tab-group animationDuration="300ms">
       <!-- PROFILE REPORTS -->
-      <mat-tab label="Profile Reports ({{ reportedUsers.length || 0}})">
+      <mat-tab label="Profile Reports ({{ reportedUsers.length || 0 }})">
         <div class="tab-content">
-          <table mat-table [dataSource]="reportedUsers" class="mat-elevation-z2">
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef> ID </th>
-              <td mat-cell *matCellDef="let r"> {{ r.id }} </td>
-            </ng-container>
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef> Reporter </th>
-              <td mat-cell *matCellDef="let r"> {{ r.reporterName }} </td>
-            </ng-container>
+          <!-- Desktop Table -->
+          <table mat-table [dataSource]="reportedUsers" class="desktop-table mat-elevation-z2">
+            <ng-container matColumnDef="id"
+              ><th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let r">{{ r.id }}</td></ng-container
+            >
+            <ng-container matColumnDef="reporter"
+              ><th mat-header-cell *matHeaderCellDef>Reporter</th>
+              <td mat-cell *matCellDef="let r">{{ r.reporterName }}</td></ng-container
+            >
             <ng-container matColumnDef="target">
-              <th mat-header-cell *matHeaderCellDef> Target User </th>
-              <td mat-cell *matCellDef="let r"> {{ r.targetUserName }} </td>
-            </ng-container>
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef> Reason </th>
-              <td mat-cell *matCellDef="let r"> {{ r.reason }} </td>
-            </ng-container>
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef> Date </th>
-              <td mat-cell *matCellDef="let r"> {{ r.createdAt | date:'short' }} </td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <th mat-header-cell *matHeaderCellDef>Target User</th>
               <td mat-cell *matCellDef="let r">
-                <button mat-icon-button color="primary" (click)="confirmResolveReport(r.id)" matTooltip="Mark as resolved">
+                <a (click)="goToProfile(r.targetUserName)" class="username-link">{{
+                  r.targetUserName
+                }}</a>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="reason"
+              ><th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let r">{{ r.reason }}</td></ng-container
+            >
+            <ng-container matColumnDef="date"
+              ><th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let r">{{ r.createdAt | date : 'short' }}</td></ng-container
+            >
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let r">
+                <button mat-icon-button color="primary" (click)="confirmResolveReport(r.id)">
                   <mat-icon>check_circle</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="confirmUserAction(r.targetUserName, 'ban')" matTooltip="Ban user">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="confirmUserAction(r.targetUserName, 'ban')"
+                >
                   <mat-icon>block</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="confirmUserAction(r.targetUserName, 'delete')" matTooltip="Delete user">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="confirmUserAction(r.targetUserName, 'delete')"
+                >
                   <mat-icon>person_remove</mat-icon>
                 </button>
               </td>
             </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="['id','reporter','target','reason','date','actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['id','reporter','target','reason','date','actions']"></tr>
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['id', 'reporter', 'target', 'reason', 'date', 'actions']"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: ['id', 'reporter', 'target', 'reason', 'date', 'actions']
+              "
+            ></tr>
           </table>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-table-cards">
+            <div class="mobile-card" *ngFor="let r of reportedUsers">
+              <div class="mobile-card-header">
+                <div class="mobile-card-title">
+                  #{{ r.id }} –
+                  <a (click)="goToProfile(r.targetUserName)" class="username-link">{{
+                    r.targetUserName
+                  }}</a>
+                </div>
+                <div class="mobile-card-actions">
+                  <button mat-icon-button color="primary" (click)="confirmResolveReport(r.id)">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="confirmUserAction(r.targetUserName, 'ban')"
+                  >
+                    <mat-icon>block</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="confirmUserAction(r.targetUserName, 'delete')"
+                  >
+                    <mat-icon>person_remove</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reporter</span
+                ><span class="mobile-value">{{ r.reporterName }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reason</span
+                ><span class="mobile-value">{{ r.reason }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Date</span
+                ><span class="mobile-value">{{ r.createdAt | date : 'short' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </mat-tab>
 
       <!-- POST REPORTS -->
       <mat-tab label="Post Reports ({{ reportedPosts.length }})">
         <div class="tab-content">
-          <table mat-table [dataSource]="reportedPosts" class="mat-elevation-z2">
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef> ID </th>
-              <td mat-cell *matCellDef="let p"> {{ p.id }} </td>
-            </ng-container>
+          <!-- Desktop Table -->
+          <table mat-table [dataSource]="reportedPosts" class="desktop-table mat-elevation-z2">
+            <ng-container matColumnDef="id"
+              ><th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let p">{{ p.id }}</td></ng-container
+            >
             <ng-container matColumnDef="postId">
-              <th mat-header-cell *matHeaderCellDef> Post ID </th>
-              <td mat-cell *matCellDef="let p"> {{ p.reportedPostId }} </td>
-            </ng-container>
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef> Reporter </th>
-              <td mat-cell *matCellDef="let p"> {{ p.reporterName }} </td>
-            </ng-container>
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef> Reason </th>
-              <td mat-cell *matCellDef="let p"> {{ p.reason }} </td>
-            </ng-container>
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef> Date </th>
-              <td mat-cell *matCellDef="let p"> {{ p.createdAt | date:'short' }} </td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <th mat-header-cell *matHeaderCellDef>Post ID</th>
               <td mat-cell *matCellDef="let p">
-                <button mat-icon-button color="primary" (click)="confirmResolveReport(p.id)" matTooltip="Mark as resolved">
+                <a (click)="viewReportedPost(p.reportedPostId)" class="post-link"
+                  >#{{ p.reportedPostId }}</a
+                >
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="reporter"
+              ><th mat-header-cell *matHeaderCellDef>Reporter</th>
+              <td mat-cell *matCellDef="let p">{{ p.reporterName }}</td></ng-container
+            >
+            <ng-container matColumnDef="reason"
+              ><th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let p">{{ p.reason }}</td></ng-container
+            >
+            <ng-container matColumnDef="date"
+              ><th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let p">{{ p.createdAt | date : 'short' }}</td></ng-container
+            >
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let p">
+                <button mat-icon-button color="primary" (click)="confirmResolveReport(p.id)">
                   <mat-icon>check_circle</mat-icon>
                 </button>
-                <button mat-icon-button 
-                        [color]="p.hidden ? 'primary' : 'accent'"
-                        (click)="confirmToggleVisibility(p.reportedPostId, p.hidden, 'reports')"
-                        [matTooltip]="p.hidden ? 'Unhide post' : 'Hide post'">
+                <button
+                  mat-icon-button
+                  [color]="p.hidden ? 'primary' : 'accent'"
+                  (click)="confirmToggleVisibility(p.reportedPostId, p.hidden, 'reports')"
+                >
                   <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="confirmDeletePost(p.reportedPostId)" matTooltip="Delete post">
+                <button mat-icon-button color="warn" (click)="confirmDeletePost(p.reportedPostId)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
             </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="['id','postId','reporter','reason','date','actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['id','postId','reporter','reason','date','actions']"></tr>
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['id', 'postId', 'reporter', 'reason', 'date', 'actions']"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: ['id', 'postId', 'reporter', 'reason', 'date', 'actions']
+              "
+            ></tr>
           </table>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-table-cards">
+            <div class="mobile-card" *ngFor="let p of reportedPosts">
+              <div class="mobile-card-header">
+                <div class="mobile-card-title">
+                  Post
+                  <a (click)="viewReportedPost(p.reportedPostId)" class="post-link"
+                    >#{{ p.reportedPostId }}</a
+                  >
+                </div>
+                <div class="mobile-card-actions">
+                  <button mat-icon-button color="primary" (click)="confirmResolveReport(p.id)">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    [color]="p.hidden ? 'primary' : 'accent'"
+                    (click)="confirmToggleVisibility(p.reportedPostId, p.hidden, 'reports')"
+                  >
+                    <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="confirmDeletePost(p.reportedPostId)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reporter</span
+                ><span class="mobile-value">{{ p.reporterName }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reason</span
+                ><span class="mobile-value">{{ p.reason }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Date</span
+                ><span class="mobile-value">{{ p.createdAt | date : 'short' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </mat-tab>
 
       <!-- SOLVED REPORTS -->
       <mat-tab label="Solved ({{ solvedReports.length }})">
         <div class="tab-content">
-          <table mat-table [dataSource]="solvedReports" class="mat-elevation-z2">
-            <ng-container matColumnDef="id"><th mat-header-cell *matHeaderCellDef> ID </th><td mat-cell *matCellDef="let s"> {{ s.id }} </td></ng-container>
-            <ng-container matColumnDef="type"><th mat-header-cell *matHeaderCellDef> Type </th>
+          <!-- Desktop Table -->
+          <table mat-table [dataSource]="solvedReports" class="desktop-table mat-elevation-z2">
+            <ng-container matColumnDef="id"
+              ><th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let s">{{ s.id }}</td></ng-container
+            >
+            <ng-container matColumnDef="type"
+              ><th mat-header-cell *matHeaderCellDef>Type</th>
               <td mat-cell *matCellDef="let s">
                 <mat-chip [color]="s.targetUserName ? 'primary' : 'accent'" selected>
-                  {{ s.reportedPostId ? 'User' : 'Post' }}
+                  {{ s.reportedPostId ? 'Post' : 'User' }}
                 </mat-chip>
               </td>
             </ng-container>
-            <ng-container matColumnDef="target"><th mat-header-cell *matHeaderCellDef> Target </th>
-              <td mat-cell *matCellDef="let s"> {{ s.targetUserName || s.reportedPostId }} </td>
-            </ng-container>
-            <ng-container matColumnDef="reporter"><th mat-header-cell *matHeaderCellDef> Reporter </th><td mat-cell *matCellDef="let s"> {{ s.reporterName }} </td></ng-container>
-            <ng-container matColumnDef="reason"><th mat-header-cell *matHeaderCellDef> Reason </th><td mat-cell *matCellDef="let s"> {{ s.reason }} </td></ng-container>
-            <ng-container matColumnDef="date"><th mat-header-cell *matHeaderCellDef> Resolved </th><td mat-cell *matCellDef="let s"> {{ s.createdAt | date:'short' }} </td></ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="['id','type','target','reporter','reason','date']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['id','type','target','reporter','reason','date']"></tr>
+            <ng-container matColumnDef="target"
+              ><th mat-header-cell *matHeaderCellDef>Target</th>
+              <td mat-cell *matCellDef="let s">
+                {{ s.targetUserName || s.reportedPostId }}
+              </td></ng-container
+            >
+            <ng-container matColumnDef="reporter"
+              ><th mat-header-cell *matHeaderCellDef>Reporter</th>
+              <td mat-cell *matCellDef="let s">{{ s.reporterName }}</td></ng-container
+            >
+            <ng-container matColumnDef="reason"
+              ><th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let s">{{ s.reason }}</td></ng-container
+            >
+            <ng-container matColumnDef="date"
+              ><th mat-header-cell *matHeaderCellDef>Resolved</th>
+              <td mat-cell *matCellDef="let s">{{ s.createdAt | date : 'short' }}</td></ng-container
+            >
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['id', 'type', 'target', 'reporter', 'reason', 'date']"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['id', 'type', 'target', 'reporter', 'reason', 'date']"
+            ></tr>
           </table>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-table-cards">
+            <div class="mobile-card" *ngFor="let s of solvedReports">
+              <div class="mobile-card-header">
+                <div class="mobile-card-title">
+                  #{{ s.id }} – {{ s.targetUserName || 'Post #' + s.reportedPostId }}
+                </div>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Type</span>
+                <span class="mobile-value"
+                  ><mat-chip [color]="s.targetUserName ? 'primary' : 'accent'" selected>{{
+                    s.reportedPostId ? 'Post' : 'User'
+                  }}</mat-chip></span
+                >
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reporter</span
+                ><span class="mobile-value">{{ s.reporterName }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Reason</span
+                ><span class="mobile-value">{{ s.reason }}</span>
+              </div>
+              <div class="mobile-row">
+                <span class="mobile-label">Resolved</span
+                ><span class="mobile-value">{{ s.createdAt | date : 'short' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </mat-tab>
     </mat-tab-group>
   </mat-card>
 
-  <!-- ALL POSTS — HIDE/UNHIDE TOGGLE -->
+  <!-- ALL POSTS -->
   <mat-card class="section-card">
     <mat-card-header>
       <mat-card-title><mat-icon>article</mat-icon> All Posts</mat-card-title>
       <mat-card-subtitle>{{ posts.length || 0 }} posts</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <table mat-table [dataSource]="posts" class="mat-elevation-z2">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef> ID </th>
-          <td mat-cell *matCellDef="let p"> {{ p.id }} </td>
-        </ng-container>
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef> Title </th>
-          <td mat-cell *matCellDef="let p"> {{ p.title }} </td>
-        </ng-container>
-        <ng-container matColumnDef="author">
-          <th mat-header-cell *matHeaderCellDef> Author </th>
-          <td mat-cell *matCellDef="let p"> {{ p.author }} </td>
-        </ng-container>
-        <ng-container matColumnDef="content">
-          <th mat-header-cell *matHeaderCellDef> Content </th>
+      <!-- Desktop Table -->
+      <table mat-table [dataSource]="posts" class="desktop-table mat-elevation-z2">
+        <ng-container matColumnDef="id"
+          ><th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let p">{{ p.id }}</td></ng-container
+        >
+        <ng-container matColumnDef="title"
+          ><th mat-header-cell *matHeaderCellDef>Title</th>
+          <td mat-cell *matCellDef="let p">{{ p.title }}</td></ng-container
+        >
+        <ng-container matColumnDef="author"
+          ><th mat-header-cell *matHeaderCellDef>Author</th>
+          <td mat-cell *matCellDef="let p">
+            <a (click)="goToProfile(p.author)" class="username-link">{{ p.author }}</a>
+          </td></ng-container
+        >
+        <ng-container matColumnDef="content"
+          ><th mat-header-cell *matHeaderCellDef>Content</th>
           <td mat-cell *matCellDef="let p">
             {{ (p.content || '').slice(0, 60) }}{{ p.content?.length > 60 ? '...' : '' }}
           </td>
         </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef> Status </th>
+        <ng-container matColumnDef="status"
+          ><th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let p">
-            <mat-chip [color]="p.hidden ? 'warn' : 'primary'" selected>
-              {{ p.hidden ? 'Hidden' : 'Visible' }}
-            </mat-chip>
+            <mat-chip [color]="p.hidden ? 'warn' : 'primary'" selected>{{
+              p.hidden ? 'Hidden' : 'Visible'
+            }}</mat-chip>
           </td>
         </ng-container>
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actions </th>
-          <td mat-cell *matCellDef="let p">
-            <button mat-icon-button 
-                    [color]="p.hidden ? 'primary' : 'accent'"
-                    (click)="confirmToggleVisibility(p.id, p.hidden, 'not-reports')"
-                    [matTooltip]="p.hidden ? 'Unhide post' : 'Hide post'">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let p" (click)="$event.stopPropagation()">
+            <button
+              mat-icon-button
+              [color]="p.hidden ? 'primary' : 'accent'"
+              (click)="confirmToggleVisibility(p.id, p.hidden, 'not-reports')"
+            >
               <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="confirmDeletePost(p.id)" matTooltip="Delete post">
+            <button mat-icon-button color="warn" (click)="confirmDeletePost(p.id)">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="['id','title','author','content','status','actions']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['id','title','author','content','status','actions']"></tr>
+        <tr
+          mat-header-row
+          *matHeaderRowDef="['id', 'title', 'author', 'content', 'status', 'actions']"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: ['id', 'title', 'author', 'content', 'status', 'actions']"
+          class="clickable-row"
+          (click)="viewPost(row)"
+        ></tr>
       </table>
+
+      <!-- Mobile Cards -->
+      <div class="mobile-table-cards">
+        <div class="mobile-card clickable-card" *ngFor="let p of posts" (click)="viewPost(p)">
+          <div class="mobile-card-header">
+            <div class="mobile-card-title">{{ p.title || 'Untitled Post' }}</div>
+            <div class="mobile-card-actions">
+              <button
+                mat-icon-button
+                [color]="p.hidden ? 'primary' : 'accent'"
+                (click)="
+                  $event.stopPropagation(); confirmToggleVisibility(p.id, p.hidden, 'not-reports')
+                "
+              >
+                <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="$event.stopPropagation(); confirmDeletePost(p.id)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">ID</span><span class="mobile-value">#{{ p.id }}</span>
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Author</span>
+            <span class="mobile-value"
+              ><a (click)="$event.stopPropagation(); goToProfile(p.author)" class="username-link">{{
+                p.author
+              }}</a></span
+            >
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Content</span
+            ><span class="mobile-value">{{ (p.content || '').slice(0, 80) }}...</span>
+          </div>
+          <div class="mobile-row">
+            <span class="mobile-label">Status</span>
+            <span class="mobile-value"
+              ><mat-chip [color]="p.hidden ? 'warn' : 'primary'" selected>{{
+                p.hidden ? 'Hidden' : 'Visible'
+              }}</mat-chip></span
+            >
+          </div>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 
@@ -310,6 +620,83 @@
           {{ confirmDialog.confirmText }}
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- POST PREVIEW MODAL – READ-ONLY (NO ACTIONS) -->
+  <div class="post-preview-overlay" *ngIf="selectedPost" (click)="selectedPost = null">
+    <div class="post-preview-modal" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview-btn" (click)="selectedPost = null">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-card class="preview-card">
+        <mat-card-header>
+          <div
+            mat-card-avatar
+            class="preview-avatar"
+            [style.background-image]="'url(' + getAvatarUrl(selectedPost.author) + ')'"
+          ></div>
+          <mat-card-title>{{ selectedPost.title || 'Untitled Post' }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ selectedPost.author }} • {{ selectedPost.createdAt | date : 'medium' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p class="preview-content">{{ selectedPost.content }}</p>
+
+          <!-- Media Grid -->
+          <div class="media-grid" *ngIf="selectedPost.mediaPaths?.length > 0">
+            <div
+              class="media-item"
+              *ngFor="let path of selectedPost.mediaPaths; let i = index"
+              (click)="openFullMedia('http://localhost:8080' + path, selectedPost.mediaTypes[i])"
+            >
+              <img
+                *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')"
+                [src]="'http://localhost:8080' + path"
+                class="preview-media"
+              />
+              <div class="video-container" *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')">
+                <video
+                  *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')"
+                  [src]="'http://localhost:8080' + path"
+                  class="preview-media"
+                  preload="metadata"
+                  controls
+                  playsinline
+                 muted
+                  (click)="
+                    openFullMedia('http://localhost:8080' + path, selectedPost.mediaTypes[i])
+                  "
+                ></video>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <!-- REMOVED: mat-card-actions with Hide/Unhide and Delete buttons -->
+        <!-- Now it's purely a preview -->
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- FULL SCREEN MEDIA PREVIEW -->
+  <div class="media-preview-overlay" *ngIf="fullMediaUrl" (click)="closeFullMedia()">
+    <div class="media-preview-container" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview" (click)="closeFullMedia()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <img *ngIf="fullMediaType?.startsWith('image')" [src]="fullMediaUrl" class="full-media" />
+      <video
+        *ngIf="fullMediaType?.startsWith('video')"
+        [src]="fullMediaUrl"
+        class="full-media"
+        controls
+        autoplay
+        loop
+      ></video>
     </div>
   </div>
 </div>

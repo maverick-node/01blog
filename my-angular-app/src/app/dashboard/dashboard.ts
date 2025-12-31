@@ -12,6 +12,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ProfileService } from '../services/profile.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,7 +49,20 @@ export class Dashboard {
     title: '',
     content: '',
   };
+  // Edit state
+  editingPostId: string | null = null;
+  editPostData: any = {
+    title: '',
+    content: '',
+    currentMedia: [],
+    newFiles: [] as File[],
+    newFilePreviews: [] as { url: string; type: string }[],
+    filesToRemove: [] as number[],
+  };
 
+  // Delete confirmation
+  showDeleteConfirm = false;
+  postToDelete: number | null = null;
   showReportBox = false;
   currentPostId: number | null = null;
 
@@ -62,7 +76,11 @@ export class Dashboard {
   errorMessage = '';
   previewType: any;
   postid: any[] = [];
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private profileService: ProfileService
+  ) {}
 
   ngOnInit() {
     this.middleware();
@@ -265,6 +283,7 @@ export class Dashboard {
         this.showNotification('Post created !');
         this.newPost = { title: '', content: '' };
         this.selectedFiles = [];
+        this.selectedFilePreviews = [];
         this.loadPosts();
       },
       error: (error: any) => {
@@ -357,9 +376,7 @@ export class Dashboard {
 
           this.notifications = response.sort(
             (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-
           );
-
 
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
@@ -374,7 +391,7 @@ export class Dashboard {
       .subscribe({
         next: (res) => {
           const notif = this.notifications.find((n) => n.id === id);
-        
+
           if (notif) {
             notif.read = !notif.read; // toggle the read status
           }
@@ -402,13 +419,6 @@ export class Dashboard {
 
   closePreview() {
     this.previewUrl = null;
-  }
-
-  onFilesSelected(event: any) {
-    const files = event.target.files;
-    if (files.length > 0) {
-      this.selectedFiles = Array.from(files);
-    }
   }
 
   getallcomments() {
@@ -442,7 +452,7 @@ export class Dashboard {
 
     const payload = {
       reportedPostId: this.currentPostId,
-      reason: this.reportReason || 'No reason provided',
+      reason: this.reportReason,
     };
 
     this.http
@@ -461,4 +471,140 @@ export class Dashboard {
         },
       });
   }
+  startEditPost(post: any) {
+    this.editingPostId = post.id;
+    this.editPostData = {
+      title: post.title || '',
+      content: post.content || '',
+      currentMedia: (post.mediaPaths || []).map((path: string, i: number) => ({
+        id: post.mediaIds?.[i], // assuming you have mediaIds in post object
+        path,
+        type: post.mediaTypes?.[i],
+      })),
+      newFiles: [],
+      newFilePreviews: [],
+      filesToRemove: [],
+    };
+  }
+
+  onEditFilesSelected(event: any) {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    this.editPostData.newFiles = Array.from(files);
+    this.editPostData.newFilePreviews = [];
+
+    Array.from(files).forEach((file: any) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editPostData.newFilePreviews.push({
+          url: e.target.result,
+          type: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  removeExistingMedia(index: number) {
+    const mediaId = this.editPostData.currentMedia[index].id;
+    if (mediaId) this.editPostData.filesToRemove.push(mediaId);
+    this.editPostData.currentMedia.splice(index, 1);
+  }
+
+  removeNewFile(index: number) {
+    this.editPostData.newFiles.splice(index, 1);
+    this.editPostData.newFilePreviews.splice(index, 1);
+  }
+
+  cancelPostEdit() {
+    this.editingPostId = null;
+    this.editPostData = { currentMedia: [], newFiles: [], newFilePreviews: [], filesToRemove: [] };
+  }
+
+  savePostEdit(postId: string) {
+    const formData = new FormData();
+    formData.append('title', this.editPostData.title || '');
+    formData.append('content', this.editPostData.content || '');
+
+    this.editPostData.newFiles?.forEach((file: File) => {
+      formData.append('file', file);
+    });
+
+    this.editPostData.filesToRemove?.forEach((id: number) => {
+      formData.append('removeMediaIds', id.toString());
+    });
+
+    this.profileService.updatePost(postId, formData).subscribe({
+      next: () => {
+        this.cancelPostEdit();
+        this.loadPosts();
+        this.showNotification('Post updated!');
+      },
+      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || 'Error')),
+    });
+  }
+
+  openDeleteConfirm(postId: number) {
+    this.postToDelete = postId;
+    this.showDeleteConfirm = true;
+  }
+
+  confirmDeletePost() {
+    if (!this.postToDelete) return;
+
+    this.profileService.deletePost(this.postToDelete + '').subscribe({
+      next: () => {
+        this.posts = this.posts.filter((p) => p.id !== this.postToDelete);
+        this.showNotification('Post deleted successfully!');
+        this.showDeleteConfirm = false;
+        this.loadPosts()
+      },
+      error: () => this.showNotification('Failed to delete post'),
+    });
+  }
+  selectedFilePreviews: { url: string; type: string }[] = [];
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  onFilesSelected(event: any) {
+    const files: FileList = event.target.files;
+
+    // Always clear previous data
+    this.selectedFiles = [];
+    this.selectedFilePreviews = [];
+
+    if (files.length === 0) {
+      // Reset the input so same file can be selected again later
+      this.fileInput.nativeElement.value = '';
+      return;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      this.selectedFiles.push(file);
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.selectedFilePreviews.push({
+          url: e.target.result,
+          type: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Critical: Reset the input value so same files can be re-selected later
+    this.fileInput.nativeElement.value = '';
+  }
+
+  removeSelectedFile(index: number) {
+    this.selectedFiles.splice(index, 1);
+    this.selectedFilePreviews.splice(index, 1);
+
+    // Also reset the file input to allow re-uploading the same file
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
 }

@@ -1,7 +1,6 @@
-<!-- dashboard.component.html – FINAL 2025 (GLOBAL REPORT BOX FIXED) -->
+<!-- dashboard.component.html – FINAL 2025 (ELITE POPUP EDIT MODAL) -->
 <div class="dashboard-wrapper">
   <mat-sidenav-container class="sidenav-container" autosize fullscreen>
-
     <!-- LEFT SIDEBAR -->
     <mat-sidenav #sidenav mode="side" opened class="left-sidenav" fixedInViewport>
       <div class="logo-container">
@@ -136,7 +135,7 @@
       <!-- SCROLLABLE FEED -->
       <div class="scrollable-feed">
         <main class="page-content">
-          <!-- FLOATING TOAST NOTIFICATIONS – ALWAYS VISIBLE WHEN SCROLLING -->
+          <!-- TOAST -->
           <div class="toast-container">
             <div
               *ngIf="errorMessage"
@@ -151,6 +150,7 @@
               </button>
             </div>
           </div>
+
           <!-- CREATE POST -->
           <section class="create-post-section">
             <h2>Create New Post</h2>
@@ -183,6 +183,33 @@
                 <mat-icon>add_photo_alternate</mat-icon>
                 {{ selectedFiles.length > 0 ? selectedFiles.length + ' selected' : 'Add media' }}
               </button>
+              <div class="media-preview-container" *ngIf="selectedFilePreviews.length > 0">
+                <p>Preview:</p>
+                <div class="media-grid">
+                  <div class="media-item" *ngFor="let file of selectedFilePreviews; let i = index">
+                    <img
+                      *ngIf="file.type.startsWith('image')"
+                      [src]="file.url"
+                      class="preview-media"
+                    />
+                    <video
+                      *ngIf="file.type.startsWith('video')"
+                      [src]="file.url"
+                      class="preview-media"
+                      controls
+                    ></video>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      class="remove-btn"
+                      (click)="removeSelectedFile(i)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <button mat-raised-button color="primary" (click)="createPost()">
                 <mat-icon>add_circle</mat-icon> Publish
               </button>
@@ -250,7 +277,7 @@
 
                   <span class="spacer"></span>
 
-                  <!-- REPORT BUTTON -->
+                  <!-- Report (not own post) -->
                   <button
                     *ngIf="username !== post.author"
                     mat-icon-button
@@ -259,6 +286,26 @@
                   >
                     <mat-icon>flag</mat-icon>
                   </button>
+
+                  <!-- Edit & Delete (own post only) -->
+                  <ng-container *ngIf="username === post.author">
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="startEditPost(post)"
+                      matTooltip="Edit post"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="openDeleteConfirm(post.id)"
+                      matTooltip="Delete post"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </ng-container>
                 </mat-card-actions>
 
                 <mat-divider></mat-divider>
@@ -319,31 +366,29 @@
       <button mat-icon-button class="close-preview" (click)="closePreview()">
         <mat-icon>close</mat-icon>
       </button>
-      <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl"  class="full-media" />
+      <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="full-media" />
       <video
-       *ngIf="previewType?.startsWith('video')"
+        *ngIf="previewType?.startsWith('video')"
         [src]="previewUrl"
-       
         class="full-media"
         controls
-        autoplay
-        loop
-          crossorigin="anonymous">
+        muted
 
+        loop
+        crossorigin="anonymous"
       ></video>
     </div>
   </div>
 
-  <!-- GLOBAL REPORT BOX – ALWAYS CENTERED & VISIBLE -->
+  <!-- GLOBAL REPORT BOX -->
   <div class="global-report-overlay" *ngIf="showReportBox" (click)="showReportBox = false">
     <div class="global-report-box" (click)="$event.stopPropagation()">
       <div class="report-header">
         <mat-icon color="warn">warning</mat-icon>
         <h3>Report Post #{{ currentPostId }}</h3>
       </div>
-
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Reason (optional)</mat-label>
+        <mat-label>Reason</mat-label>
         <textarea
           matInput
           rows="4"
@@ -351,11 +396,151 @@
           placeholder="Why are you reporting this post?"
         ></textarea>
       </mat-form-field>
-
       <div class="report-actions">
         <button mat-button (click)="showReportBox = false">Cancel</button>
         <button mat-raised-button color="warn" (click)="sendReport()">
           <mat-icon>flag</mat-icon> Report Post
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRMATION -->
+  <div class="global-report-overlay" *ngIf="showDeleteConfirm" (click)="showDeleteConfirm = false">
+    <div class="global-report-box" (click)="$event.stopPropagation()">
+      <div class="report-header">
+        <mat-icon color="warn">warning</mat-icon>
+        <h3>Delete Post?</h3>
+      </div>
+      <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+      <div class="report-actions">
+        <button mat-button (click)="showDeleteConfirm = false">Cancel</button>
+        <button mat-raised-button color="warn" (click)="confirmDeletePost()">
+          <mat-icon>delete</mat-icon> Delete Post
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST EDIT POPUP MODAL – ELITE 2025 STYLE -->
+  <!-- POST EDIT POPUP MODAL – PREMIUM 2025 STYLE -->
+  <div class="post-edit-modal-overlay" *ngIf="editingPostId" (click)="cancelPostEdit()">
+    <div class="post-edit-modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Post</h3>
+        <button mat-icon-button (click)="cancelPostEdit()" class="close-modal">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- TITLE FIELD – LARGE & ELEGANT -->
+        <div class="title-field-container">
+          <mat-form-field appearance="outline" class="title-field">
+            <mat-label>Title</mat-label>
+            <input
+              matInput
+              [(ngModel)]="editPostData.title"
+              placeholder="Give your post an awesome title..."
+              class="title-input"
+            />
+            <mat-icon matSuffix color="primary">title</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- CONTENT FIELD – SPACIOUS TEXTAREA -->
+        <div class="content-field-container">
+          <mat-form-field appearance="outline" class="content-field">
+            <mat-label>Content</mat-label>
+            <textarea
+              matInput
+              rows="8"
+              [(ngModel)]="editPostData.content"
+              placeholder="Share your thoughts, story, or update..."
+              class="content-textarea"
+            ></textarea>
+            <mat-icon matSuffix color="primary">edit_note</mat-icon>
+          </mat-form-field>
+          <mat-hint align="end">{{ editPostData.content?.length || 0 }} characters</mat-hint>
+        </div>
+
+        <!-- Current Media -->
+        <div class="current-media-section" *ngIf="editPostData.currentMedia?.length > 0">
+          <p class="section-title">Current media</p>
+          <div class="media-grid">
+            <div
+              class="media-item removable"
+              *ngFor="let file of editPostData.currentMedia; let i = index"
+            >
+              <img
+                *ngIf="file.type.startsWith('image')"
+                [src]="'http://localhost:8080' + file.path"
+              />
+              <video *ngIf="file.type.startsWith('video')" controls preload="metadata">
+                <source [src]="'http://localhost:8080' + file.path" [type]="file.type" />
+              </video>
+              <button
+                mat-icon-button
+                color="warn"
+                class="remove-btn"
+                (click)="removeExistingMedia(i)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add New Media -->
+        <div class="file-upload-section">
+          <input
+            #editFileInput
+            type="file"
+            multiple
+            (change)="onEditFilesSelected($event)"
+            accept="image/*,video/*"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="editFileInput.click()"
+            class="upload-btn"
+          >
+            <mat-icon>add_photo_alternate</mat-icon>
+            {{
+              editPostData.newFilePreviews.length > 0
+                ? editPostData.newFilePreviews.length + ' files selected'
+                : 'Add photos or videos'
+            }}
+          </button>
+
+          <div class="new-media-preview" *ngIf="editPostData.newFilePreviews.length > 0">
+            <p class="section-title">New media</p>
+            <div class="media-grid">
+              <div
+                class="media-item removable"
+                *ngFor="let preview of editPostData.newFilePreviews; let i = index"
+              >
+                <img *ngIf="preview.type.startsWith('image')" [src]="preview.url" />
+                <video
+                  *ngIf="preview.type.startsWith('video')"
+                  [src]="preview.url"
+                  controls
+                ></video>
+                <button mat-icon-button color="warn" class="remove-btn" (click)="removeNewFile(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button mat-button (click)="cancelPostEdit()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="savePostEdit(editingPostId)">
+          <mat-icon>save</mat-icon> Save Changes
         </button>
       </div>
     </div>

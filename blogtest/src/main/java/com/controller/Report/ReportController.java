@@ -46,7 +46,10 @@ public class ReportController {
 
             @CookieValue("jwt") String jwt,
             @RequestBody @Valid CreateReportDTO dto) {
-                System.out.println(dto);
+
+            if (dto.getReason().trim().isEmpty()|| dto.getReason().trim().isBlank()){
+                return ResponseEntity.badRequest().body(Map.of("message", "Reason cannot be empty or blank"));
+            }
 
         reportService.reportPost(dto.getReportedPostId(), jwt, dto);
         return ResponseEntity.ok(Map.of("message", "Post reported successfully"));

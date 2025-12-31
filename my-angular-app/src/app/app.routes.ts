@@ -7,6 +7,7 @@ import { Admin } from './admin/admin';
 import { User } from './user/user';
 import { Notification } from './notification/notification';
 import { AdminGuard } from './guards/admin.guard';
+import { NotFoundComponent } from './not-found/not-found';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -19,5 +20,5 @@ export const routes: Routes = [
   },
   { path: 'users/:username', component: User },
   { path: 'notifications', component: Notification },
-  { path: '**', redirectTo: '/login' }
+ { path: '**', component: NotFoundComponent }
 ];

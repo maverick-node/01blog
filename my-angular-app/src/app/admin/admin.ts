@@ -24,10 +24,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTableModule,
     MatTabsModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './admin.html',
-  styleUrl: './admin.css'
+  styleUrl: './admin.css',
 })
 export class Admin {
   users: any[] = [];
@@ -43,7 +43,7 @@ export class Admin {
     color: 'warn' as 'primary' | 'accent' | 'warn',
     icon: '',
     confirmText: '',
-    action: () => {}
+    action: () => {},
   };
 
   constructor(private http: HttpClient, public router: Router) {}
@@ -62,88 +62,102 @@ export class Admin {
           this.loadPosts();
           this.loadReports();
           this.getsolvedreports();
-       
-       
         }
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
   // GETTERS
-  get reportedUsers() { return this.reports.filter(r => !r.reportedPostId); }
-  get reportedPosts() { return this.reports.filter(r => r.reportedPostId); }
-  get solvedReports() { return this.reportssolved; }
-  get unsolvedReports() { return this.reports.filter(r => !r.resolved); }
-  get postsCount() { return this.posts.length; }
-  get usersCount() { return this.users.length|| 0; }
-  get bannedUsersCount() { return this.users.filter(u => u.banned).length; }
+  get reportedUsers() {
+    return this.reports.filter((r) => !r.reportedPostId);
+  }
+  get reportedPosts() {
+    return this.reports.filter((r) => r.reportedPostId);
+  }
+  get solvedReports() {
+    return this.reportssolved;
+  }
+  get unsolvedReports() {
+    return this.reports.filter((r) => !r.resolved);
+  }
+  get postsCount() {
+    return this.posts.length;
+  }
+  get usersCount() {
+    return this.users.length || 0;
+  }
+  get bannedUsersCount() {
+    return this.users.filter((u) => u.banned).length;
+  }
 
   loadUsers() {
-    this.http.get<any>('http://localhost:8080/get-users', { withCredentials: true })
-      .subscribe(res => this.users = res.users || []);
+    this.http
+      .get<any>('http://localhost:8080/get-users', { withCredentials: true })
+      .subscribe((res) => (this.users = res.users || []));
   }
 
   loadPosts() {
-    this.http.get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
-      .subscribe(res => this.posts = res || []);
+    this.http
+      .get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
+      .subscribe((res) => (this.posts = res || []));
   }
 
   loadReports() {
-    this.http.get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
-      .subscribe(res =>this.reports = res || []);
-         
+    this.http
+      .get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
+      .subscribe((res) => (this.reports = res || []));
   }
 
   getsolvedreports() {
-    this.http.get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
-      .subscribe(res =>this.reportssolved = res || []);
-         
+    this.http
+      .get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
+      .subscribe((res) => (this.reportssolved = res || []));
   }
 
   showNotification(message: string) {
     this.errorMessage = message;
-    setTimeout(() => this.errorMessage = '', 4000);
+    setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
   // CONFIRM DIALOG SYSTEM
-confirmAction(
-  title: string,
-  message: string,
-  action: () => void,
-  color: 'primary' | 'accent' | 'warn' = 'warn',
-  icon = 'check'
-) {
-  this.confirmDialog = {
-    show: true,
-    title,
-    message,
-    color,
-    icon,
-    confirmText: color === 'warn' ? 'Confirm' : 'Yes',
-    action: () => {
-      action();                    // Run the actual action
-      this.confirmDialog.show = false;  // THIS LINE CLOSES THE DIALOG
-    }
-  };
-}
+  confirmAction(
+    title: string,
+    message: string,
+    action: () => void,
+    color: 'primary' | 'accent' | 'warn' = 'warn',
+    icon = 'check'
+  ) {
+    this.confirmDialog = {
+      show: true,
+      title,
+      message,
+      color,
+      icon,
+      confirmText: color === 'warn' ? 'Confirm' : 'Yes',
+      action: () => {
+        action(); // Run the actual action
+        this.confirmDialog.show = false; // THIS LINE CLOSES THE DIALOG
+      },
+    };
+  }
 
   // USER ACTIONS
   confirmUserAction(username: string, action: 'ban' | 'unban' | 'delete') {
     const titles = {
       ban: 'Ban User',
       unban: 'Unban User',
-      delete: 'Delete User'
+      delete: 'Delete User',
     };
     const messages = {
       ban: `Are you sure you want to ban @${username}?`,
       unban: `Are you sure you want to unban @${username}?`,
-      delete: `Permanently delete @${username}? This cannot be undone.`
+      delete: `Permanently delete @${username}? This cannot be undone.`,
     };
     const icons = {
       ban: 'block',
       unban: 'lock_open',
-      delete: 'delete'
+      delete: 'delete',
     };
 
     this.confirmAction(
@@ -159,25 +173,27 @@ confirmAction(
   }
 
   banUser(username: string) {
-    this.http.post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
+    this.http
+      .post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
-          const user = this.users.find(u => u.username === username);
+          const user = this.users.find((u) => u.username === username);
           if (user) user.banned = !user.banned;
           this.showNotification(user?.banned ? 'User banned' : 'User unbanned');
         },
-        error: () => this.showNotification('Action failed')
+        error: () => this.showNotification('Action failed'),
       });
   }
 
   deleteUser(username: string) {
-    this.http.delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })
+    this.http
+      .delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })
       .subscribe({
         next: () => {
-          this.users = this.users.filter(u => u.username !== username);
+          this.users = this.users.filter((u) => u.username !== username);
           this.showNotification('User deleted');
         },
-        error: () => this.showNotification('Delete failed')
+        error: () => this.showNotification('Delete failed'),
       });
   }
 
@@ -190,6 +206,7 @@ confirmAction(
       'warn',
       'delete'
     );
+    this.loadPosts();
   }
 
   confirmResolveReport(reportId: number) {
@@ -202,53 +219,88 @@ confirmAction(
     );
   }
 
-  confirmToggleVisibility(postId: number, isHidden: boolean, reports : string) {
+  confirmToggleVisibility(postId: number, isHidden: boolean, reports: string) {
     this.confirmAction(
       isHidden ? 'Unhide Post' : 'Hide Post',
-      isHidden
-        ? 'Make this post visible to everyone again?'
-        : 'Hide this post from all users?',
+      isHidden ? 'Make this post visible to everyone again?' : 'Hide this post from all users?',
       () => this.togglePostVisibility(postId, isHidden, reports),
       isHidden ? 'primary' : 'accent',
       isHidden ? 'visibility' : 'visibility_off'
     );
   }
 
-  togglePostVisibility(postId: number, currentlyHidden: boolean , reports:string) {
+  togglePostVisibility(postId: number, currentlyHidden: boolean, reports: string) {
     const endpoint = currentlyHidden
       ? `http://localhost:8080/admin/reports/unhide/${postId}`
       : `http://localhost:8080/admin/reports/hide/${postId}`;
 
-    this.http.post(endpoint, reports, { withCredentials: true,  headers: { 'Content-Type': 'text/plain' }  }).subscribe({
-      next: () => {
-        const post = this.posts.find(p => p.id === postId);
-        if (post) post.hidden = !currentlyHidden;
-        this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
-      },
-      error: () => this.showNotification('Failed')
-    });
+    this.http
+      .post(endpoint, reports, { withCredentials: true, headers: { 'Content-Type': 'text/plain' } })
+      .subscribe({
+        next: () => {
+          const post = this.posts.find((p) => p.id === postId);
+          if (post) post.hidden = !currentlyHidden;
+          this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
+        },
+        error: () => this.showNotification('Failed'),
+      });
   }
 
   deletePost(id: number) {
-    this.http.delete(`http://localhost:8080/admin/delete-post/${id}`, { withCredentials: true })
+    this.http
+      .delete(`http://localhost:8080/admin/delete-post/${id}`, { withCredentials: true })
       .subscribe({
         next: () => {
-          this.posts = this.posts.filter(p => p.id !== id);
+          this.posts = this.posts.filter((p) => p.id !== id);
           this.showNotification('Post deleted');
         },
-        error: () => this.showNotification('Delete failed')
+        error: () => this.showNotification('Delete failed'),
       });
   }
 
   resolveReport(id: number) {
-    this.http.post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
+    this.http
+      .post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
-          const r = this.reports.find(x => x.id === id);
+          const r = this.reports.find((x) => x.id === id);
           if (r) r.resolved = true;
           this.showNotification('Report resolved');
         },
-        error: () => this.showNotification('Failed')
+        error: () => this.showNotification('Failed'),
       });
   }
+  selectedPost: any = null;
+  fullMediaUrl: string | null = null;
+  fullMediaType: string | null = null;
+
+  getAvatarUrl(seed: string): string {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
+
+  viewPost(post: any) {
+    this.selectedPost = post;
+  }
+
+  goToProfile(username: string) {
+    window.open(`http://localhost:4200/users/${username}`, '_blank');
+    // Or navigate in same tab: this.router.navigate(['/users', username]);
+  }
+
+  openFullMedia(url: string, type: string) {
+    this.fullMediaUrl = url;
+    this.fullMediaType = type;
+  }
+
+  closeFullMedia() {
+    this.fullMediaUrl = null;
+    this.fullMediaType = null;
+  }
+  viewReportedPost(postId: number) {
+
+        this.selectedPost = this.posts.find((p) => p.id === postId);
+    
 }
+
+}
+

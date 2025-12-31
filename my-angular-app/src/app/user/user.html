@@ -1,6 +1,5 @@
-<!-- user.component.html – 2025 ELITE USER PROFILE + GLOBAL REPORT BOX -->
+<!-- user.component.html – 2025 ELITE USER PROFILE + POST PREVIEW MODAL -->
 <div class="user-profile-wrapper">
-
   <!-- HEADER -->
   <header class="profile-header">
     <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Back">
@@ -12,59 +11,47 @@
 
   <!-- MAIN CONTENT -->
   <main class="profile-content">
-
-    <!-- ERROR -->
-  <!-- FLOATING TOAST NOTIFICATIONS – ALWAYS VISIBLE WHEN SCROLLING -->
-<div class="toast-container">
-  <div *ngIf="errorMessage" class="toast-notification error" 
-       [class.show]="errorMessage" 
-       (click)="errorMessage = ''">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ errorMessage }}</span>
-    <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-</div>
+    <!-- FLOATING TOAST NOTIFICATIONS -->
+    <div class="toast-container">
+      <div
+        *ngIf="errorMessage"
+        class="toast-notification error"
+        [class.show]="errorMessage"
+        (click)="errorMessage = ''"
+      >
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+        <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
 
     <!-- PROFILE CARD -->
-    <mat-card class="hero-card" appearance="outlined">
-      <mat-card-content class="hero-content">
+   <!-- PROFILE CARD – FULLY RESPONSIVE -->
+<mat-card class="hero-card" appearance="outlined">
+  <mat-card-content class="hero-content">
 
-        <!-- Avatar + Username -->
-        <div class="top-section">
-          <div class="avatar-large"
-               [style.background-image]="'url(' + getAvatarUrl(profile.username) + ')'">
-          </div>
-          <div class="user-info">
-            <h2 class="username">@{{ profile.username }}</h2>
-            <p class="bio" *ngIf="profile.bio">{{ profile.bio }}</p>
-            <p class="no-bio" *ngIf="!profile.bio">No bio yet</p>
-          </div>
-        </div>
+    <!-- Avatar + Username -->
+    <div class="top-section">
+      <div
+        class="avatar-large"
+        [style.background-image]="'url(' + getAvatarUrl(profile.username) + ')'"
+      ></div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat">
-            <div class="value">{{ posts.length }}</div>
-            <div class="label">Posts</div>
-          </div>
-          <div class="stat">
-            <div class="value">{{ profile.followers || 0 }}</div>
-            <div class="label">Followers</div>
-          </div>
-          <div class="stat">
-            <div class="value">{{ profile.following || 0 }}</div>
-            <div class="label">Following</div>
-          </div>
-        </div>
+      <div class="user-info">
+        <h2 class="username">@{{ profile.username }}</h2>
+        <p class="bio" *ngIf="profile.bio">{{ profile.bio }}</p>
+        <p class="no-bio" *ngIf="!profile.bio">No bio yet</p>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <button mat-raised-button 
-                  [color]="isFollowing ? 'warn' : 'primary'"
-                  (click)="follow()"
-                  class="follow-btn">
+        <!-- Move action buttons here on mobile for better flow -->
+        <div class="action-buttons mobile-only">
+          <button
+            mat-raised-button
+            [color]="isFollowing ? 'warn' : 'primary'"
+            (click)="follow()"
+            class="follow-btn"
+          >
             <mat-icon>{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
             {{ isFollowing ? 'Unfollow' : 'Follow' }}
           </button>
@@ -74,21 +61,57 @@
             Report Profile
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Info Grid -->
-        <div class="info-grid">
-          <div class="info-item">
-            <mat-icon>cake</mat-icon>
-            <span *ngIf="profile.age">Age {{ profile.age }}</span>
-            <span *ngIf="!profile.age" class="muted">Age not set</span>
-          </div>
-          <div class="info-item">
-            <mat-icon>alternate_email</mat-icon>
-            <span class="muted">{{profile.email}}</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="value">{{ posts.length }}</div>
+        <div class="label">Posts</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ profile.followers || 0 }}</div>
+        <div class="label">Followers</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ profile.following || 0 }}</div>
+        <div class="label">Following</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons (Desktop/Tablet) -->
+    <div class="action-buttons desktop-only">
+      <button
+        mat-raised-button
+        [color]="isFollowing ? 'warn' : 'primary'"
+        (click)="follow()"
+        class="follow-btn"
+      >
+        <mat-icon>{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
+        {{ isFollowing ? 'Unfollow' : 'Follow' }}
+      </button>
+
+      <button mat-stroked-button color="warn" (click)="reportProfile()" class="report-btn">
+        <mat-icon>flag</mat-icon>
+        Report Profile
+      </button>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      <div class="info-item">
+        <mat-icon>cake</mat-icon>
+        <span *ngIf="profile.age">Age {{ profile.age }}</span>
+        <span *ngIf="!profile.age" class="muted">Age not set</span>
+      </div>
+      <div class="info-item">
+        <mat-icon>alternate_email</mat-icon>
+        <span class="muted">{{ profile.email }}</span>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
 
     <!-- POSTS SECTION -->
     <mat-card class="posts-card" appearance="outlined">
@@ -108,15 +131,22 @@
 
         <!-- POSTS GRID -->
         <div class="posts-grid" *ngIf="posts.length > 0">
-          <div class="post-item" *ngFor="let post of posts" (click)="goToPost(post.id)">
+          <div class="post-item" *ngFor="let post of posts" (click)="viewPost(post)">
             <div class="post-media-container" *ngIf="post.mediaPaths?.length > 0">
-              <img *ngIf="post.mediaTypes[0]?.startsWith('image')"
-                   [src]="'http://localhost:8080' + post.mediaPaths[0]"
-                   class="post-thumb" />
-              <video *ngIf="post.mediaTypes[0]?.startsWith('video')"
-                     class="post-thumb"
-                     preload="metadata">
-                <source [src]="'http://localhost:8080' + post.mediaPaths[0]" [type]="post.mediaTypes[0]">
+              <img
+                *ngIf="post.mediaTypes[0]?.startsWith('image')"
+                [src]="'http://localhost:8080' + post.mediaPaths[0]"
+                class="post-thumb"
+              />
+              <video
+                *ngIf="post.mediaTypes[0]?.startsWith('video')"
+                class="post-thumb"
+                preload="metadata"
+              >
+                <source
+                  [src]="'http://localhost:8080' + post.mediaPaths[0]"
+                  [type]="post.mediaTypes[0]"
+                />
               </video>
               <div class="play-overlay" *ngIf="post.mediaTypes[0]?.startsWith('video')">
                 <mat-icon>play_circle</mat-icon>
@@ -129,8 +159,10 @@
 
             <div class="post-info">
               <h3>{{ post.title || 'Untitled' }}</h3>
-              <p>{{ post.content | slice:0:100 }}{{ post.content.length > 100 ? '...' : '' }}</p>
-              <small class="date">{{ post.createdAt | date:'mediumDate' }}</small>
+              <p>
+                {{ post.content | slice : 0 : 100 }}{{ post.content.length > 100 ? '...' : '' }}
+              </p>
+              <small class="date">{{ post.createdAt | date : 'mediumDate' }}</small>
             </div>
           </div>
         </div>
@@ -138,8 +170,12 @@
     </mat-card>
   </main>
 
-  <!-- GLOBAL REPORT PROFILE BOX – CENTERED & BEAUTIFUL -->
-  <div class="global-report-overlay" *ngIf="showReportProfileBox" (click)="showReportProfileBox = false">
+  <!-- GLOBAL REPORT PROFILE BOX -->
+  <div
+    class="global-report-overlay"
+    *ngIf="showReportProfileBox"
+    (click)="showReportProfileBox = false"
+  >
     <div class="global-report-box" (click)="$event.stopPropagation()">
       <div class="report-header">
         <mat-icon color="warn">warning</mat-icon>
@@ -147,10 +183,13 @@
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Reason (optional)</mat-label>
-        <textarea matInput rows="4" 
-                  [(ngModel)]="reportProfileReason" 
-                  placeholder="Why are you reporting this user?"></textarea>
+        <mat-label>Reason</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          [(ngModel)]="reportProfileReason"
+          placeholder="Why are you reporting this user?"
+        ></textarea>
       </mat-form-field>
 
       <div class="report-actions">
@@ -158,6 +197,86 @@
         <button mat-raised-button color="warn" (click)="sendProfileReport()">
           <mat-icon>flag</mat-icon> Report User
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST PREVIEW MODAL (READ-ONLY) -->
+  <div class="post-preview-overlay" *ngIf="selectedPost" (click)="selectedPost = null">
+    <div class="post-preview-modal" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview-btn" (click)="selectedPost = null">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-card class="preview-card">
+        <mat-card-header>
+          <div
+            mat-card-avatar
+            class="preview-avatar"
+            [style.background-image]="'url(' + getAvatarUrl(selectedPost.author) + ')'"
+          ></div>
+          <mat-card-title>{{ selectedPost.title || 'Untitled Post' }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ selectedPost.author }} • {{ selectedPost.createdAt | date : 'medium' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p class="preview-content">{{ selectedPost.content }}</p>
+
+          <!-- Media Grid -->
+          <!-- Media Grid – BIGGER & BETTER -->
+          <div class="media-grid" *ngIf="selectedPost.mediaPaths?.length > 0">
+            <div class="media-item" *ngFor="let path of selectedPost.mediaPaths; let i = index">
+              <!-- Image -->
+              <img
+                *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')"
+                [src]="'http://localhost:8080' + path"
+                class="preview-media"
+                (click)="
+                  openMediaPreview('http://localhost:8080' + path, selectedPost.mediaTypes[i])
+                "
+              />
+
+              <!-- Video -->
+              <video
+                *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')"
+                [src]="'http://localhost:8080' + path"
+                class="preview-media"
+                preload="metadata"
+                controls
+                muted
+                playsinline
+                loop
+              ></video>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- FULL SCREEN MEDIA PREVIEW (with click overlay fix) -->
+  <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
+    <div class="media-preview-container" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="close-preview" (click)="closePreview()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="full-media" />
+
+      <div class="video-wrapper" *ngIf="previewType?.startsWith('video')">
+        <video
+          [src]="previewUrl"
+          class="full-media"
+          controls
+          autoplay
+          loop
+          muted
+          playsinline
+          crossorigin="anonymous"
+        ></video>
+        <div class="video-click-overlay" (click)="closePreview()"></div>
       </div>
     </div>
   </div>

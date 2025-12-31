@@ -184,9 +184,11 @@
                   <button mat-stroked-button color="primary" (click)="startEditPost(post)">
                     <mat-icon>edit</mat-icon> Edit
                   </button>
-                  <button mat-stroked-button color="warn" (click)="deletePost(post.id)">
-                    <mat-icon>delete</mat-icon> Delete
-                  </button>
+             <button mat-stroked-button color="warn" (click)="openDeleteBox(post.id)">
+  <mat-icon>delete</mat-icon> Delete
+</button>
+
+
                 </mat-card-actions>
               </div>
 
@@ -278,6 +280,24 @@
       
       <video [src]="previewUrl" *ngIf="previewType?.startsWith('video')" 
              class="full-media" controls autoplay loop></video>
+    </div>
+  </div>
+</div>
+<!-- GLOBAL DELETE CONFIRMATION – ALWAYS CENTERED -->
+<div class="global-delete-overlay" *ngIf="showDeleteBox" (click)="showDeleteBox = false">
+  <div class="global-delete-box" (click)="$event.stopPropagation()">
+    <div class="delete-header">
+      <mat-icon color="warn">delete</mat-icon>
+      <h3>Delete Post #{{ currentPostId }}</h3>
+    </div>
+
+    <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+
+    <div class="delete-actions">
+      <button mat-button (click)="showDeleteBox = false">Cancel</button>
+      <button mat-raised-button color="warn" (click)="confirmDeletePost()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
     </div>
   </div>
 </div>
