@@ -276,7 +276,7 @@ input[type="file"] {
   position: fixed !important;
   top: 76px;
   right: 12px;
-  z-index: 99999;
+  z-index: 99999 !important;
   animation: slideDown 0.3s ease-out;
 }
 
@@ -633,7 +633,7 @@ input[type="file"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: 3;
   padding: 1rem;
   animation: fadeIn 0.3s ease-out;
 }
@@ -670,7 +670,7 @@ input[type="file"] {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 99999;
+  z-index: 5 !important;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -686,6 +686,7 @@ input[type="file"] {
   display: flex;
   align-items: center;
   gap: 12px;
+
   min-width: 300px;
   max-width: 420px;
   opacity: 0;

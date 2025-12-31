@@ -230,7 +230,7 @@ export class Dashboard {
     this.errorMessage = message;
     setTimeout(() => {
       this.errorMessage = '';
-    }, 5000);
+    }, 500000);
   }
 
   getUsernames() {

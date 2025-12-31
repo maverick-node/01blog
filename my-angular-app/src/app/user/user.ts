@@ -51,7 +51,7 @@ export class User {
   ) {}
   ngOnInit() {
     this.middleware();
-
+    
     this.route.paramMap.subscribe((params) => {
       this.usernameParam = params.get('username');
 

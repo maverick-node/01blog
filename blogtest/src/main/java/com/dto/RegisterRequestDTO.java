@@ -14,6 +14,9 @@ public class RegisterRequestDTO {
 
     @NotBlank(message = "Username is required")
     @Size(min = 4, max = 10, message = "Username must be 4-10 characters")
+    @Pattern(
+    regexp = "^[a-zA-Z0-9_]+$",
+    message = "Username may contain letters, numbers, and underscores only")
     private String username;
 
     @NotBlank(message = "Password is required")

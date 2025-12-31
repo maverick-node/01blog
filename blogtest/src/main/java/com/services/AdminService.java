@@ -108,7 +108,10 @@ public class AdminService {
         if (!userRepo.existsByUsername(username)) {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
-
+        UserStruct userr = userRepo.findByUsername(username);
+        if (userr.getRole().equalsIgnoreCase("admin")) {
+            throw new com.Exceptions.UnauthorizedActionException("You cant delete the admin");
+        }
         userRepo.deleteByUsername(username);
     }
 
@@ -124,12 +127,12 @@ public class AdminService {
 
         if (reports != null) {
 
-            reports.setResolved(true); 
-            reports.setCreatedAt(LocalDateTime.now()); 
+            reports.setResolved(true);
+            reports.setCreatedAt(LocalDateTime.now());
 
             reportRepo.save(reports);
         }
-        
+
         postRepo.deleteById(postId);
 
     }
@@ -183,6 +186,9 @@ public class AdminService {
     public void banUserOrDeban(String jwt, String username) {
         checkAdmin(jwt);
         UserStruct user = userRepo.findByUsername(username);
+        if (user.getRole().equalsIgnoreCase("admin")) {
+            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
+        }
         if (user == null) {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }

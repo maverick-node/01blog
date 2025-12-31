@@ -1,3 +1,18 @@
+          <!-- TOAST -->
+          <div class="toast-container">
+            <div
+              *ngIf="errorMessage"
+              class="toast-notification error"
+              [class.show]="errorMessage"
+              (click)="errorMessage = ''"
+            >
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ errorMessage }}</span>
+              <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
 <!-- dashboard.component.html – FINAL 2025 (ELITE POPUP EDIT MODAL) -->
 <div class="dashboard-wrapper">
   <mat-sidenav-container class="sidenav-container" autosize fullscreen>
@@ -135,21 +150,7 @@
       <!-- SCROLLABLE FEED -->
       <div class="scrollable-feed">
         <main class="page-content">
-          <!-- TOAST -->
-          <div class="toast-container">
-            <div
-              *ngIf="errorMessage"
-              class="toast-notification error"
-              [class.show]="errorMessage"
-              (click)="errorMessage = ''"
-            >
-              <mat-icon>error_outline</mat-icon>
-              <span>{{ errorMessage }}</span>
-              <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          </div>
+
 
           <!-- CREATE POST -->
           <section class="create-post-section">

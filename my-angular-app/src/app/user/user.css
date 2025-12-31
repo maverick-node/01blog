@@ -336,7 +336,7 @@ mat-card-subtitle {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: 2;
   padding: 1rem;
   animation: fadeIn 0.3s ease-out;
 }
@@ -397,7 +397,7 @@ mat-card-subtitle {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 99999;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 12px;
