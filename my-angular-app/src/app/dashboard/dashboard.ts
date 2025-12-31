@@ -80,7 +80,7 @@ export class Dashboard {
     private http: HttpClient,
     private router: Router,
     private profileService: ProfileService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.middleware();
@@ -123,7 +123,6 @@ export class Dashboard {
     const apiPosts = 'http://localhost:8080/get-followed-posts';
     this.http.get(apiPosts, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log(response);
 
         this.posts = response.sort(
           (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -134,7 +133,6 @@ export class Dashboard {
 
           this.loadLikeCount(p.id);
         });
-        console.log('postid', this.likeCounts);
         this.getallcomments();
       },
 
@@ -146,7 +144,6 @@ export class Dashboard {
 
   likePost(postId: number) {
     var check = this.middleware();
-    console.log(check);
 
     if (check == false) {
       this.router.navigate(['/login']);
@@ -167,8 +164,8 @@ export class Dashboard {
 
         this.loadLikeCount(postId);
       },
-      () => {
-        this.showNotification('Like failed');
+      (error:any) => {
+        this.showNotification(error.error?.error || error.error.message || 'Like failed');
       }
     );
   }
@@ -177,7 +174,6 @@ export class Dashboard {
     const apiCount = `http://localhost:8080/likes/count/${postId}`;
     this.http.get(apiCount, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log(response, postId);
 
         this.likeCounts[postId] = response?.likeCount ?? 0;
       },
@@ -203,7 +199,7 @@ export class Dashboard {
         this.showNotification(msg);
       },
       (error: any) => {
-        this.showNotification(error?.error?.message || 'Reporting failed');
+        this.showNotification(error.error?.message || error.error?.error || 'Reporting failed');
       }
     );
   }
@@ -237,14 +233,13 @@ export class Dashboard {
     const apiUsernames = 'http://localhost:8080/get-users';
     this.http.get(apiUsernames, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log('sss', response.users);
         //exclude my username from the list
         this.allusernames = response.users
           .map((u: any) => u.username)
           .filter((username: string) => username !== this.username);
       },
       (error: any) => {
-        this.showNotification(error.error?.error || 'Loading usernames failed!');
+        this.showNotification(error.error?.error ||error.error?.message || 'Loading usernames failed!');
       }
     );
   }
@@ -286,7 +281,7 @@ export class Dashboard {
         this.loadPosts();
       },
       error: (error: any) => {
-        this.showNotification(error.error?.message || 'Failed to create post');
+        this.showNotification(error.error?.message || error.error?.error || 'Failed to create post');
       },
     });
   }
@@ -300,14 +295,13 @@ export class Dashboard {
       postId: parseInt(postId),
       content: commentText.trim(),
     };
-    console.log('commentPayload', commentPayload);
     this.http.post(apiComment, commentPayload, { withCredentials: true }).subscribe(
       () => {
         this.newComment[postId] = '';
         this.getComments(postId);
       },
       (error: any) => {
-        this.showNotification(error.error?.message || 'Adding comment failed!');
+        this.showNotification(error.error?.message || error.error?.error || 'Adding comment failed!');
       }
     );
   }
@@ -319,7 +313,7 @@ export class Dashboard {
         this.comments[postId] = response.comments;
       },
       (error: any) => {
-        this.showNotification(error.error?.error || 'Loading comments failed!');
+        this.showNotification(error.error?.error || error.error?.message || 'Loading comments failed!');
       }
     );
   }
@@ -362,7 +356,6 @@ export class Dashboard {
   }
 
   loadNotifications() {
-    console.log('2');
 
     const api = 'http://localhost:8080/notifications/get';
     this.http
@@ -371,7 +364,6 @@ export class Dashboard {
       })
       .subscribe(
         (response: any) => {
-          console.log('sadfas', response);
 
           this.notifications = response.sort(
             (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -433,10 +425,8 @@ export class Dashboard {
         res.likedPosts.forEach((post: any) => {
           this.likedPosts[post] = true;
         });
-        console.log('sssss', res.likedPosts);
       },
       error: (err: any) => {
-        console.log(err);
       },
     });
   }
@@ -465,8 +455,8 @@ export class Dashboard {
           this.currentPostId = null;
           this.reportReason = '';
         },
-        error: () => {
-          this.showNotification('Failed to report post');
+        error: (err) => {
+          this.showNotification(err.error?.error || err.error?.message || 'Failed to report post');
         },
       });
   }
@@ -540,7 +530,7 @@ export class Dashboard {
         this.loadPosts();
         this.showNotification('Post updated!');
       },
-      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || 'Error')),
+      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || err.error?.error || 'Error')),
     });
   }
 
@@ -559,7 +549,7 @@ export class Dashboard {
         this.showDeleteConfirm = false;
         this.loadPosts()
       },
-      error: () => this.showNotification('Failed to delete post'),
+      error: (err) => this.showNotification(err.error?.error || err.error?.message || 'Failed to delete post'),
     });
   }
   selectedFilePreviews: { url: string; type: string }[] = [];

@@ -12,17 +12,14 @@ export class LoginGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<boolean> {
-    console.log('LoginGuard: canActivate called');
 
     return this.authService.checkAuthentication().pipe(
       map(response => {
-        console.log('LoginGuard: JWT valid response', response);
         // JWT valid → redirect to dashboard
         this.router.navigate(['/dashboard']);
         return false; // block login/register route
       }),
       catchError(error => {
-        console.warn('LoginGuard: JWT invalid/error, allowing access', error);
         return of(true); // JWT invalid → allow login/register
       })
     );

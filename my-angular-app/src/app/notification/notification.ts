@@ -63,7 +63,6 @@ export class Notification {
       withCredentials: true
     }).subscribe(
       (response: any) => {
-        console.log("sadfas", response);
         
         this.notifications = response;
         this.unreadCount = this.notifications.filter(n => !n.read).length;
@@ -77,7 +76,6 @@ export class Notification {
   }
 
   markAsRead() {
-    console.log("markAsRead called (frontend)");
     // ensure we have a token before calling the backend
     
 

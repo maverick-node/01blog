@@ -181,7 +181,7 @@ export class Admin {
           if (user) user.banned = !user.banned;
           this.showNotification(user?.banned ? 'User banned' : 'User unbanned');
         },
-        error: () => this.showNotification('Action failed'),
+        error: (error) => this.showNotification(error.error?.message || error.error?.error ||  'Action failed'),
       });
   }
 
@@ -193,7 +193,7 @@ export class Admin {
           this.users = this.users.filter((u) => u.username !== username);
           this.showNotification('User deleted');
         },
-        error: () => this.showNotification('Delete failed'),
+        error: (error) => this.showNotification(error.error?.error || error.error?.message || 'Delete failed'),
       });
   }
 
@@ -242,7 +242,7 @@ export class Admin {
           if (post) post.hidden = !currentlyHidden;
           this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
         },
-        error: () => this.showNotification('Failed'),
+        error: (error) => this.showNotification(error.error?.error ||  error.error?.message || 'Failed'),
       });
   }
 
@@ -254,7 +254,7 @@ export class Admin {
           this.posts = this.posts.filter((p) => p.id !== id);
           this.showNotification('Post deleted');
         },
-        error: () => this.showNotification('Delete failed'),
+        error: (error) => this.showNotification(error.error?.error || error.error?.message || 'Delete failed'),
       });
   }
 
@@ -267,7 +267,7 @@ export class Admin {
           if (r) r.resolved = true;
           this.showNotification('Report resolved');
         },
-        error: () => this.showNotification('Failed'),
+        error: (error) => this.showNotification(error.error?.message ||error.error?.error || 'Failed'),
       });
   }
   selectedPost: any = null;

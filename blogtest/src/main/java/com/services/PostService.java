@@ -113,7 +113,13 @@ public class PostService {
         if (!post.getAuthorUser().getUsername().equals(username)) {
             throw new UnauthorizedActionException("You can only edit your own posts");
         }
+        if (post.isHidden()) {
+            throw new UnauthorizedActionException("You can only edit on visible post");
 
+        }
+        if (title.trim().length()>50 || content.trim().length()>600){
+            throw new UnauthorizedActionException("Title or content too large");
+        }
         // Update text
         post.setTitle(title);
         post.setContent(content);

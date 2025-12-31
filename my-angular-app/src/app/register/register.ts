@@ -45,11 +45,6 @@ export class Register {
     private authService: AuthService,
     private router: Router
   ) {}
-
-
-
- 
-
   register(): void {
     // validate required fields
     if (!this.user.username || !this.user.mail || !this.user.password) {
@@ -72,7 +67,6 @@ export class Register {
         this.errorMessage = '';
       },
       error: (err) => {
-        console.log(err);
         
         this.showNotification(err.error.error || 'Registration failed!');
       }

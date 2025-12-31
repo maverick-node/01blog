@@ -78,7 +78,6 @@ export class User {
     const api = `http://localhost:8080/profile/user/${username}`;
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
-        console.log('sadsadas', response);
 
         this.profile = {
           username: response.username,
@@ -125,7 +124,7 @@ export class User {
           },
           error: (error) => {
             // Show backend error message if available
-            const msg = error?.error?.message || 'Something went wrong while unfollowing';
+            const msg = error.error?.message || error.error?.error || 'Something went wrong while unfollowing';
             this.showNotification(msg);
           },
         });
@@ -146,7 +145,7 @@ export class User {
           },
           error: (error) => {
             // Show backend error message if available
-            const msg = error?.error?.message || 'Something went wrong while following';
+            const msg = error.error?.message || error.error?.error ||  'Something went wrong while following';
             this.showNotification(msg);
           },
         });
@@ -171,7 +170,7 @@ export class User {
           this.showNotification('Profile reported');
           this.showReportProfileBox = false;
         },
-        error: () => this.showNotification('Report failed'),
+        error: (error) => this.showNotification(error.error?.message || error.error?.error || 'Report failed'),
       });
   }
 

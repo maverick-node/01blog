@@ -35,7 +35,14 @@ public class CreatePost {
 
         ObjectMapper mapper = new ObjectMapper();
         CreatePostDTO postDto = mapper.readValue(postJson, CreatePostDTO.class);
+        if (postDto.getContent().trim().length() == 0 || postDto.getTitle().trim().length() == 0) {
+            return ResponseEntity.badRequest().body(Map.of("error", "The title or content is empty"));
 
+        }
+        if (postDto.getContent().trim().length() > 600 || postDto.getTitle().trim().length() > 50) {
+            return ResponseEntity.badRequest().body(Map.of("error", "The title or content too large"));
+
+        }
         final long MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
         if (media != null && media.length > 0) {
@@ -64,7 +71,4 @@ public class CreatePost {
         return ResponseEntity.ok(Map.of("message", "Post created successfully"));
     }
 
-
-
-    
 }

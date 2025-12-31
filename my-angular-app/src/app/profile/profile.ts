@@ -131,7 +131,7 @@ export class Profile implements OnInit {
   loadUserPosts() {
     this.profileService.getMyPosts().subscribe({
       next: (posts: any) => (this.userPosts = posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-      error: () => this.showNotification('Failed to load posts'),
+      error: (err) => this.showNotification(err.error?.error || err.error?.message ||'Failed to load posts'),
     });
   }
 
@@ -154,7 +154,7 @@ export class Profile implements OnInit {
         this.loadUserPosts();
         this.showNotification('Post updated!', 'success');
       },
-      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || 'Error')),
+      error: (err) => this.showNotification('Update failed: ' + (err.error?.message || err.error?.error ||  'Error')),
     });
   }
 
@@ -165,7 +165,7 @@ export class Profile implements OnInit {
         this.userPosts = this.userPosts.filter((p) => p.id !== postId);
         this.showNotification('Post deleted successfully!', 'success');
       },
-      error: () => this.showNotification('Failed to delete post'),
+      error: (err) => this.showNotification(err.error?.message ||err.error?.error ||  'Failed to delete post'),
     });
   }
 
