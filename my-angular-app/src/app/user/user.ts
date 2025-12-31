@@ -48,10 +48,10 @@ export class User {
     private http: HttpClient,
     private router: Router,
     private profileService: ProfileService
-  ) {}
+  ) { }
   ngOnInit() {
     this.middleware();
-    
+
     this.route.paramMap.subscribe((params) => {
       this.usernameParam = params.get('username');
 
@@ -65,7 +65,7 @@ export class User {
   middleware() {
     const apiMiddleware = 'http://localhost:8080/middleware';
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      () => {},
+      () => { },
       (error) => {
         if (error.status === 401 || error.status === 403) {
           this.router.navigate(['/login']);
@@ -91,6 +91,7 @@ export class User {
         this.checkIfFollowing();
       },
       (error) => {
+        this.router.navigate(['/404']);
         this.showNotification(error.error?.message || 'Profile not found');
       }
     );
@@ -145,7 +146,7 @@ export class User {
           },
           error: (error) => {
             // Show backend error message if available
-            const msg = error.error?.message || error.error?.error ||  'Something went wrong while following';
+            const msg = error.error?.message || error.error?.error || 'Something went wrong while following';
             this.showNotification(msg);
           },
         });
