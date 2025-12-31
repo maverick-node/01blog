@@ -14,6 +14,7 @@ import com.services.UserServiceMiddle;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -30,20 +31,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Set<String> excludedPaths = Set.of("/login", "/logout");
 
     // Rate limiting settings
-    private final int MAX_REQUESTS = 20;        // max requests per window
-    private final long WINDOW_MILLIS = 60_000;  // 1 minute
+    private final int MAX_REQUESTS = 20; // max requests per window
+    private final long WINDOW_MILLIS = 60_000; // 1 minute
 
     // Map: userKey -> requestKey -> request info
     private final Map<String, Map<String, UserRequestInfo>> requestCounts = new ConcurrentHashMap<>();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
         String method = request.getMethod();
-System.out.println("RateLimitFilter:========================== ");
+        System.out.println("RateLimitFilter:========================== ");
         // Skip excluded paths
         if (excludedPaths.contains(path)) {
             filterChain.doFilter(request, response);
@@ -58,7 +59,14 @@ System.out.println("RateLimitFilter:========================== ");
             try {
                 user = uStruct.getUserFromJwt(jwt);
             } catch (Exception e) {
-                // Invalid JWT → reject request
+                //remove cookies
+                Cookie cookie = new Cookie("jwt", null);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setPath("/");
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid token");
                 return;

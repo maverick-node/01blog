@@ -28,7 +28,7 @@ public class CommentController {
     public ResponseEntity<?> create(@Valid 
             @RequestBody CreateCommentDTO dto,
             @CookieValue("jwt") String jwt) {
-        System.out.println("Create comment request received: " + dto);
+                
         commentService.createComment(dto, jwt);
 
         return ResponseEntity.ok(Map.of("message", "Comment created successfully"));

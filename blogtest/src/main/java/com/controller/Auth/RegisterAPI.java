@@ -1,8 +1,10 @@
 package com.controller.Auth;
 
 import com.dto.RegisterRequestDTO;
+import com.services.JwtService;
 import com.services.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
@@ -16,15 +18,16 @@ import org.springframework.web.bind.annotation.*;
 public class RegisterAPI {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public RegisterAPI(UserService userService) {
+    public RegisterAPI(UserService userService, JwtService jwtService) {
         this.userService = userService;
-
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequestDTO user,
-            BindingResult bindingResult) {
+            BindingResult bindingResult, HttpServletResponse response) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> {
@@ -32,6 +35,7 @@ public class RegisterAPI {
             });
             return ResponseEntity.badRequest().body(errors);
         }
+
 
         userService.registerUser(user);
 

@@ -87,6 +87,9 @@ public class CommentService {
         if (!postRepo.existsById(dto.getPostId())) {
             throw new RuntimeException("Post not found");
         }
+        if (postRepo.findById(dto.getPostId()).get().isHidden()) {
+            throw new UnauthorizedActionException("Cannot comment on a hidden post");
+        }
 
         CommentStruct comment = new CommentStruct();
         comment.setPost(postRepo.findById(dto.getPostId()).orElseThrow(() -> new RuntimeException("Post not found")));

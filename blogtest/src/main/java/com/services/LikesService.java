@@ -51,6 +51,9 @@ public class LikesService {
 
         PostsStruct post = postRepo.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
+                if (post.isHidden()) {
+                    throw new PostNotFoundException("Post not found");
+                }
 
         LikesStruct existingLike = likesRepo.findByPostIdAndUserId(postId, user.getId());
         boolean liked;
