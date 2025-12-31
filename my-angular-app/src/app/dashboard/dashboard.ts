@@ -95,7 +95,6 @@ export class Dashboard {
       (response: any) => {
         this.username = response.username;
         this.userRole = (response.role || 'user').toLowerCase();
-        console.log(this.userRole);
         this.loadPosts();
         this.loadLikesPosts();
         return true;

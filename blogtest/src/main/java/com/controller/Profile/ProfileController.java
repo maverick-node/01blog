@@ -31,7 +31,6 @@ public class ProfileController {
     public ResponseEntity<UserProfileDTO> getProfile(
             @PathVariable String username,
             @CookieValue("jwt") String jwt) {
-        System.out.println("Get profile request for user: " + username);
 
         UserProfileDTO profile = profileService.getProfile(username, jwt);
         return ResponseEntity.ok(profile);
@@ -40,7 +39,7 @@ public class ProfileController {
     @PutMapping("/editmyinfo")
     public ResponseEntity<Map<String, String>> editmyinfo(@Valid @RequestBody UserProfileDTO info,
             @CookieValue("jwt") String jwt) {
-                System.out.println("=========================="+ info);
+            
         return profileService.editmyinfo(info, jwt);
     }
 }

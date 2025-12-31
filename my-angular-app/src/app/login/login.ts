@@ -29,7 +29,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login implements OnInit {
+export class Login {
 
   user = {
     email: '',
@@ -43,26 +43,9 @@ export class Login implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.checkAuthentication();
-  }
 
   
-  checkAuthentication(): void {
-    this.authService.checkAuthentication().subscribe({
-      next: (res) => {
-        if (res.status === 200) {
-          this.router.navigate(['/dashboard']);
-        }
-      },
-      error: () => {
-       if (this.router.url !== '/login'){
-
-         this.showNotification('Please log in to continue.');
-       }
-      }
-    });
-  }
+  
 
 
   login(): void {

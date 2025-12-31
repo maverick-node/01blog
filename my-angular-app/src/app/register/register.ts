@@ -29,7 +29,7 @@ import { AuthService, RegisterUser } from '../services/auth.service';
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
-export class Register implements OnInit {
+export class Register {
 
   user = {
     username: '',
@@ -46,20 +46,9 @@ export class Register implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.checkAuthentication();
-  }
 
-  checkAuthentication(): void {
-    this.authService.checkAuthentication().subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
-      },
-      error: () => {
 
-      }
-    });
-  }
+ 
 
   register(): void {
     // validate required fields

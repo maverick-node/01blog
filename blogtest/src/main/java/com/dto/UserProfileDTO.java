@@ -17,7 +17,7 @@ public class UserProfileDTO {
     @NotBlank
     private String email;
 
-    @Size(min = 10, max = 100, message = "Bio must be between 10 and 100 characters")
+    @Size(min = 5, max = 100, message = "Bio must be between 5 and 100 characters")
     private String bio;
 
     @Min(value = 18, message = "Age must be at least 18")
