@@ -281,7 +281,7 @@ export class Dashboard {
         this.loadPosts();
       },
       error: (error: any) => {
-        console.log(error);
+       
         
         this.showNotification(error.error?.message || error.error?.error || 'Failed to create post');
       },
@@ -313,7 +313,7 @@ export class Dashboard {
     this.http.get(apiGetComments, { withCredentials: true }).subscribe(
       (response: any) => {
         this.comments[postId] = response.comments;
-        console.log(this.comments);
+        
         
       },
       (error: any) => {
