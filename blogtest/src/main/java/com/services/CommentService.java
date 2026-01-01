@@ -52,7 +52,10 @@ public class CommentService {
         if (!comment.getAuthorUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not the author of this comment");
         }
+        if (comment.getPost().isHidden()) {
+            throw new UnauthorizedActionException("Your Post is Hidden");
 
+        }
         commentRepo.delete(comment);
     }
 
