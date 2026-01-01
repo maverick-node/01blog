@@ -281,6 +281,8 @@ export class Dashboard {
         this.loadPosts();
       },
       error: (error: any) => {
+        console.log(error);
+        
         this.showNotification(error.error?.message || error.error?.error || 'Failed to create post');
       },
     });

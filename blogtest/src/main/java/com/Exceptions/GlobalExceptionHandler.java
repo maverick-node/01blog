@@ -1,6 +1,7 @@
 package com.Exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -69,11 +70,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Map<String, String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .header("Access-Control-Allow-Origin", "http://localhost:4200")
-                .body(Map.of("error", "One or more files exceed the maximum allowed size of 4MB"));
+    public ResponseEntity<Map<String,String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .header("Access-Control-Allow-Origin", "http://localhost:4200")
+        .header("Access-Control-Allow-Credentials", "true")
+        .body(Map.of("error","File too large"));
     }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
 
