@@ -533,6 +533,7 @@ input[type="file"] {
 
 .comment-body p {
   margin: 8px 0;
+  word-break: break-all;
   color: #334155;
   line-height: 1.6;
 }
@@ -1337,3 +1338,8 @@ input[type="file"] {
   pointer-events: none;
 }
 
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

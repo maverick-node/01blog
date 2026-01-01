@@ -16,7 +16,7 @@ public class DeleteComment {
         this.commentService = commentService;
     }
 
-    @DeleteMapping("comment/{id}")
+    @DeleteMapping("delete-comment/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id, @CookieValue("jwt") String jwt) {
         commentService.deleteComment(id, jwt);
         return ResponseEntity.ok(Map.of("message", "Deleted successfully"));

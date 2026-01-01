@@ -39,7 +39,7 @@ public class GetComments {
          List<CommentsDTO> commentDTOs = new java.util.ArrayList<>();
          for (CommentStruct comment : comments) {
                CommentsDTO dto = new CommentsDTO();
-               
+               dto.setCommentID(comment.getId());
                dto.setPostId(comment.getPost().getId());
                dto.setComment(comment.getComment());
                dto.setUsername(comment.getAuthorUser().getUsername());

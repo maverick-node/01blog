@@ -1,18 +1,13 @@
-          <!-- TOAST -->
-          <div class="toast-container">
-            <div
-              *ngIf="errorMessage"
-              class="toast-notification error"
-              [class.show]="errorMessage"
-              (click)="errorMessage = ''"
-            >
-              <mat-icon>error_outline</mat-icon>
-              <span>{{ errorMessage }}</span>
-              <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          </div>
+<!-- TOAST -->
+<div class="toast-container">
+  <div *ngIf="errorMessage" class="toast-notification error" [class.show]="errorMessage" (click)="errorMessage = ''">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+    <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
 <!-- dashboard.component.html – FINAL 2025 (ELITE POPUP EDIT MODAL) -->
 <div class="dashboard-wrapper">
   <mat-sidenav-container class="sidenav-container" autosize fullscreen>
@@ -27,15 +22,8 @@
             </linearGradient>
           </defs>
           <rect x="30" y="30" width="140" height="140" rx="40" fill="url(#grad1)" />
-          <text
-            x="100"
-            y="125"
-            font-size="110"
-            font-weight="bold"
-            fill="white"
-            text-anchor="middle"
-            dominant-baseline="middle"
-          >
+          <text x="100" y="125" font-size="110" font-weight="bold" fill="white" text-anchor="middle"
+            dominant-baseline="middle">
             B
           </text>
         </svg>
@@ -43,10 +31,7 @@
       </div>
 
       <div class="sidebar-user">
-        <div
-          class="sidebar-avatar"
-          [style.background-image]="'url(' + getAvatarUrl(username) + ')'"
-        ></div>
+        <div class="sidebar-avatar" [style.background-image]="'url(' + getAvatarUrl(username) + ')'"></div>
         <div class="user-info-text">
           <div class="username-sidebar">{{ username }}</div>
           <div class="role-badge" [class.admin]="userRole === 'admin'">
@@ -84,13 +69,8 @@
           <mat-icon>menu</mat-icon>
         </button>
         <h1>BlogFlow</h1>
-        <button
-          mat-icon-button
-          [matBadge]="unreadCount > 0 ? unreadCount : null"
-          matBadgeColor="warn"
-          matBadgeSize="small"
-          (click)="toggleNotifications()"
-        >
+        <button mat-icon-button [matBadge]="unreadCount > 0 ? unreadCount : null" matBadgeColor="warn"
+          matBadgeSize="small" (click)="toggleNotifications()">
           <mat-icon>notifications</mat-icon>
         </button>
       </header>
@@ -106,16 +86,9 @@
             <p>No new notifications</p>
           </div>
           <ul class="notifications-list" *ngIf="notifications?.length">
-            <li
-              *ngFor="let n of notifications"
-              class="notification-item"
-              [class.unread]="!n.read"
-              (click)="markRead(n.id)"
-            >
-              <div
-                class="notification-avatar"
-                [style.background-image]="'url(' + getAvatarUrl(n.username) + ')'"
-              ></div>
+            <li *ngFor="let n of notifications" class="notification-item" [class.unread]="!n.read"
+              (click)="markRead(n.id)">
+              <div class="notification-avatar" [style.background-image]="'url(' + getAvatarUrl(n.username) + ')'"></div>
               <div class="notification-content">
                 <div class="notification-username">{{ n.username }}</div>
                 <div class="notification-message">{{ n.message }}</div>
@@ -133,10 +106,7 @@
         </button>
         <div class="users-scroll-container" #usersScroll>
           <div class="user-bubble" *ngFor="let user of allusernames" (click)="goToUser(user)">
-            <div
-              class="user-avatar-circle"
-              [style.background-image]="'url(' + getAvatarUrl(user) + ')'"
-            >
+            <div class="user-avatar-circle" [style.background-image]="'url(' + getAvatarUrl(user) + ')'">
               <mat-icon class="online-dot">circle</mat-icon>
             </div>
             <span class="username-label">{{ user }}</span>
@@ -156,31 +126,12 @@
           <section class="create-post-section">
             <h2>Create New Post</h2>
             <div class="create-post-form">
-              <input
-                type="text"
-                [(ngModel)]="newPost.title"
-                placeholder="Title..."
-                class="post-input"
-              />
-              <textarea
-                [(ngModel)]="newPost.content"
-                placeholder="Share something awesome..."
-                class="post-textarea"
-              ></textarea>
-              <input
-                type="file"
-                #fileInput
-                multiple
-                (change)="onFilesSelected($event)"
-                accept="image/*,video/*"
-                style="display: none"
-              />
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="fileInput.click()"
-                style="margin: 12px 0"
-              >
+              <input type="text" [(ngModel)]="newPost.title" placeholder="Title..." class="post-input" />
+              <textarea [(ngModel)]="newPost.content" placeholder="Share something awesome..."
+                class="post-textarea"></textarea>
+              <input type="file" #fileInput multiple (change)="onFilesSelected($event)" accept="image/*,video/*"
+                style="display: none" />
+              <button mat-raised-button color="primary" (click)="fileInput.click()" style="margin: 12px 0">
                 <mat-icon>add_photo_alternate</mat-icon>
                 {{ selectedFiles.length > 0 ? selectedFiles.length + ' selected' : 'Add media' }}
               </button>
@@ -188,23 +139,10 @@
                 <p>Preview:</p>
                 <div class="media-grid">
                   <div class="media-item" *ngFor="let file of selectedFilePreviews; let i = index">
-                    <img
-                      *ngIf="file.type.startsWith('image')"
-                      [src]="file.url"
-                      class="preview-media"
-                    />
-                    <video
-                      *ngIf="file.type.startsWith('video')"
-                      [src]="file.url"
-                      class="preview-media"
-                      controls
-                    ></video>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      class="remove-btn"
-                      (click)="removeSelectedFile(i)"
-                    >
+                    <img *ngIf="file.type.startsWith('image')" [src]="file.url" class="preview-media" />
+                    <video *ngIf="file.type.startsWith('video')" [src]="file.url" class="preview-media"
+                      controls></video>
+                    <button mat-icon-button color="warn" class="remove-btn" (click)="removeSelectedFile(i)">
                       <mat-icon>close</mat-icon>
                     </button>
                   </div>
@@ -222,38 +160,23 @@
             <div class="posts-list" *ngIf="posts.length; else noPosts">
               <mat-card class="post-card" *ngFor="let post of posts">
                 <mat-card-header>
-                  <div
-                    mat-card-avatar
-                    class="avatar-icon"
-                    [style.background-image]="'url(' + getAvatarUrl(post.author) + ')'"
-                  ></div>
+                  <div mat-card-avatar class="avatar-icon"
+                    [style.background-image]="'url(' + getAvatarUrl(post.author) + ')'"></div>
                   <mat-card-title>{{ post.title }}</mat-card-title>
-                  <mat-card-subtitle
-                    >{{ post.author }} •
-                    {{ post.createdAt | date : 'mediumDate' }}</mat-card-subtitle
-                  >
+                  <mat-card-subtitle>{{ post.author }} •
+                    {{ post.createdAt | date : 'mediumDate' }}</mat-card-subtitle>
                 </mat-card-header>
 
                 <mat-card-content>
                   <p class="post-content">{{ post.content }}</p>
 
                   <div class="media-grid" *ngIf="post.mediaPaths?.length > 0">
-                    <div
-                      class="media-item"
-                      *ngFor="let path of post.mediaPaths; let i = index"
-                      (click)="openMediaPreview(path, post.mediaTypes[i])"
-                    >
-                      <img
-                        *ngIf="post.mediaTypes[i]?.startsWith('image')"
-                        [src]="'http://localhost:8080' + path"
-                        class="post-media"
-                      />
+                    <div class="media-item" *ngFor="let path of post.mediaPaths; let i = index"
+                      (click)="openMediaPreview(path, post.mediaTypes[i])">
+                      <img *ngIf="post.mediaTypes[i]?.startsWith('image')" [src]="'http://localhost:8080' + path"
+                        class="post-media" />
                       <div class="video-container" *ngIf="post.mediaTypes[i]?.startsWith('video')">
-                        <video
-                          [src]="'http://localhost:8080' + path"
-                          class="post-media"
-                          preload="metadata"
-                        ></video>
+                        <video [src]="'http://localhost:8080' + path" class="post-media" preload="metadata"></video>
                         <div class="play-overlay"><mat-icon>play_circle</mat-icon></div>
                       </div>
                     </div>
@@ -272,38 +195,24 @@
                   <button mat-button color="primary" (click)="toggleComments(post.id)">
                     <mat-icon>{{
                       showComments[post.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-                    }}</mat-icon>
+                      }}</mat-icon>
                     {{ (comments[post.id] || []).length }} Comments
                   </button>
 
                   <span class="spacer"></span>
 
                   <!-- Report (not own post) -->
-                  <button
-                    *ngIf="username !== post.author"
-                    mat-icon-button
-                    color="warn"
-                    (click)="openReportBox(post.id)"
-                  >
+                  <button *ngIf="username !== post.author" mat-icon-button color="warn"
+                    (click)="openReportBox(post.id)">
                     <mat-icon>flag</mat-icon>
                   </button>
 
                   <!-- Edit & Delete (own post only) -->
                   <ng-container *ngIf="username === post.author">
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="startEditPost(post)"
-                      matTooltip="Edit post"
-                    >
+                    <button mat-icon-button color="primary" (click)="startEditPost(post)" matTooltip="Edit post">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="openDeleteConfirm(post.id)"
-                      matTooltip="Delete post"
-                    >
+                    <button mat-icon-button color="warn" (click)="openDeleteConfirm(post.id)" matTooltip="Delete post">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </ng-container>
@@ -315,36 +224,35 @@
                 <div class="comments-section" *ngIf="showComments[post.id]">
                   <div class="comment-input-row">
                     <mat-form-field appearance="outline" class="comment-field">
-                      <textarea
-                        matInput
-                        rows="2"
-                        [(ngModel)]="newComment[post.id]"
-                        placeholder="Add a comment..."
-                      ></textarea>
+                      <textarea matInput rows="2" [(ngModel)]="newComment[post.id]"
+                        placeholder="Add a comment..."></textarea>
                     </mat-form-field>
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="addComment(post.id)"
-                      [disabled]="!newComment[post.id]?.trim()"
-                    >
+                    <button mat-icon-button color="primary" (click)="addComment(post.id)"
+                      [disabled]="!newComment[post.id]?.trim()">
                       <mat-icon>send</mat-icon>
                     </button>
                   </div>
 
-                  <div class="comments-list">
-                    <div class="comment-item" *ngFor="let c of comments[post.id]">
-                      <div
-                        class="comment-avatar"
-                        [style.background-image]="'url(' + getAvatarUrl(c.username) + ')'"
-                      ></div>
-                      <div class="comment-body">
+                  <div class="comment-item" *ngFor="let c of comments[post.id]">
+                    <div class="comment-avatar" [style.background-image]="'url(' + getAvatarUrl(c.username) + ')'">
+                    </div>
+
+                    <div class="comment-body">
+                      <div class="comment-header">
                         <strong>{{ c.username }}</strong>
-                        <p>{{ c.comment }}</p>
-                        <small>{{ c.createdAt | date : 'short' }}</small>
+
+                        <!-- DELETE BUTTON (only owner can see it) -->
+                        <button mat-icon-button color="warn" *ngIf="username === c.username"
+                          (click)="deleteComment(c.commentID, c.postId)">
+                          <mat-icon>delete</mat-icon>
+                        </button>
                       </div>
+
+                      <p>{{ c.comment }}</p>
+                      <small>{{ c.createdAt | date : 'short' }}</small>
                     </div>
                   </div>
+
                 </div>
               </mat-card>
             </div>
@@ -368,16 +276,8 @@
         <mat-icon>close</mat-icon>
       </button>
       <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="full-media" />
-      <video
-        *ngIf="previewType?.startsWith('video')"
-        [src]="previewUrl"
-        class="full-media"
-        controls
-        muted
-
-        loop
-        crossorigin="anonymous"
-      ></video>
+      <video *ngIf="previewType?.startsWith('video')" [src]="previewUrl" class="full-media" controls muted loop
+        crossorigin="anonymous"></video>
     </div>
   </div>
 
@@ -390,12 +290,8 @@
       </div>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Reason</mat-label>
-        <textarea
-          matInput
-          rows="4"
-          [(ngModel)]="reportReason"
-          placeholder="Why are you reporting this post?"
-        ></textarea>
+        <textarea matInput rows="4" [(ngModel)]="reportReason"
+          placeholder="Why are you reporting this post?"></textarea>
       </mat-form-field>
       <div class="report-actions">
         <button mat-button (click)="showReportBox = false">Cancel</button>
@@ -439,12 +335,8 @@
         <div class="title-field-container">
           <mat-form-field appearance="outline" class="title-field">
             <mat-label>Title</mat-label>
-            <input
-              matInput
-              [(ngModel)]="editPostData.title"
-              placeholder="Give your post an awesome title..."
-              class="title-input"
-            />
+            <input matInput [(ngModel)]="editPostData.title" placeholder="Give your post an awesome title..."
+              class="title-input" />
             <mat-icon matSuffix color="primary">title</mat-icon>
           </mat-form-field>
         </div>
@@ -453,13 +345,8 @@
         <div class="content-field-container">
           <mat-form-field appearance="outline" class="content-field">
             <mat-label>Content</mat-label>
-            <textarea
-              matInput
-              rows="8"
-              [(ngModel)]="editPostData.content"
-              placeholder="Share your thoughts, story, or update..."
-              class="content-textarea"
-            ></textarea>
+            <textarea matInput rows="8" [(ngModel)]="editPostData.content"
+              placeholder="Share your thoughts, story, or update..." class="content-textarea"></textarea>
             <mat-icon matSuffix color="primary">edit_note</mat-icon>
           </mat-form-field>
           <mat-hint align="end">{{ editPostData.content?.length || 0 }} characters</mat-hint>
@@ -469,23 +356,12 @@
         <div class="current-media-section" *ngIf="editPostData.currentMedia?.length > 0">
           <p class="section-title">Current media</p>
           <div class="media-grid">
-            <div
-              class="media-item removable"
-              *ngFor="let file of editPostData.currentMedia; let i = index"
-            >
-              <img
-                *ngIf="file.type.startsWith('image')"
-                [src]="'http://localhost:8080' + file.path"
-              />
+            <div class="media-item removable" *ngFor="let file of editPostData.currentMedia; let i = index">
+              <img *ngIf="file.type.startsWith('image')" [src]="'http://localhost:8080' + file.path" />
               <video *ngIf="file.type.startsWith('video')" controls preload="metadata">
                 <source [src]="'http://localhost:8080' + file.path" [type]="file.type" />
               </video>
-              <button
-                mat-icon-button
-                color="warn"
-                class="remove-btn"
-                (click)="removeExistingMedia(i)"
-              >
+              <button mat-icon-button color="warn" class="remove-btn" (click)="removeExistingMedia(i)">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
@@ -494,41 +370,23 @@
 
         <!-- Add New Media -->
         <div class="file-upload-section">
-          <input
-            #editFileInput
-            type="file"
-            multiple
-            (change)="onEditFilesSelected($event)"
-            accept="image/*,video/*"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            color="primary"
-            (click)="editFileInput.click()"
-            class="upload-btn"
-          >
+          <input #editFileInput type="file" multiple (change)="onEditFilesSelected($event)" accept="image/*,video/*"
+            style="display: none" />
+          <button mat-stroked-button color="primary" (click)="editFileInput.click()" class="upload-btn">
             <mat-icon>add_photo_alternate</mat-icon>
             {{
-              editPostData.newFilePreviews.length > 0
-                ? editPostData.newFilePreviews.length + ' files selected'
-                : 'Add photos or videos'
+            editPostData.newFilePreviews.length > 0
+            ? editPostData.newFilePreviews.length + ' files selected'
+            : 'Add photos or videos'
             }}
           </button>
 
           <div class="new-media-preview" *ngIf="editPostData.newFilePreviews.length > 0">
             <p class="section-title">New media</p>
             <div class="media-grid">
-              <div
-                class="media-item removable"
-                *ngFor="let preview of editPostData.newFilePreviews; let i = index"
-              >
+              <div class="media-item removable" *ngFor="let preview of editPostData.newFilePreviews; let i = index">
                 <img *ngIf="preview.type.startsWith('image')" [src]="preview.url" />
-                <video
-                  *ngIf="preview.type.startsWith('video')"
-                  [src]="preview.url"
-                  controls
-                ></video>
+                <video *ngIf="preview.type.startsWith('video')" [src]="preview.url" controls></video>
                 <button mat-icon-button color="warn" class="remove-btn" (click)="removeNewFile(i)">
                   <mat-icon>close</mat-icon>
                 </button>

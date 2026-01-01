@@ -49,6 +49,7 @@ export class User {
     private router: Router,
     private profileService: ProfileService
   ) { }
+ 
   ngOnInit() {
     this.middleware();
 
@@ -56,8 +57,8 @@ export class User {
       this.usernameParam = params.get('username');
 
       if (this.usernameParam) {
-        this.loadFollowersandFollowing(this.usernameParam);
         this.loadProfile(this.usernameParam);
+         
       }
     });
   }
@@ -86,9 +87,11 @@ export class User {
           age: response.age,
           id: response.id,
         };
-
+this.loadFollowersandFollowing(username);
         this.loadposts(username);
         this.checkIfFollowing();
+              
+
       },
       (error) => {
         this.router.navigate(['/404']);

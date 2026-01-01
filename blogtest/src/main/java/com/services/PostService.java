@@ -117,7 +117,7 @@ public class PostService {
             throw new UnauthorizedActionException("You can only edit on visible post");
 
         }
-        if (title.trim().length()>50 || content.trim().length()>600){
+        if (title.trim().length() > 50 || content.trim().length() > 600) {
             throw new UnauthorizedActionException("Title or content too large");
         }
         // Update text
@@ -167,7 +167,10 @@ public class PostService {
         if (!post.getAuthorUser().getUsername().equals(username)) {
             throw new UnauthorizedActionException("Not your post");
         }
+        if (post.isHidden()) {
+            throw new UnauthorizedActionException("Your post is hidden");
 
+        }
         // Delete all media files from disk
         if (post.getMediaFiles() != null) {
             post.getMediaFiles().forEach(file -> deleteFileFromDisk(file.getFilePath()));

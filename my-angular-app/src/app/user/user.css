@@ -162,6 +162,7 @@
   padding: 1rem 1.5rem;
   background: #f8fafc;
   border-radius: 16px;
+  word-break: break-word;
   color: #475569;
   font-size: 1.1rem;
 }

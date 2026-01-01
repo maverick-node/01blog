@@ -164,7 +164,7 @@ export class Dashboard {
 
         this.loadLikeCount(postId);
       },
-      (error:any) => {
+      (error: any) => {
         this.showNotification(error.error?.error || error.error.message || 'Like failed');
       }
     );
@@ -239,7 +239,7 @@ export class Dashboard {
           .filter((username: string) => username !== this.username);
       },
       (error: any) => {
-        this.showNotification(error.error?.error ||error.error?.message || 'Loading usernames failed!');
+        this.showNotification(error.error?.error || error.error?.message || 'Loading usernames failed!');
       }
     );
   }
@@ -311,6 +311,8 @@ export class Dashboard {
     this.http.get(apiGetComments, { withCredentials: true }).subscribe(
       (response: any) => {
         this.comments[postId] = response.comments;
+        console.log(this.comments);
+        
       },
       (error: any) => {
         this.showNotification(error.error?.error || error.error?.message || 'Loading comments failed!');
@@ -595,5 +597,20 @@ export class Dashboard {
       this.fileInput.nativeElement.value = '';
     }
   }
+deleteComment(commentid: string, commentpost: string) {
+  const id = Number(commentid);
+  const post = Number(commentpost)
+  this.http
+    .delete(`http://localhost:8080/delete-comment/${id}`, {withCredentials: true})
+    .subscribe({
+      next: () => {
+       this.showNotification("Comment Deleted")
+       this.getComments(commentpost)
+      },
+      error: (err) => {
+         this.showNotification(err.error?.error ||err.error?.message ||"Error Comment Deleted")
+      }
+    });
+}
 
 }

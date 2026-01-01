@@ -18,12 +18,11 @@ public class ProfileService {
 
     private final JwtService jwtService;
     private final UserRepo userRepo;
-   
 
     public ProfileService(JwtService jwtService, UserRepo userRepo) {
         this.jwtService = jwtService;
         this.userRepo = userRepo;
-  
+
     }
 
     public UserProfileDTO getProfile(String username, String jwt) {
@@ -47,18 +46,20 @@ public class ProfileService {
 
     public ResponseEntity<Map<String, String>> editmyinfo(@Valid UserProfileDTO info, String jwt) {
 
-
         String username = jwtService.extractUsername(jwt);
 
-    
         UserStruct user = userRepo.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException("User not found");
         }
 
+        if (user.isBanned()) {
+            throw new IllegalArgumentException("You are banned");
 
-        if (info.getAge() != 0 ) {
-            user.setAge(info.getAge()); 
+        }
+
+        if (info.getAge() != 0) {
+            user.setAge(info.getAge());
         }
         if (info.getBio() != null && !info.getBio().isBlank()) {
             user.setBio(info.getBio());

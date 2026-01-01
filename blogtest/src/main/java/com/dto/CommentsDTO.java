@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CommentsDTO {
+    private Integer commentID;
     private Integer postId;
     private String comment;
     private String username;

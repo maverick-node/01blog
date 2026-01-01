@@ -38,18 +38,7 @@
             <p class="no-bio" *ngIf="!profile.bio">No bio yet</p>
 
             <!-- Move action buttons here on mobile for better flow -->
-            <div class="action-buttons mobile-only">
-              <button mat-raised-button [color]="isFollowing ? 'warn' : 'primary'" (click)="follow()"
-                class="follow-btn">
-                <mat-icon>{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
-                {{ isFollowing ? 'Unfollow' : 'Follow' }}
-              </button>
-
-              <button mat-stroked-button color="warn" (click)="reportProfile()" class="report-btn">
-                <mat-icon>flag</mat-icon>
-                Report Profile
-              </button>
-            </div>
+      
           </div>
         </div>
 
