@@ -31,8 +31,7 @@ public class ReportController {
     }
 
     @PostMapping("/create/{username}")
-    public ResponseEntity<Map<String, String>> createReport( @Valid 
-            @PathVariable String username,
+    public ResponseEntity<Map<String, String>> createReport(@Valid @PathVariable String username,
             @CookieValue("jwt") String jwt,
             @RequestBody @Valid CreateReportDTO dto) {
 
@@ -42,15 +41,19 @@ public class ReportController {
     }
 
     @PostMapping("/report-post")
-    public ResponseEntity<Map<String, String>> reportPost( @Valid 
-
-            @CookieValue("jwt") String jwt,
+    public ResponseEntity<Map<String, String>> reportPost(@Valid @CookieValue("jwt") String jwt,
             @RequestBody @Valid CreateReportDTO dto) {
 
-            if (dto.getReason().trim().isEmpty()|| dto.getReason().trim().isBlank()){
-                return ResponseEntity.badRequest().body(Map.of("message", "Reason cannot be empty or blank"));
-            }
+        if (dto.getReason().trim().isEmpty() || dto.getReason().trim().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Reason cannot be empty or blank"));
+        }
+        if (dto.getReportedPostId() == 0) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Reported Post ID cannot be null"));
+        }
 
+        if (dto.getReason().length() > 500) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Details cannot be more than 500 characters"));
+        }
         reportService.reportPost(dto.getReportedPostId(), jwt, dto);
         return ResponseEntity.ok(Map.of("message", "Post reported successfully"));
     }

@@ -120,6 +120,7 @@ export class Dashboard {
   }
 
   loadPosts() {
+   
     const apiPosts = 'http://localhost:8080/get-followed-posts';
     this.http.get(apiPosts, { withCredentials: true }).subscribe(
       (response: any) => {
@@ -184,6 +185,12 @@ export class Dashboard {
   }
 
   reportPost(postId: number) {
+      var check = this.middleware();
+
+    if (check == false) {
+      this.router.navigate(['/login']);
+      return;
+    }
     //window create prompt to ask for reason
     const reason = window.prompt('Please enter report reason:', '');
     if (reason === null) return; // user cancelled
@@ -252,6 +259,12 @@ export class Dashboard {
     this.router.navigate(['/users', username]);
   }
   createPost() {
+      var check = this.middleware();
+
+    if (check == false) {
+      this.router.navigate(['/login']);
+      return;
+    }
     const formData = new FormData();
 
     // Send title & content as JSON string under "post"
@@ -289,6 +302,12 @@ export class Dashboard {
   }
 
   addComment(postId: string) {
+      var check = this.middleware();
+
+    if (check == false) {
+      this.router.navigate(['/login']);
+      return;
+    }
     const commentText = this.newComment[postId];
     if (!commentText?.trim()) return;
 
@@ -381,6 +400,12 @@ export class Dashboard {
       );
   }
   markRead(id: number) {
+      var check = this.middleware();
+
+    if (check == false) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.http
       .post(`http://localhost:8080/notifications/mark-as-read/${id}`, {}, { withCredentials: true })
       .subscribe({

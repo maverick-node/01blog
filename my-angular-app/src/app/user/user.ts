@@ -63,10 +63,14 @@ export class User {
     });
   }
 
+
+
   middleware() {
     const apiMiddleware = 'http://localhost:8080/middleware';
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      () => { },
+      () => { 
+        
+      },
       (error) => {
         if (error.status === 401 || error.status === 403) {
           this.router.navigate(['/login']);

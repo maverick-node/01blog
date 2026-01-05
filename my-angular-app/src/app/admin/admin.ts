@@ -61,7 +61,7 @@ export class Admin {
           this.loadUsers();
           this.loadPosts();
           this.loadReports();
-          this.getsolvedreports();
+          this.getSolvedReports();
         }
       },
       error: () => {},
@@ -91,29 +91,63 @@ export class Admin {
     return this.users.filter((u) => u.banned).length;
   }
 
-  loadUsers() {
-    this.http
-      .get<any>('http://localhost:8080/get-users', { withCredentials: true })
-      .subscribe((res) => (this.users = res.users || []));
-  }
+loadUsers() {
+  this.http
+    .get<any>('http://localhost:8080/get-users', { withCredentials: true })
+    .subscribe(
+      (res) => {
+        this.users = res.users || [];
+      },
+      (err) => {
+        console.error('Failed to load users', err);
+        // Optionally, show a message to the user
+        this.users = [];
+      }
+    );
+}
 
-  loadPosts() {
-    this.http
-      .get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
-      .subscribe((res) => (this.posts = res || []));
-  }
+loadPosts() {
+  this.http
+    .get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
+    .subscribe(
+      (res) => {
+        this.posts = res || [];
+      },
+      (err) => {
+        console.error('Failed to load posts', err);
+        this.posts = [];
+      }
+    );
+}
 
-  loadReports() {
-    this.http
-      .get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
-      .subscribe((res) => (this.reports = res || []));
-  }
+loadReports() {
+  this.http
+    .get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
+    .subscribe(
+      (res) => {
+        this.reports = res || [];
+      },
+      (err) => {
+        console.error('Failed to load reports', err);
+        this.reports = [];
+      }
+    );
+}
 
-  getsolvedreports() {
-    this.http
-      .get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
-      .subscribe((res) => (this.reportssolved = res || []));
-  }
+getSolvedReports() {
+  this.http
+    .get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
+    .subscribe(
+      (res) => {
+        this.reportssolved = res || [];
+      },
+      (err) => {
+        console.error('Failed to load solved reports', err);
+        this.reportssolved = [];
+      }
+    );
+}
+
 
   showNotification(message: string) {
     this.errorMessage = message;

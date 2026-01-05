@@ -11,7 +11,5 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './not-found.css'
 })
 export class NotFoundComponent {
-  goBack() {
-    window.history.back();
-  }
+ 
 }

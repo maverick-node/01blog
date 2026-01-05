@@ -68,6 +68,7 @@ export class Profile implements OnInit {
   ========================= */
   ngOnInit() {
     this.checkAuthAndLoadProfile();
+
   }
 
   /* =========================
@@ -79,6 +80,7 @@ export class Profile implements OnInit {
         this.dbUser = res.username;
         this.loadFollowersandFollowing(res.username);
         this.loadProfile(res);
+       
       },
       error: (err) => {
         this.showNotification(err.error?.error);
@@ -107,7 +109,7 @@ export class Profile implements OnInit {
         this.isEditing = false;
         this.showNotification('Profile updated successfully!', 'success');
       },
-      error: (err) => this.showNotification(err.error.fields.error),
+      error: (err) => this.showNotification(err.error?.fields.error),
     });
   }
 

@@ -120,6 +120,10 @@ public class PostService {
         if (title.trim().length() > 50 || content.trim().length() > 600) {
             throw new UnauthorizedActionException("Title or content too large");
         }
+        if (title == null || title.isBlank() || content == null || content.isBlank()) {
+            throw new InvalidPostException("Title and content cannot be empty");
+        }
+        
         // Update text
         post.setTitle(title);
         post.setContent(content);
@@ -155,8 +159,11 @@ public class PostService {
         if (username == null || username.isEmpty()) {
             throw new InvalidJwtTokenException("Invalid JWT token");
         }
-
+        
         UserStruct user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new UserNotFoundException("User not found");
+        }
         if (user.isBanned()) {
             throw new UnauthorizedActionException("You are banned");
         }

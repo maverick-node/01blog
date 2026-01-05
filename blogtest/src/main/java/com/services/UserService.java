@@ -30,10 +30,10 @@ public class UserService {
         if (userRepo.existsByUsername(dto.getUsername())) {
             throw new UserAlreadyExistsException("Username already taken!");
         }
-
+        
         UserStruct user = new UserStruct();
         user.setMail(dto.getMail());
-       user.setUsername(dto.getUsername());
+        user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setAge(age1);
         user.setBio(dto.getBio());

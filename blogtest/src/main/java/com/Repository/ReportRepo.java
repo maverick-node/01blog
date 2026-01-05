@@ -10,7 +10,7 @@ public interface ReportRepo extends JpaRepository<ReportStruct, Integer> {
         ReportStruct findById(int id);
 
         ReportStruct findByReportedPostId(Integer reportedPostId);
-
+        List<ReportStruct>      findAllByReportedPostId(Integer reportedPostId);
         List<ReportStruct> findAll();
 
 

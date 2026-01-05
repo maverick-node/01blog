@@ -52,10 +52,7 @@ public class CommentService {
         if (!comment.getAuthorUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not the author of this comment");
         }
-        if (comment.getPost().isHidden()) {
-            throw new UnauthorizedActionException("Your Post is Hidden");
 
-        }
         commentRepo.delete(comment);
     }
 
@@ -73,7 +70,6 @@ public class CommentService {
         if (!comment.getAuthorUser().getUsername().equals(username)) {
             throw new UnauthorizedActionException("You are not the author of this comment");
         }
-
         comment.setComment(dto.getNewContent());
         commentRepo.save(comment);
     }
@@ -86,14 +82,19 @@ public class CommentService {
         if (isBanned(username)) {
             throw new UnauthorizedActionException("You are banned from commenting");
         }
-        // Optional: verify that the post exists
+
         if (!postRepo.existsById(dto.getPostId())) {
             throw new RuntimeException("Post not found");
         }
         if (postRepo.findById(dto.getPostId()).get().isHidden()) {
             throw new UnauthorizedActionException("Cannot comment on a hidden post");
         }
-
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
+            throw new IllegalArgumentException("Comment content cannot be empty");
+        }
+        if (dto.getContent().length() > 500) {
+            throw new IllegalArgumentException("Comment content exceeds maximum length of 500 characters");
+        }
         CommentStruct comment = new CommentStruct();
         comment.setPost(postRepo.findById(dto.getPostId()).orElseThrow(() -> new RuntimeException("Post not found")));
         comment.setAuthorUser(userRepo.findByUsername(username));

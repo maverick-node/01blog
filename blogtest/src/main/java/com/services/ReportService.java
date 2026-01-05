@@ -1,6 +1,5 @@
 package com.services;
 
-
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -50,6 +49,18 @@ public class ReportService {
         if (reporter.getId() == targetUser.getId()) {
             throw new UnauthorizedActionException("You cannot report yourself");
         }
+        if (targetUser.isBanned()) {
+            throw new UnauthorizedActionException("You cannot report a banned user");
+        }
+        if (reporter.isBanned()) {
+            throw new UnauthorizedActionException("You are banned from reporting users");
+        }
+        if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+            throw new UnauthorizedActionException("Report reason cannot be empty");
+        }
+        if (dto.getReason().length() > 500) {
+            throw new UnauthorizedActionException("Report reason is too long");
+        }
 
         ReportStruct report = new ReportStruct();
         report.setReporter(reporter);
@@ -57,9 +68,9 @@ public class ReportService {
         UserStruct getuser = username.get();
         report.setTargetUser(getuser);
         report.setReason(dto.getReason());
-
         reportRepo.save(report);
     }
+
     public void reportPost(Integer postId, String jwt, CreateReportDTO dto) {
         String reporterUsername = jwtService.extractUsername(jwt);
 
@@ -81,6 +92,5 @@ public class ReportService {
 
         reportRepo.save(report);
     }
- 
-        
+
 }

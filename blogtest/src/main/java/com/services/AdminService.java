@@ -123,18 +123,19 @@ public class AdminService {
             throw new ReportNotFoundException("Post not found");
         }
 
-        ReportStruct reports = reportRepo.findByReportedPostId(postId);
+        // Get all reports for this post
+        List<ReportStruct> reports = reportRepo.findAllByReportedPostId(postId);
 
-        if (reports != null) {
-
-            reports.setResolved(true);
-            reports.setCreatedAt(LocalDateTime.now());
-
-            reportRepo.save(reports);
+        if (!reports.isEmpty()) {
+            for (ReportStruct report : reports) {
+                report.setResolved(true);
+                report.setCreatedAt(LocalDateTime.now());
+            }
+            reportRepo.saveAll(reports);
         }
 
+        // Delete the post
         postRepo.deleteById(postId);
-
     }
 
     public List<ReportedDTO> getAllReportsResolved(String jwt) {
