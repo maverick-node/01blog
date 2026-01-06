@@ -203,43 +203,48 @@ public class AdminService {
         userRepo.save(user);
     }
 
-    public void hidePost(String jwt, Integer postId, String reports) {
-        checkAdmin(jwt);
-        if (!postRepo.existsById(postId)) {
-            throw new ReportNotFoundException("Post not found");
+ public void hidePost(String jwt, Integer postId, String reports) {
+    checkAdmin(jwt);
+
+    PostsStruct post = postRepo.findById(postId)
+            .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+
+    if ("reports".equals(reports)) {
+        List<ReportStruct> reportsList =
+                reportRepo.findAllByReportedPostId(postId);
+
+        for (ReportStruct report : reportsList) {
+            report.setResolved(true);
         }
-        Optional<PostsStruct> optionalPost = postRepo.findById(postId);
 
-        var solved = reportRepo.findByReportedPostId(postId);
-
-        PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
-        if (reports.equals("reports")) {
-            solved.setResolved(true);
-            reportRepo.save(solved);
-        }
-        post.setHidden(true);
-        postRepo.save(post);
-
+        reportRepo.saveAll(reportsList);
     }
 
-    public void unhidePost(String jwt, Integer postId, String reports) {
-        System.out.println("===========" + reports);
-        checkAdmin(jwt);
-        if (!postRepo.existsById(postId)) {
-            throw new ReportNotFoundException("Post not found");
+    post.setHidden(true);
+    postRepo.save(post);
+}
+
+
+   public void unhidePost(String jwt, Integer postId, String reports) {
+    checkAdmin(jwt);
+
+    PostsStruct post = postRepo.findById(postId)
+            .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+
+    if ("reports".equals(reports)) {
+        List<ReportStruct> reportsList =
+                reportRepo.findAllByReportedPostId(postId);
+
+        for (ReportStruct report : reportsList) {
+            report.setResolved(true);
         }
-        Optional<PostsStruct> optionalPost = postRepo.findById(postId);
 
-        var solved = reportRepo.findByReportedPostId(postId);
-        if (reports.equals("reports")) {
-            solved.setResolved(true);
-            reportRepo.save(solved);
-        }
-
-        PostsStruct post = optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
-        post.setHidden(false);
-        postRepo.save(post);
-
+        reportRepo.saveAll(reportsList);
     }
+
+    post.setHidden(false);
+    postRepo.save(post);
+}
+
 
 }

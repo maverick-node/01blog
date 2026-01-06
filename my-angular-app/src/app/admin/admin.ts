@@ -272,9 +272,11 @@ getSolvedReports() {
       .post(endpoint, reports, { withCredentials: true, headers: { 'Content-Type': 'text/plain' } })
       .subscribe({
         next: () => {
+
           const post = this.posts.find((p) => p.id === postId);
           if (post) post.hidden = !currentlyHidden;
           this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
+          this.loadReports();
         },
         error: (error) => this.showNotification(error.error?.error ||  error.error?.message || 'Failed'),
       });
