@@ -5,11 +5,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.Exceptions.BannedUserExceptions;
 import com.Exceptions.RateLimitExceededException;
+import com.Exceptions.UnauthorizedActionException;
 import com.Model.UserStruct;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.services.UserServiceMiddle;
 
 import jakarta.servlet.FilterChain;
@@ -59,7 +63,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             try {
                 user = uStruct.getUserFromJwt(jwt);
             } catch (Exception e) {
-                //remove cookies
+                // remove cookies
                 Cookie cookie = new Cookie("jwt", null);
                 cookie.setHttpOnly(true);
                 cookie.setSecure(true);
@@ -75,9 +79,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         // If user exists and is banned, block request
         if ("POST".equalsIgnoreCase(method) && user != null && user.isBanned()) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("You are banned from making requests.");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are banned from making requests.");
             return;
+
         }
 
         // Rate limiting only for POST requests
@@ -107,8 +111,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         info.count++;
         if (info.count > MAX_REQUESTS) {
-            throw new RateLimitExceededException(
-                    "Rate limit exceeded. Max " + MAX_REQUESTS + " requests per minute allowed.");
+            response.sendError(401, "Too many requests. Please try again later.");
+            return;
         }
 
         // Continue the filter chain
@@ -141,4 +145,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             this.startTime = startTime;
         }
     }
+
+  
+
 }

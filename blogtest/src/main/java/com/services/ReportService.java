@@ -80,9 +80,23 @@ public class ReportService {
 
         var reporter = userRepo.findByUsername(reporterUsername);
         Optional<PostsStruct> postOwner = postRepo.findById(postId);
+        var postExist = postRepo.existsById(postId);
+        if (!postExist) {
+            throw new UnauthorizedActionException("Post not found");
+        }
         var reporteduser = postOwner.get().getAuthorUser().getUsername();
         if (reporterUsername.equals(reporteduser)) {
             throw new UnauthorizedActionException("You cannot report your own post");
+        }
+        if (postOwner.get().isHidden()) {
+            throw new UnauthorizedActionException("You cannot report a hidden post");
+        }
+
+        if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+            throw new UnauthorizedActionException("Report reason cannot be empty");
+        }
+        if (dto.getReason().length() > 500) {
+            throw new UnauthorizedActionException("Report reason is too long");
         }
         ReportStruct report = new ReportStruct();
         report.setTargetUser(postOwner.get().getAuthorUser());

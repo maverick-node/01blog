@@ -15,6 +15,7 @@ public class ReportedDTO {
     @NotBlank
     private String targetUserName;
     @NotBlank
+    @Column(length = 500)
     private String reason;
     private int reportedPostId;
     private LocalDateTime createdAt;

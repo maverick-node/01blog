@@ -106,7 +106,17 @@ public class CommentService {
         List<UserStruct> allUsers = userRepo.findAll();
 
         for (UserStruct u : allUsers) {
+            // check if i commented on my own dont send notification
+            if (u.getUsername().equalsIgnoreCase(username)) {
+                continue;
+            }
+
             if (isFollowingService.CheckIfFollow(u.getUsername(), username)) { // u follows commenter
+                // check if he comment on his own post dont notify
+                if (postRepo.findById(dto.getPostId()).get().getAuthorUser().getUsername()
+                        .equalsIgnoreCase(username)) {
+                    continue;
+                }
                 NotificationStruct notif = new NotificationStruct();
                 notif.setUser(u); // recipient
                 notif.setFromUser(comment.getAuthorUser()); // commenter

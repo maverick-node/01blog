@@ -157,16 +157,17 @@ export class Dashboard {
         const msg = response?.message || JSON.stringify(response);
         this.showNotification(msg);
 
+
         if (response.message === 'Liked') {
           this.likedPosts[postId] = true;
         } else {
           this.likedPosts[postId] = false;
         }
-
-        this.loadLikeCount(postId);
+this.loadLikeCount(postId);
       },
       (error: any) => {
-        this.showNotification(error.error?.error || error.error.message || 'Like failed');
+        
+        this.showNotification(error.error.message || error.error?.error || 'Like failed');
       }
     );
   }
@@ -175,7 +176,7 @@ export class Dashboard {
     const apiCount = `http://localhost:8080/likes/count/${postId}`;
     this.http.get(apiCount, { withCredentials: true }).subscribe(
       (response: any) => {
-
+        
         this.likeCounts[postId] = response?.likeCount ?? 0;
       },
       () => {
@@ -331,7 +332,9 @@ export class Dashboard {
     const apiGetComments = `http://localhost:8080/posts/${postId}/comments`;
     this.http.get(apiGetComments, { withCredentials: true }).subscribe(
       (response: any) => {
-        this.comments[postId] = response.comments;
+        this.comments[postId] = response.comments.sort(
+          (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         
         
       },
@@ -413,11 +416,11 @@ export class Dashboard {
           const notif = this.notifications.find((n) => n.id === id);
 
           if (notif) {
-            notif.read = !notif.read; // toggle the read status
+            notif.read = !notif.read; 
           }
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
-        error: (err: any) => console.error('Failed to mark as read', err),
+        error: (err: any) => this.showNotification(err.error?.message|| err.error?.error || 'Failed to mark notification as read'),
       });
   }
 

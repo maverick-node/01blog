@@ -58,11 +58,31 @@ public class ProfileService {
 
         }
 
+        if (info.getEmail() != null && !info.getEmail().isBlank()) {
+            if (userRepo.existsByMail(info.getEmail()) && !info.getEmail().equals(user.getMail())) {
+
+                throw new IllegalArgumentException("Email is already in use");
+            }
+        }
+
+
+       //no speacial characters allowed in mail allow @ and . and max length 50
+       if (info.getEmail() != null && (info.getEmail().length() > 50 || !info.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"))) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if (info.getBio() != null && info.getBio().trim().length() > 300) {
+            throw new IllegalArgumentException("Bio is too long");
+        }
+        if (info.getAge() < 0 || info.getAge() > 150) {
+            throw new IllegalArgumentException("Invalid age");
+        }
+
         if (info.getAge() != 0) {
             user.setAge(info.getAge());
         }
         if (info.getBio() != null && !info.getBio().isBlank()) {
-            user.setBio(info.getBio());
+            user.setBio(info.getBio().trim());
         }
         if (info.getEmail() != null && !info.getEmail().isBlank()) {
             user.setMail(info.getEmail());

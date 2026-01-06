@@ -30,7 +30,10 @@ public class UserService {
         if (userRepo.existsByUsername(dto.getUsername())) {
             throw new UserAlreadyExistsException("Username already taken!");
         }
-        
+        // email interdit special char and max length 50
+        if (dto.getMail().length() > 50 || !dto.getMail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            throw new IllegalArgumentException("Invalid email format!");
+        }
         UserStruct user = new UserStruct();
         user.setMail(dto.getMail());
         user.setUsername(dto.getUsername());

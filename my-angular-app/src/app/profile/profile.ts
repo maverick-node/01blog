@@ -109,7 +109,9 @@ export class Profile implements OnInit {
         this.isEditing = false;
         this.showNotification('Profile updated successfully!', 'success');
       },
-      error: (err) => this.showNotification(err.error?.fields.error),
+      error: (err) => {      
+        this.showNotification(err.error.error ||err.error?.fields.error || err.error?.message || 'Failed to update profile')
+      }
     });
   }
 

@@ -28,7 +28,7 @@ public class RegisterRequestDTO {
     private int age;
 
     @NotBlank(message = "Bio is required")
-    @Size(max = 150, message = "Bio must be at most 150 characters", min = 5)
+    @Size(max = 150, message = "Bio must be min 5 characters and max 150", min = 5)
     private String bio;
 
 }

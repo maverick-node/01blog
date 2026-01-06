@@ -38,7 +38,9 @@ public class FollowersService {
         if (currentUser == null) {
             throw new InvalidJwtTokenException("Current user not found");
         }
-
+        if (currentUser.isBanned()) {
+            throw new UnauthorizedActionException("You are banned from following users");
+        }
         var targetUser = userRepo.findByUsername(targetUsername);
         if (targetUser == null) {
             throw new UserNotFoundException("User to follow does not exist");
@@ -80,21 +82,27 @@ public class FollowersService {
         if (currentUsername == null || currentUsername.isEmpty()) {
             throw new InvalidJwtTokenException("Invalid JWT token");
         }
-
+        
         var currentUser = userRepo.findByUsername(currentUsername);
         if (currentUser == null) {
             throw new InvalidJwtTokenException("Current user not found");
         }
-        System.out.println("Current user: " + currentUser.getUsername() + ", Target user to unfollow: " + targetUsername);
+
         var targetUser = userRepo.findByUsername(targetUsername);
         if (targetUser == null) {
             throw new UserNotFoundException("User to unfollow does not exist");
         }
-       
-
-
+       if (currentUser.getId() == targetUser.getId()) {
+            throw new UnauthorizedActionException("You cannot unfollow yourself");
+        }
+        if (currentUser.isBanned()) {
+            throw new UnauthorizedActionException("You are banned from unfollowing users");
+        }   
+        if (!followersRepo.existsBySubscriberIdAndTargetId(currentUser.getId(), targetUser.getId())) {
+            throw new UnauthorizedActionException("You are not following this user");
+        }
         FollowersStruct follower = followersRepo.findBySubscriberIdAndTargetId(currentUser.getId(), targetUser.getId());
-        System.out.println("Follower record: " + currentUser.getId() + " -> " + targetUser.getId());
+      
         if (follower == null) {
             throw new UnauthorizedActionException("You are not following this user");
         }

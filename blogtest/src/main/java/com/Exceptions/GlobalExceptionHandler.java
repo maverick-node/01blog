@@ -1,5 +1,6 @@
 package com.Exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +12,40 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.time.ZonedDateTime;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(PostNotFoundException.class) 
+         public ResponseEntity<?> notfoundpost(PostNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+    
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<?> unauto(UnauthorizedActionException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUserExists(UserAlreadyExistsException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    // banned
+    @ExceptionHandler(BannedUserExceptions.class)
+    public ResponseEntity<Map<String, String>> handleBannedUsers(BannedUserExceptions ex) {
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", ex.getMessage()));
     }
 
@@ -58,35 +81,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<Map<String, Object>> handleRateLimit(RateLimitExceededException ex,
             HttpServletRequest request) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", ZonedDateTime.now().toString());
-        body.put("status", 429);
-        body.put("error", "Too Many Requests");
-        body.put("message", ex.getMessage());
-        body.put("path", request.getRequestURI());
-
-        return ResponseEntity.status(429).body(body);
+        return ResponseEntity.status(429)
+                .body(Map.of(
+                        "error", "Too many requests",
+                        "message", ex.getMessage(),
+                        "path", request.getRequestURI()));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Map<String,String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .header("Access-Control-Allow-Origin", "http://localhost:4200")
-        .header("Access-Control-Allow-Credentials", "true")
-        .body(Map.of("error","File too large"));
+    public ResponseEntity<Map<String, String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(Map.of("error", "File too large"));
     }
-    
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
 
         Map<String, Object> response = new HashMap<>();
-        response.put("error", "Validation failed");
+        // print first error
+        response.put("error", ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage());
 
         Map<String, String> fieldErrors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            fieldErrors.put("error",error.getField() +" : "+ error.getDefaultMessage());
+            fieldErrors.put("error", error.getField() + " : " + error.getDefaultMessage());
         }
 
         response.put("fields", fieldErrors);

@@ -24,27 +24,23 @@ import { AuthService, RegisterUser } from '../services/auth.service';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './register.html',
-  styleUrls: ['./register.css']
+  styleUrls: ['./register.css'],
 })
 export class Register {
-
   user = {
     username: '',
     mail: '',
     password: '',
     age: null as number | null,
-    bio: ''
+    bio: '',
   };
 
   errorMessage = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
   register(): void {
     // validate required fields
     if (!this.user.username || !this.user.mail || !this.user.password) {
@@ -57,8 +53,8 @@ export class Register {
       username: this.user.username,
       mail: this.user.mail,
       password: this.user.password,
-      age: this.user.age ?? 18, 
-      bio: this.user.bio
+      age: this.user.age || 0,
+      bio: this.user.bio,
     };
 
     this.authService.register(userToSend).subscribe({
@@ -67,9 +63,8 @@ export class Register {
         this.errorMessage = '';
       },
       error: (err) => {
-        
         this.showNotification(err.error.error || 'Registration failed!');
-      }
+      },
     });
   }
 

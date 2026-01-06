@@ -54,6 +54,8 @@ public class ReportController {
         if (dto.getReason().length() > 500) {
             return ResponseEntity.badRequest().body(Map.of("message", "Details cannot be more than 500 characters"));
         }
+        
+     
         reportService.reportPost(dto.getReportedPostId(), jwt, dto);
         return ResponseEntity.ok(Map.of("message", "Post reported successfully"));
     }

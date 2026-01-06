@@ -26,27 +26,29 @@ public class GetComments {
                 this.commentRepo = commentRepo;
                 this.jwtService = jwtService;
         }
+
         @GetMapping("/posts/{id}/comments")
-        public ResponseEntity<Map<String, Object>> getComments(@CookieValue("jwt") String jwt, @PathVariable("id") int postId) {
+        public ResponseEntity<Map<String, Object>> getComments(@CookieValue("jwt") String jwt,
+                        @PathVariable("id") int postId) {
                 System.out.println("Get comments request for post ID: " + postId);
                 String username = jwtService.extractUsername(jwt);
                 if (username == null || username.isEmpty()) {
                         return ResponseEntity
-                                .badRequest()
-                                .body(Map.of("message", "Error: Invalid JWT token Login please!"));
+                                        .badRequest()
+                                        .body(Map.of("message", "Error: Invalid JWT token Login please!"));
                 }
-         List<CommentStruct> comments = commentRepo.findAllByPostId(postId);
-         List<CommentsDTO> commentDTOs = new java.util.ArrayList<>();
-         for (CommentStruct comment : comments) {
-               CommentsDTO dto = new CommentsDTO();
-               dto.setCommentID(comment.getId());
-               dto.setPostId(comment.getPost().getId());
-               dto.setComment(comment.getComment());
-               dto.setUsername(comment.getAuthorUser().getUsername());
-               dto.setCreatedAt(comment.getCreatedAt());
-                 commentDTOs.add(dto);
+                List<CommentStruct> comments = commentRepo.findAllByPostId(postId);
+                List<CommentsDTO> commentDTOs = new java.util.ArrayList<>();
+                for (CommentStruct comment : comments) {
+                        CommentsDTO dto = new CommentsDTO();
+                        dto.setCommentID(comment.getId());
+                        dto.setPostId(comment.getPost().getId());
+                        dto.setComment(comment.getComment());
+                        dto.setUsername(comment.getAuthorUser().getUsername());
+                        dto.setCreatedAt(comment.getCreatedAt());
+                        commentDTOs.add(dto);
 
-         }
+                }
                 return ResponseEntity.ok(Map.of("comments", commentDTOs));
         }
 }
