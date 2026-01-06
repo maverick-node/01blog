@@ -177,21 +177,24 @@ getSolvedReports() {
   }
 
   // USER ACTIONS
-  confirmUserAction(username: string, action: 'ban' | 'unban' | 'delete') {
+  confirmUserAction(username: string, action: 'ban' | 'unban' | 'delete' | 'banreport') {
     const titles = {
       ban: 'Ban User',
       unban: 'Unban User',
       delete: 'Delete User',
+      banreport: 'Ban User (Report)'
     };
     const messages = {
       ban: `Are you sure you want to ban @${username}?`,
       unban: `Are you sure you want to unban @${username}?`,
       delete: `Permanently delete @${username}? This cannot be undone.`,
+      banreport: `Are you sure you want to ban @${username} for their reports?`
     };
     const icons = {
       ban: 'block',
       unban: 'lock_open',
       delete: 'delete',
+      banreport: 'block'
     };
 
     this.confirmAction(
@@ -199,6 +202,7 @@ getSolvedReports() {
       messages[action],
       () => {
         if (action === 'delete') this.deleteUser(username);
+        if (action === 'banreport') this.banUserReport(username);
         else this.banUser(username);
       },
       action === 'delete' ? 'warn' : 'warn',
@@ -219,6 +223,19 @@ getSolvedReports() {
       });
   }
 
+  banUserReport(username: string) {
+    this.http
+      .post(`http://localhost:8080/admin/ban-user-report/${username}`, {}, { withCredentials: true })
+      .subscribe({
+        next: () => {
+         
+
+          this.showNotification('User banned' );
+        },
+        error: (error) => this.showNotification(error.error?.message || error.error?.error ||  'Action failed'),
+      });
+  }
+ 
   deleteUser(username: string) {
     this.http
       .delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })

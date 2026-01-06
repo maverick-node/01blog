@@ -187,12 +187,13 @@ public class AdminService {
     public void banUserOrDeban(String jwt, String username) {
         checkAdmin(jwt);
         UserStruct user = userRepo.findByUsername(username);
-        if (user.getRole().equalsIgnoreCase("admin")) {
-            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
-        }
         if (user == null) {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
+        if (user.getRole().equalsIgnoreCase("admin")) {
+            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
+        }
+
         if (user.isBanned()) {
             user.setBanned(false);
             userRepo.save(user);
@@ -203,48 +204,63 @@ public class AdminService {
         userRepo.save(user);
     }
 
- public void hidePost(String jwt, Integer postId, String reports) {
-    checkAdmin(jwt);
-
-    PostsStruct post = postRepo.findById(postId)
-            .orElseThrow(() -> new ReportNotFoundException("Post not found"));
-
-    if ("reports".equals(reports)) {
-        List<ReportStruct> reportsList =
-                reportRepo.findAllByReportedPostId(postId);
-
-        for (ReportStruct report : reportsList) {
-            report.setResolved(true);
+    public void banUserReport(String jwt, String username) {
+        checkAdmin(jwt);
+        UserStruct user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new com.Exceptions.UserNotFoundException("User not found");
+        }
+        if (user.getRole().equalsIgnoreCase("admin")) {
+            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
         }
 
-        reportRepo.saveAll(reportsList);
-    }
+        if (user.isBanned()) {
 
-    post.setHidden(true);
-    postRepo.save(post);
-}
-
-
-   public void unhidePost(String jwt, Integer postId, String reports) {
-    checkAdmin(jwt);
-
-    PostsStruct post = postRepo.findById(postId)
-            .orElseThrow(() -> new ReportNotFoundException("Post not found"));
-
-    if ("reports".equals(reports)) {
-        List<ReportStruct> reportsList =
-                reportRepo.findAllByReportedPostId(postId);
-
-        for (ReportStruct report : reportsList) {
-            report.setResolved(true);
+            return;
         }
 
-        reportRepo.saveAll(reportsList);
+        user.setBanned(true);
+        userRepo.save(user);
     }
 
-    post.setHidden(false);
-    postRepo.save(post);
-}
+    public void hidePost(String jwt, Integer postId, String reports) {
+        checkAdmin(jwt);
 
+        PostsStruct post = postRepo.findById(postId)
+                .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+
+        if ("reports".equals(reports)) {
+            List<ReportStruct> reportsList = reportRepo.findAllByReportedPostId(postId);
+
+            for (ReportStruct report : reportsList) {
+                report.setResolved(true);
+            }
+
+            reportRepo.saveAll(reportsList);
+        }
+
+        post.setHidden(true);
+        postRepo.save(post);
+    }
+
+    public void unhidePost(String jwt, Integer postId, String reports) {
+        checkAdmin(jwt);
+
+        PostsStruct post = postRepo.findById(postId)
+                .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+
+        if ("reports".equals(reports)) {
+            List<ReportStruct> reportsList = reportRepo.findAllByReportedPostId(postId);
+
+            for (ReportStruct report : reportsList) {
+                report.setResolved(true);
+            }
+
+            reportRepo.saveAll(reportsList);
+        }
+
+        post.setHidden(false);
+        postRepo.save(post);
+    }
 
 }

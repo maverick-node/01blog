@@ -78,10 +78,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         // If user exists and is banned, block request
-        if ("POST".equalsIgnoreCase(method) && user != null && user.isBanned()) {
+        if (user.isBanned()) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are banned from making requests.");
+  
+            
             return;
-
         }
 
         // Rate limiting only for POST requests

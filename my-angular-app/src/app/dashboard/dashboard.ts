@@ -100,7 +100,11 @@ export class Dashboard {
         return true;
       },
       (error: any) => {
+
+        
         if (error.status === 401 || error.status === 403) {
+                  console.log(error);
+          this.showNotification(error.error?.message || error.error?.error || 'Authentication failed');
           this.router.navigate(['/login']);
         } else {
           this.showNotification('Authentication failed');
@@ -361,6 +365,7 @@ this.loadLikeCount(postId);
   }
 
   logout() {
+    this.middleware();
     const apiLogout = 'http://localhost:8080/logout';
     this.http.post(apiLogout, {}, { withCredentials: true }).subscribe(
       () => {

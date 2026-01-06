@@ -66,7 +66,11 @@ public class AdminController {
         adminService.banUserOrDeban(jwt, username);
         return new MessageResponseDTO("User banned successfully");
     }
-
+  @PostMapping("/ban-user-report/{username}")
+    public MessageResponseDTO banUserReport(@CookieValue("jwt") String jwt, @PathVariable String username) {
+        adminService.banUserReport(jwt, username);
+        return new MessageResponseDTO("User banned successfully");
+    }
     @PostMapping("/reports/{id}/resolve")
     public MessageResponseDTO resolveReport(@CookieValue("jwt") String jwt, @PathVariable Integer id) {
         adminService.resolveReport(jwt, id);
