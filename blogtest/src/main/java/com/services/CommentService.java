@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.Exceptions.BadRequestException;
 import com.Exceptions.CommentNotFoundException;
+import com.Exceptions.ForbiddenException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.NotFoundException;
 import com.Exceptions.UnauthorizedActionException;
@@ -54,7 +55,10 @@ public class CommentService {
         if (!comment.getAuthorUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not the author of this comment");
         }
+        if (comment.getPost().isHidden()) {
+            throw new ForbiddenException("You cant delete comment on hidden post");
 
+        }
         commentRepo.delete(comment);
     }
 
