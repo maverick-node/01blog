@@ -101,7 +101,7 @@ public class PostService {
 
         String username = jwtService.extractUsername(jwt);
         UserStruct currentUser = userRepo.findByUsername(username);
-        System.out.println(Arrays.toString(newFiles));
+     
 
         if (currentUser.isBanned()) {
             throw new UnauthorizedActionException("You are banned");

@@ -103,14 +103,17 @@ export class Profile implements OnInit {
   }
 
   saveProfile() {
+    
     this.profileService.updateProfile(this.editProfile).subscribe({
       next: () => {
         this.userProfile = { ...this.editProfile };
         this.isEditing = false;
         this.showNotification('Profile updated successfully!', 'success');
       },
-      error: (err) => {      
-        this.showNotification(err.error.error ||err.error?.fields.error || err.error?.message || 'Failed to update profile')
+      error: (err) => {  
+      
+            
+        this.showNotification( err.error?.message || err.error?.error ||err.error?.fields.error ||  'Failed to update profile')
       }
     });
   }
@@ -135,7 +138,7 @@ export class Profile implements OnInit {
   loadUserPosts() {
     this.profileService.getMyPosts().subscribe({
       next: (posts: any) => (this.userPosts = posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-      error: (err) => this.showNotification(err.error?.error || err.error?.message ||'Failed to load posts'),
+      error: (err) => this.showNotification( err.error?.message|| err.error?.error  ||'Failed to load posts'),
     });
   }
 

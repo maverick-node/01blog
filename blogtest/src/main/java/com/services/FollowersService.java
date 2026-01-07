@@ -2,6 +2,7 @@ package com.services;
 
 import org.springframework.stereotype.Service;
 
+import com.Exceptions.ForbiddenException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.UnauthorizedActionException;
 import com.Exceptions.UserNotFoundException;
@@ -47,7 +48,7 @@ public class FollowersService {
         }
 
         if (currentUser.getId() == targetUser.getId()) {
-            throw new UnauthorizedActionException("You cannot follow yourself");
+            throw new ForbiddenException("You cannot follow yourself");
         }
         if (followersRepo.existsBySubscriberIdAndTargetId(currentUser.getId(), targetUser.getId())) {
             throw new UnauthorizedActionException("You are already following this user");

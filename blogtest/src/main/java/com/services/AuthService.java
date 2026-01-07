@@ -25,7 +25,7 @@ public class AuthService {
 
     public String login(LoginRequestDTO dto) {
 
-        UserStruct user = userRepo.findByMail(dto.getEmail());
+        UserStruct user = userRepo.findByMail(dto.getEmail().toLowerCase());
         if (user == null) {
             throw new UserNotFoundException("Username not found");
         }
@@ -38,6 +38,6 @@ public class AuthService {
             
         }
 
-        return jwtService.generateToken(user.getUsername());
+        return jwtService.generateToken(user.getUsername(), user.getUserUuid());
     }
 }

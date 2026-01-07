@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.Exceptions.ForbiddenException;
+import com.Exceptions.NotFoundException;
 import com.Exceptions.ReportNotFoundException;
 import com.Exceptions.UnauthorizedActionException;
 import com.Model.PostsStruct;
@@ -43,7 +45,7 @@ public class AdminService {
         String username = jwtService.extractUsername(jwt);
         UserStruct user = userRepo.findByUsername(username);
         if (user == null || !user.getRole().toLowerCase().equals("admin")) {
-            throw new UnauthorizedActionException("You are not an admin!");
+            throw new ForbiddenException("You are not an admin!");
         }
     }
 
@@ -54,7 +56,7 @@ public class AdminService {
         if (reports.isEmpty()) {
             return dtos;
         }
-        System.out.println(reports);
+
         for (ReportStruct r : reports) {
             if (r.isResolved()) {
                 continue;
@@ -95,7 +97,7 @@ public class AdminService {
         checkAdmin(jwt);
         ReportStruct report = reportRepo.findById(reportId);
         if (report == null) {
-            throw new ReportNotFoundException("Report not found");
+            throw new NotFoundException("Report not found");
         }
         report.setResolved(true);
         report.setCreatedAt(LocalDateTime.now());
@@ -110,7 +112,7 @@ public class AdminService {
         }
         UserStruct userr = userRepo.findByUsername(username);
         if (userr.getRole().equalsIgnoreCase("admin")) {
-            throw new com.Exceptions.UnauthorizedActionException("You cant delete the admin");
+            throw new com.Exceptions.ForbiddenException("You cant delete the admin");
         }
         userRepo.deleteByUsername(username);
     }
@@ -120,7 +122,7 @@ public class AdminService {
 
         // Check if the post exists
         if (!postRepo.existsById(postId)) {
-            throw new ReportNotFoundException("Post not found");
+            throw new NotFoundException("Post not found");
         }
 
         // Get all reports for this post
@@ -191,7 +193,7 @@ public class AdminService {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
         if (user.getRole().equalsIgnoreCase("admin")) {
-            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
+            throw new com.Exceptions.ForbiddenException("You cant ban the admin");
         }
 
         if (user.isBanned()) {
@@ -211,7 +213,7 @@ public class AdminService {
             throw new com.Exceptions.UserNotFoundException("User not found");
         }
         if (user.getRole().equalsIgnoreCase("admin")) {
-            throw new com.Exceptions.UnauthorizedActionException("You cant ban the admin");
+            throw new com.Exceptions.ForbiddenException("You cant ban the admin");
         }
 
         if (user.isBanned()) {
@@ -227,7 +229,7 @@ public class AdminService {
         checkAdmin(jwt);
 
         PostsStruct post = postRepo.findById(postId)
-                .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+                .orElseThrow(() -> new NotFoundException("Post not found"));
 
         if ("reports".equals(reports)) {
             List<ReportStruct> reportsList = reportRepo.findAllByReportedPostId(postId);
@@ -247,7 +249,7 @@ public class AdminService {
         checkAdmin(jwt);
 
         PostsStruct post = postRepo.findById(postId)
-                .orElseThrow(() -> new ReportNotFoundException("Post not found"));
+                .orElseThrow(() -> new NotFoundException("Post not found"));
 
         if ("reports".equals(reports)) {
             List<ReportStruct> reportsList = reportRepo.findAllByReportedPostId(postId);

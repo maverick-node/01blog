@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.Exceptions.BadRequestException;
+import com.Exceptions.ForbiddenException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.UnauthorizedActionException;
 import com.Exceptions.UserNotFoundException;
@@ -37,7 +39,7 @@ public class ReportService {
             throw new InvalidJwtTokenException("Invalid JWT token");
         }
         if (reporterUsername.equals(targetUsername)) {
-            throw new UnauthorizedActionException("You cannot report yourself");
+            throw new ForbiddenException("You cannot report yourself");
         }
         var reporter = userRepo.findByUsername(reporterUsername);
         var targetUser = userRepo.findByUsername(targetUsername);
@@ -47,19 +49,19 @@ public class ReportService {
         }
 
         if (reporter.getId() == targetUser.getId()) {
-            throw new UnauthorizedActionException("You cannot report yourself");
+            throw new ForbiddenException("You cannot report yourself");
         }
         if (targetUser.isBanned()) {
-            throw new UnauthorizedActionException("You cannot report a banned user");
+            throw new ForbiddenException("You cannot report a banned user");
         }
         if (reporter.isBanned()) {
-            throw new UnauthorizedActionException("You are banned from reporting users");
+            throw new ForbiddenException("You are banned from reporting users");
         }
         if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
-            throw new UnauthorizedActionException("Report reason cannot be empty");
+            throw new BadRequestException("Report reason cannot be empty");
         }
         if (dto.getReason().length() > 500) {
-            throw new UnauthorizedActionException("Report reason is too long");
+            throw new BadRequestException("Report reason is too long");
         }
 
         ReportStruct report = new ReportStruct();
@@ -86,17 +88,17 @@ public class ReportService {
         }
         var reporteduser = postOwner.get().getAuthorUser().getUsername();
         if (reporterUsername.equals(reporteduser)) {
-            throw new UnauthorizedActionException("You cannot report your own post");
+            throw new ForbiddenException("You cannot report your own post");
         }
         if (postOwner.get().isHidden()) {
-            throw new UnauthorizedActionException("You cannot report a hidden post");
+            throw new ForbiddenException("You cannot report a hidden post");
         }
 
         if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
-            throw new UnauthorizedActionException("Report reason cannot be empty");
+            throw new BadRequestException("Report reason cannot be empty");
         }
         if (dto.getReason().length() > 500) {
-            throw new UnauthorizedActionException("Report reason is too long");
+            throw new BadRequestException("Report reason is too long");
         }
         ReportStruct report = new ReportStruct();
         report.setTargetUser(postOwner.get().getAuthorUser());

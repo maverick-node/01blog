@@ -30,7 +30,7 @@ public class GetComments {
         @GetMapping("/posts/{id}/comments")
         public ResponseEntity<Map<String, Object>> getComments(@CookieValue("jwt") String jwt,
                         @PathVariable("id") int postId) {
-                System.out.println("Get comments request for post ID: " + postId);
+                
                 String username = jwtService.extractUsername(jwt);
                 if (username == null || username.isEmpty()) {
                         return ResponseEntity

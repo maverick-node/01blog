@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.Exceptions.BadRequestException;
 import com.Exceptions.CommentNotFoundException;
 import com.Exceptions.InvalidJwtTokenException;
+import com.Exceptions.NotFoundException;
 import com.Exceptions.UnauthorizedActionException;
 import com.Model.CommentStruct;
 import com.Model.NotificationStruct;
@@ -84,16 +86,16 @@ public class CommentService {
         }
 
         if (!postRepo.existsById(dto.getPostId())) {
-            throw new RuntimeException("Post not found");
+            throw new NotFoundException("Post not found");
         }
         if (postRepo.findById(dto.getPostId()).get().isHidden()) {
             throw new UnauthorizedActionException("Cannot comment on a hidden post");
         }
         if (dto.getContent() == null || dto.getContent().isBlank()) {
-            throw new IllegalArgumentException("Comment content cannot be empty");
+            throw new BadRequestException("Comment content cannot be empty");
         }
         if (dto.getContent().length() > 500) {
-            throw new IllegalArgumentException("Comment content exceeds maximum length of 500 characters");
+            throw new BadRequestException("Comment content exceeds maximum length of 500 characters");
         }
         CommentStruct comment = new CommentStruct();
         comment.setPost(postRepo.findById(dto.getPostId()).orElseThrow(() -> new RuntimeException("Post not found")));
@@ -111,7 +113,7 @@ public class CommentService {
                 continue;
             }
 
-            if (isFollowingService.CheckIfFollow(u.getUsername(), username)) { // u follows commenter
+            if (isFollowingService.CheckIfFollow(username, u.getUsername())) { // u follows commenter
                 // check if he comment on his own post dont notify
                 if (postRepo.findById(dto.getPostId()).get().getAuthorUser().getUsername()
                         .equalsIgnoreCase(username)) {

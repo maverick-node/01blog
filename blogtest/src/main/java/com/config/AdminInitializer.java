@@ -1,5 +1,7 @@
 package com.config;
 
+import java.util.UUID;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,8 @@ public class AdminInitializer implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setAge(30);
             admin.setBio("I am the admin user.");
+            admin.setUserUuid(UUID.randomUUID().toString());
+
             userRepository.save(admin);
 
             System.out.println("✅ ADMIN user created");
@@ -40,4 +44,3 @@ public class AdminInitializer implements CommandLineRunner {
         }
     }
 }
-

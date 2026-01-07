@@ -70,18 +70,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 cookie.setPath("/");
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
-
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid token");
                 return;
             }
         }
-
+        if (user == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // If user exists and is banned, block request
         if (user.isBanned()) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are banned from making requests.");
-  
-            
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is banned");
+    
+
             return;
         }
 
@@ -112,7 +113,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         info.count++;
         if (info.count > MAX_REQUESTS) {
-            response.sendError(401, "Too many requests. Please try again later.");
+            response.sendError(429, "Too many requests. Please try again later.");
             return;
         }
 
@@ -146,7 +147,5 @@ public class RateLimitFilter extends OncePerRequestFilter {
             this.startTime = startTime;
         }
     }
-
-  
 
 }

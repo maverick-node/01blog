@@ -202,7 +202,7 @@ getSolvedReports() {
       messages[action],
       () => {
         if (action === 'delete') this.deleteUser(username);
-        if (action === 'banreport') this.banUserReport(username);
+        else if (action === 'banreport') this.banUserReport(username);
         else this.banUser(username);
       },
       action === 'delete' ? 'warn' : 'warn',
@@ -244,7 +244,7 @@ getSolvedReports() {
           this.users = this.users.filter((u) => u.username !== username);
           this.showNotification('User deleted');
         },
-        error: (error) => this.showNotification(error.error?.error || error.error?.message || 'Delete failed'),
+        error: (error) => this.showNotification( error.error?.message  || error.error?.error || 'Delete failed'),
       });
   }
 

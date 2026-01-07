@@ -1,5 +1,7 @@
 package com.Repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
@@ -13,6 +15,7 @@ public interface UserRepo extends JpaRepository<UserStruct, Integer> {
     UserStruct findByUsername(String username);
 
     UserStruct findByMail(String mail);
+    Optional<UserStruct> findByMailIgnoreCase(String mail);
 
     UserStruct getUserByUsername(String username);
 

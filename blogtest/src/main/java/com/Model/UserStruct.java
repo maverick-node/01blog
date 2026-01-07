@@ -1,10 +1,10 @@
 package com.Model;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+
 @Data
 @Entity
 @Table(name = "users")
@@ -27,7 +27,7 @@ public class UserStruct {
     private String bio;
 
     @Column(nullable = false)
-     @Min(value = 13, message = "Age must be at least 13")
+    @Min(value = 13, message = "Age must be at least 13")
     @Max(value = 100, message = "Age must be less than or equal to 100")
     private int age;
 
@@ -36,6 +36,9 @@ public class UserStruct {
 
     @Column(nullable = false)
     private String role = "USER";
+    
+    @Column(nullable = false, unique = true, updatable = false)
+    private String userUuid;
 
     // Link to posts
     @OneToMany(mappedBy = "authorUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -58,8 +61,5 @@ public class UserStruct {
     @OneToMany(mappedBy = "reporter", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @lombok.ToString.Exclude
     private java.util.List<ReportStruct> reportsMade;
-
-
-
 
 }

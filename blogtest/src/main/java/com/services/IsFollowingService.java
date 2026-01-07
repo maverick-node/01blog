@@ -20,12 +20,8 @@ public class IsFollowingService {
 
     public Boolean CheckIfFollow(String current, String target) {
         UserStruct user = userRepo.findByUsername(current);
-        UserStruct targ = userRepo.findByUsername(target);
-
-        System.out.println("Checking if '" + current + "' follows '" + target + "'");
-        System.out.println("Follower ID: " + user.getId() + ", Target ID: " + targ.getId());
+        UserStruct targ = userRepo.findByUsername(target);  
         boolean exists = followersRepo.existsBySubscriberIdAndTargetId(user.getId(), targ.getId());
-        System.out.println("Exists? " + exists);
         return exists;
     }
 }

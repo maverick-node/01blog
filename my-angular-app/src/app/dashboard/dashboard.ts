@@ -101,9 +101,9 @@ export class Dashboard {
       },
       (error: any) => {
 
-        
+            
         if (error.status === 401 || error.status === 403) {
-                  console.log(error);
+             
           this.showNotification(error.error?.message || error.error?.error || 'Authentication failed');
           this.router.navigate(['/login']);
         } else {
@@ -403,7 +403,9 @@ this.loadLikeCount(postId);
           this.unreadCount = this.notifications.filter((n) => !n.read).length;
         },
         (error: any) => {
-          console.error('Error loading notifications:', error);
+        
+          
+      this.showNotification(error.error.message|| "Error Showing Notification")
         }
       );
   }
@@ -586,7 +588,7 @@ this.loadLikeCount(postId);
         this.showDeleteConfirm = false;
         this.loadPosts()
       },
-      error: (err) => this.showNotification(err.error?.error || err.error?.message || 'Failed to delete post'),
+      error: (err) => this.showNotification(  err.error?.message || err.error?.error || 'Failed to delete post'),
     });
   }
   selectedFilePreviews: { url: string; type: string }[] = [];
@@ -643,7 +645,7 @@ deleteComment(commentid: string, commentpost: string) {
        this.getComments(commentpost)
       },
       error: (err) => {
-         this.showNotification(err.error?.error ||err.error?.message ||"Error Comment Deleted")
+         this.showNotification( err.error?.message || err.error?.error  ||"Error Comment Deleted")
       }
     });
 }

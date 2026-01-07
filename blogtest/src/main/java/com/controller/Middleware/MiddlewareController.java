@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.Exceptions.BadRequestException;
 import com.Exceptions.UnauthorizedActionException;
 
 import com.Model.UserStruct;
@@ -26,7 +28,7 @@ public class MiddlewareController {
     public ResponseEntity<UserDTOMiddle> getUser(@CookieValue(value = "jwt", required = false)String jwt) {
         UserStruct user = userService.getUserFromJwt(jwt);
         if (user == null || jwt.isEmpty()){
-            throw new UnauthorizedActionException("You are not logged");
+            throw new BadRequestException("You are not logged");
         }
         UserDTOMiddle response = new UserDTOMiddle(
             user.getUsername(),

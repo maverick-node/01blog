@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.Exceptions.BadRequestException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.UserNotFoundException;
 import com.Model.UserStruct;
@@ -54,28 +55,28 @@ public class ProfileService {
         }
 
         if (user.isBanned()) {
-            throw new IllegalArgumentException("You are banned");
+            throw new BadRequestException("You are banned");
 
         }
 
         if (info.getEmail() != null && !info.getEmail().isBlank()) {
-            if (userRepo.existsByMail(info.getEmail()) && !info.getEmail().equals(user.getMail())) {
+            if (userRepo.existsByMail(info.getEmail().toLowerCase()) && !info.getEmail().equals(user.getMail())) {
 
-                throw new IllegalArgumentException("Email is already in use");
+                throw new BadRequestException("Email is already in use");
             }
         }
 
 
        //no speacial characters allowed in mail allow @ and . and max length 50
-       if (info.getEmail() != null && (info.getEmail().length() > 50 || !info.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"))) {
-            throw new IllegalArgumentException("Invalid email format");
+       if (info.getEmail() != null && (info.getEmail().length() > 50 || !info.getEmail().matches("^[a-zA-Z0-9@.]+$"))) {
+            throw new BadRequestException("Invalid email format");
         }
 
         if (info.getBio() != null && info.getBio().trim().length() > 300) {
-            throw new IllegalArgumentException("Bio is too long");
+            throw new BadRequestException("Bio is too long");
         }
         if (info.getAge() < 0 || info.getAge() > 150) {
-            throw new IllegalArgumentException("Invalid age");
+            throw new BadRequestException("Invalid age");
         }
 
         if (info.getAge() != 0) {
@@ -85,10 +86,10 @@ public class ProfileService {
             user.setBio(info.getBio().trim());
         }
         if (info.getEmail() != null && !info.getEmail().isBlank()) {
-            user.setMail(info.getEmail());
+            user.setMail(info.getEmail().toLowerCase());
         }
         if (info.getUsername() != null && !info.getUsername().equals(username)) {
-            throw new IllegalArgumentException("You can't change your username");
+            throw new BadRequestException("You can't change your username");
         }
 
         // Save changes

@@ -41,7 +41,7 @@ public class Likes {
     public ResponseEntity<Map<String, String>> likePost(
             @CookieValue("jwt") String jwt,
             @PathVariable("postId") int postId) {
-        System.out.println("Like post request for post ID: " + postId);
+       
         Boolean liked = likesService.toggleLike(postId, jwt);
         if (liked == true) {
             return ResponseEntity.ok(Map.of("message", "Liked"));

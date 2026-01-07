@@ -26,7 +26,7 @@ public class AllProfile {
     @GetMapping("/get-users")
     public ResponseEntity<Map<String, Object>> getAllUsers(@CookieValue("jwt") String jwt) {
         String username = jwtService.extractUsername(jwt);
-        System.out.println("Username from JWT: " + username);
+      
         if (!userRepo.existsByUsername(username)) {
             return ResponseEntity
                     .badRequest()

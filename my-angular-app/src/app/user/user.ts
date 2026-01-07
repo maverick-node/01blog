@@ -48,29 +48,24 @@ export class User {
     private http: HttpClient,
     private router: Router,
     private profileService: ProfileService
-  ) { }
- 
+  ) {}
+
   ngOnInit() {
     this.middleware();
 
     this.route.paramMap.subscribe((params) => {
-      this.usernameParam = params.get('username');
+      this.usernameParam = params.get('username')?.toLowerCase()+"";
 
       if (this.usernameParam) {
         this.loadProfile(this.usernameParam);
-         
       }
     });
   }
 
-
-
   middleware() {
     const apiMiddleware = 'http://localhost:8080/middleware';
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      () => { 
-        
-      },
+      () => {},
       (error) => {
         if (error.status === 401 || error.status === 403) {
           this.router.navigate(['/login']);
@@ -83,7 +78,6 @@ export class User {
     const api = `http://localhost:8080/profile/user/${username}`;
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
-
         this.profile = {
           username: response.username,
           email: response.email,
@@ -91,11 +85,9 @@ export class User {
           age: response.age,
           id: response.id,
         };
-this.loadFollowersandFollowing(username);
+        this.loadFollowersandFollowing(username);
         this.loadposts(username);
         this.checkIfFollowing();
-              
-
       },
       (error) => {
         this.router.navigate(['/404']);
@@ -106,9 +98,14 @@ this.loadFollowersandFollowing(username);
 
   loadposts(username: string) {
     const api = `http://localhost:8080/get-posts/${username}`;
-    this.http.get(api, { withCredentials: true }).subscribe((response: any) => {
-      this.posts = response || [];
-    });
+    this.http.get(api, { withCredentials: true }).subscribe(
+      (response: any) => {
+        this.posts = response || [];
+      },
+      (error) => {
+        this.showNotification(error.error?.message || 'Failed to load posts');
+      }
+    );
   }
 
   checkIfFollowing() {
@@ -132,7 +129,10 @@ this.loadFollowersandFollowing(username);
           },
           error: (error) => {
             // Show backend error message if available
-            const msg = error.error?.message || error.error?.error || 'Something went wrong while unfollowing';
+            const msg =
+              error.error?.message ||
+              error.error?.error ||
+              'Something went wrong while unfollowing';
             this.showNotification(msg);
           },
         });
@@ -153,7 +153,8 @@ this.loadFollowersandFollowing(username);
           },
           error: (error) => {
             // Show backend error message if available
-            const msg = error.error?.message || error.error?.error || 'Something went wrong while following';
+            const msg =
+              error.error?.message || error.error?.error || 'Something went wrong while following';
             this.showNotification(msg);
           },
         });
@@ -178,7 +179,8 @@ this.loadFollowersandFollowing(username);
           this.showNotification('Profile reported');
           this.showReportProfileBox = false;
         },
-        error: (error) => this.showNotification(error.error?.message || error.error?.error || 'Report failed'),
+        error: (error) =>
+          this.showNotification(error.error?.message || error.error?.error || 'Report failed'),
       });
   }
 

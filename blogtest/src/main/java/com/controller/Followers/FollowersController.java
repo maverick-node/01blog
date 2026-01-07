@@ -45,7 +45,7 @@ public class FollowersController {
     @DeleteMapping("/unfollow/{username}")
     public ResponseEntity<?> unfollowUser(@PathVariable String username,
             @CookieValue("jwt") String jwt) {
-        System.out.println("Unfollow request for user: " + username);
+    
         String message = followersService.unfollowUser(username, jwt);
         return ResponseEntity.ok(Map.of("message", message));
     }
@@ -60,9 +60,9 @@ public class FollowersController {
 
         UserStruct userloged = userRepo.findByUsername(currentUsername);
         UserStruct usertarget = userRepo.findByUsername(username);
-        System.out.println("Checking if " + userloged.getUsername() + " is following " + usertarget.getUsername());
+       
         boolean isFollowing = followersService.isFollowing(userloged.getId(), usertarget.getId());
-        System.out.println("Is following: " + isFollowing);
+       
         return ResponseEntity.ok(Map.of("isFollowing", isFollowing));
     }
 

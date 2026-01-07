@@ -28,7 +28,7 @@ public class LoginAPI {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto, HttpServletResponse response) {
-        System.out.println("Login attempt for user: " + dto);
+      
         String token = authService.login(dto);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
