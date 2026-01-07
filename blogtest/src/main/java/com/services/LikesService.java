@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.Exceptions.ForbiddenException;
 import com.Exceptions.InvalidJwtTokenException;
 import com.Exceptions.PostNotFoundException;
 import com.Exceptions.UserNotFoundException;
@@ -64,10 +65,15 @@ public class LikesService {
         // 🔒 Create a unique lock key for this user + post
         String key = postId + ":" + username;
         Object lock = locks.computeIfAbsent(key, k -> new Object());
+        Boolean check = isFollowingService.CheckIfFollow(username, post.getAuthorUser().getUsername());
+        if (!check && !username.equalsIgnoreCase(post.getAuthorUser().getUsername())) {
+            throw new ForbiddenException("You are not following this user");
 
+        }
         synchronized (lock) {
             // Now only one thread can toggle this like at a time
             LikesStruct existingLike = likesRepo.findByPostIdAndUserId(postId, user.getId());
+            // check if follow
 
             boolean liked;
 
@@ -104,7 +110,7 @@ public class LikesService {
                     // Check if the follower actually follows the user
                     boolean isFollowing = isFollowingService.CheckIfFollow(user.getUsername(), follower.getUsername());
                     if (!isFollowing) {
-              
+
                         continue;
                     }
 

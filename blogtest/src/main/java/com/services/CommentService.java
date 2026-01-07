@@ -101,6 +101,11 @@ public class CommentService {
         if (dto.getContent().length() > 500) {
             throw new BadRequestException("Comment content exceeds maximum length of 500 characters");
         }
+        var find = postRepo.findById(dto.getPostId());
+        boolean check = isFollowingService.CheckIfFollow(username, find.get().getAuthorUser().getUsername());
+        if (!check && !username.equalsIgnoreCase(find.get().getAuthorUser().getUsername())){
+            throw new ForbiddenException("You are not following this user");
+        }
         CommentStruct comment = new CommentStruct();
         comment.setPost(postRepo.findById(dto.getPostId()).orElseThrow(() -> new RuntimeException("Post not found")));
         comment.setAuthorUser(userRepo.findByUsername(username));
