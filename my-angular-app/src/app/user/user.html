@@ -106,10 +106,10 @@
         <div class="posts-grid" *ngIf="posts.length > 0">
           <div class="post-item" *ngFor="let post of posts" (click)="viewPost(post)">
             <div class="post-media-container" *ngIf="post.mediaPaths?.length > 0">
-              <img *ngIf="post.mediaTypes[0]?.startsWith('image')" [src]="'http://localhost:8080' + post.mediaPaths[0]"
+              <img *ngIf="post.mediaTypes[0]?.startsWith('image')" [src]="environment.apiUrl + post.mediaPaths[0]"
                 class="post-thumb" />
               <video *ngIf="post.mediaTypes[0]?.startsWith('video')" class="post-thumb" preload="metadata">
-                <source [src]="'http://localhost:8080' + post.mediaPaths[0]" [type]="post.mediaTypes[0]" />
+                <source [src]="environment.apiUrl + post.mediaPaths[0]" [type]="post.mediaTypes[0]" />
               </video>
               <div class="play-overlay" *ngIf="post.mediaTypes[0]?.startsWith('video')">
                 <mat-icon>play_circle</mat-icon>
@@ -181,13 +181,13 @@
           <div class="media-grid" *ngIf="selectedPost.mediaPaths?.length > 0">
             <div class="media-item" *ngFor="let path of selectedPost.mediaPaths; let i = index">
               <!-- Image -->
-              <img *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')" [src]="'http://localhost:8080' + path"
+              <img *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')" [src]="environment.apiUrl + path"
                 class="preview-media" (click)="
-                  openMediaPreview('http://localhost:8080' + path, selectedPost.mediaTypes[i])
+                  openMediaPreview(environment.apiUrl + path, selectedPost.mediaTypes[i])
                 " />
 
               <!-- Video -->
-              <video *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')" [src]="'http://localhost:8080' + path"
+              <video *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')" [src]="environment.apiUrl + path"
                 class="preview-media" preload="metadata" controls muted playsinline loop></video>
             </div>
           </div>

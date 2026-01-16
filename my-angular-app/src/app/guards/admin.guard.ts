@@ -3,6 +3,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../config/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +34,7 @@ export class AdminGuard implements CanActivate {
   }
 
   getUserRole(): Observable<string> {
-    const apiMiddleware = 'http://localhost:8080/middleware';
+    const apiMiddleware = `${environment.apiUrl}/middleware`;
     return this.http.get<{ role: string }>(apiMiddleware, { withCredentials: true }).pipe(
       map((response) => response.role.toLocaleLowerCase() || 'user'), // Return the role from the response or default to 'user'
       catchError((error) => {

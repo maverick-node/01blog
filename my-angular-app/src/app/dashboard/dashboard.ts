@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProfileService } from '../services/profile.service';
+import { environment } from '../config/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,6 +37,7 @@ import { ProfileService } from '../services/profile.service';
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
+  environment = environment;
   selectedMediaName: any = '';
   selectedMedia: File | null = null;
   showPopup = false;
@@ -90,7 +92,7 @@ export class Dashboard {
   }
 
   middleware(): boolean {
-    const apiMiddleware = 'http://localhost:8080/middleware';
+    const apiMiddleware = `${environment.apiUrl}/middleware`;
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       (response: any) => {
         this.username = response.username;
@@ -117,7 +119,7 @@ export class Dashboard {
   }
 
   getToken() {
-    const apiMiddleware = 'http://localhost:8080/middleware';
+    const apiMiddleware = `${environment.apiUrl}/middleware`;
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe((response: any) => {
       this.token = response.token;
     });
@@ -125,7 +127,7 @@ export class Dashboard {
 
   loadPosts() {
    
-    const apiPosts = 'http://localhost:8080/get-followed-posts';
+    const apiPosts = `${environment.apiUrl}/get-followed-posts`;
     this.http.get(apiPosts, { withCredentials: true }).subscribe(
       (response: any) => {
 
@@ -155,7 +157,7 @@ export class Dashboard {
       return;
     }
 
-    const apiLike = `http://localhost:8080/like-post/${postId}`;
+    const apiLike = `${environment.apiUrl}/like-post/${postId}`;
     this.http.post(apiLike, {}, { withCredentials: true }).subscribe(
       (response: any) => {
         const msg = response?.message || JSON.stringify(response);
@@ -177,7 +179,7 @@ this.loadLikeCount(postId);
   }
 
   loadLikeCount(postId: number) {
-    const apiCount = `http://localhost:8080/likes/count/${postId}`;
+    const apiCount = `${environment.apiUrl}/likes/count/${postId}`;
     this.http.get(apiCount, { withCredentials: true }).subscribe(
       (response: any) => {
         
@@ -204,7 +206,7 @@ this.loadLikeCount(postId);
       reportedPostId: postId,
       reason: reason,
     };
-    const apiReport = 'http://localhost:8080/reports/report-post';
+    const apiReport = `${environment.apiUrl}/reports/report-post`;
     this.http.post(apiReport, objecte, { withCredentials: true }).subscribe(
       (response: any) => {
         const msg = response?.message || 'Post reported';
@@ -242,7 +244,7 @@ this.loadLikeCount(postId);
   }
 
   getUsernames() {
-    const apiUsernames = 'http://localhost:8080/get-users';
+    const apiUsernames = `${environment.apiUrl}/get-users`;
     this.http.get(apiUsernames, { withCredentials: true }).subscribe(
       (response: any) => {
         //exclude my username from the list
@@ -288,7 +290,7 @@ this.loadLikeCount(postId);
       });
     }
 
-    const apiCreatePost = 'http://localhost:8080/create-post';
+    const apiCreatePost = `${environment.apiUrl}/create-post`;
 
     this.http.post(apiCreatePost, formData, { withCredentials: true }).subscribe({
       next: () => {
@@ -316,7 +318,7 @@ this.loadLikeCount(postId);
     const commentText = this.newComment[postId];
     if (!commentText?.trim()) return;
 
-    const apiComment = `http://localhost:8080/create-comment`;
+    const apiComment = `${environment.apiUrl}/create-comment`;
     const commentPayload = {
       postId: parseInt(postId),
       content: commentText.trim(),
@@ -333,7 +335,7 @@ this.loadLikeCount(postId);
   }
 
   getComments(postId: string) {
-    const apiGetComments = `http://localhost:8080/posts/${postId}/comments`;
+    const apiGetComments = `${environment.apiUrl}/posts/${postId}/comments`;
     this.http.get(apiGetComments, { withCredentials: true }).subscribe(
       (response: any) => {
         this.comments[postId] = response.comments.sort(
@@ -366,7 +368,7 @@ this.loadLikeCount(postId);
 
   logout() {
     this.middleware();
-    const apiLogout = 'http://localhost:8080/logout';
+    const apiLogout = `${environment.apiUrl}/logout`;
     this.http.post(apiLogout, {}, { withCredentials: true }).subscribe(
       () => {
         this.username = '';
@@ -388,7 +390,7 @@ this.loadLikeCount(postId);
 
   loadNotifications() {
 
-    const api = 'http://localhost:8080/notifications/get';
+    const api = `${environment.apiUrl}/notifications/get`;
     this.http
       .get(api, {
         withCredentials: true,
@@ -417,7 +419,7 @@ this.loadLikeCount(postId);
       return;
     }
     this.http
-      .post(`http://localhost:8080/notifications/mark-as-read/${id}`, {}, { withCredentials: true })
+      .post(`${environment.apiUrl}/notifications/mark-as-read/${id}`, {}, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const notif = this.notifications.find((n) => n.id === id);
@@ -443,7 +445,7 @@ this.loadLikeCount(postId);
   previewUrl: string | null = null;
 
   openMediaPreview(path: string, type: string) {
-    this.previewUrl = 'http://localhost:8080' + path;
+    this.previewUrl = environment.apiUrl + path;
     this.previewType = type; // 'image/jpeg' or 'video/mp4'
   }
 
@@ -458,7 +460,7 @@ this.loadLikeCount(postId);
   }
 
   loadLikesPosts() {
-    const api = 'http://localhost:8080/get-all-my-liked-posts';
+    const api = `${environment.apiUrl}/get-all-my-liked-posts`;
     this.http.get(api, { withCredentials: true }).subscribe({
       next: (res: any) => {
         res.likedPosts.forEach((post: any) => {
@@ -484,7 +486,7 @@ this.loadLikeCount(postId);
     };
 
     this.http
-      .post('http://localhost:8080/reports/report-post', payload, {
+      .post(`${environment.apiUrl}/reports/report-post`, payload, {
         withCredentials: true,
       })
       .subscribe({
@@ -638,7 +640,7 @@ deleteComment(commentid: string, commentpost: string) {
   const id = Number(commentid);
   const post = Number(commentpost)
   this.http
-    .delete(`http://localhost:8080/delete-comment/${id}`, {withCredentials: true})
+    .delete(`${environment.apiUrl}/delete-comment/${id}`, {withCredentials: true})
     .subscribe({
       next: () => {
        this.showNotification("Comment Deleted")

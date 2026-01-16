@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Renderer2 } from '@angular/core';
+import { environment } from '../config/environment';
 
 @Component({
   selector: 'app-notification',
@@ -30,7 +31,7 @@ export class Notification {
  
 
   getToken() {
-    const apiMiddleware = 'http://localhost:8080/middleware';
+    const apiMiddleware = `${environment.apiUrl}/middleware`;
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       (response: any) => {
         this.token = response.token;
@@ -58,7 +59,7 @@ export class Notification {
     }
 
     this.loading = true;
-    const api = 'http://localhost:8080/notifications/get';
+    const api = `${environment.apiUrl}/notifications/get`;
     this.http.get(api, { 
       withCredentials: true
     }).subscribe(
@@ -79,7 +80,7 @@ export class Notification {
     // ensure we have a token before calling the backend
     
 
-    const api = `http://localhost:8080/notifications/mark-as-read`;
+    const api = `${environment.apiUrl}/notifications/mark-as-read`;
     // backend exposes GET /notifications/read to mark all as read
     this.http.post(api, {}, { withCredentials: true }).subscribe(
       (response: any) => {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { ProfileService } from '../services/profile.service';
+import { environment } from '../config/environment';
 
 // Material
 import { MatCardModule } from '@angular/material/card';
@@ -40,6 +41,7 @@ export class Profile implements OnInit {
   /* =========================
      STATE
   ========================= */
+  environment = environment;
   userProfile: any = {
     username: '',
     email: '',
@@ -207,7 +209,7 @@ export class Profile implements OnInit {
     setTimeout(() => (this.errorMessage = ''), 5000);
   }
   openMediaPreview(path: string, type: string) {
-    this.previewUrl = 'http://localhost:8080' + path;
+    this.previewUrl = environment.apiUrl + path;
     this.previewType = type;
   }
 

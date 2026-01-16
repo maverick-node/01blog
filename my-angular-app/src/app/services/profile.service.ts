@@ -1,12 +1,13 @@
 // src/app/services/profile.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../config/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  private API = 'http://localhost:8080';
+  private API = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { ProfileService } from '../services/profile.service';
+import { environment } from '../config/environment';
 
 @Component({
   selector: 'app-user',
@@ -33,6 +34,7 @@ import { ProfileService } from '../services/profile.service';
   styleUrls: ['./user.css'],
 })
 export class User {
+  environment = environment;
   usernameParam: string | null = null;
   profile: any = { username: '', bio: '', age: null, id: null, followers: 0, following: 0 };
   posts: any[] = [];
@@ -63,7 +65,7 @@ export class User {
   }
 
   middleware() {
-    const apiMiddleware = 'http://localhost:8080/middleware';
+    const apiMiddleware = `${environment.apiUrl}/middleware`;
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
       () => {},
       (error) => {
@@ -75,7 +77,7 @@ export class User {
   }
 
   loadProfile(username: string) {
-    const api = `http://localhost:8080/profile/user/${username}`;
+    const api = `${environment.apiUrl}/profile/user/${username}`;
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
         this.profile = {
@@ -97,7 +99,7 @@ export class User {
   }
 
   loadposts(username: string) {
-    const api = `http://localhost:8080/get-posts/${username}`;
+    const api = `${environment.apiUrl}/get-posts/${username}`;
     this.http.get(api, { withCredentials: true }).subscribe(
       (response: any) => {
         this.posts = response || [];
@@ -109,7 +111,7 @@ export class User {
   }
 
   checkIfFollowing() {
-    const api = `http://localhost:8080/followers/get-follow/${this.profile.username}`;
+    const api = `${environment.apiUrl}/followers/get-follow/${this.profile.username}`;
     this.http.get(api, { withCredentials: true }).subscribe((res: any) => {
       this.isFollowing = res.isFollowing === true;
     });
@@ -118,7 +120,7 @@ export class User {
   follow() {
     if (this.isFollowing) {
       this.http
-        .delete(`http://localhost:8080/followers/unfollow/${this.profile.username}`, {
+        .delete(`${environment.apiUrl}/followers/unfollow/${this.profile.username}`, {
           withCredentials: true,
         })
         .subscribe({
@@ -139,7 +141,7 @@ export class User {
     } else {
       this.http
         .post(
-          `http://localhost:8080/followers/follow/${this.profile.username}`,
+          `${environment.apiUrl}/followers/follow/${this.profile.username}`,
           {},
           {
             withCredentials: true,
@@ -171,7 +173,7 @@ export class User {
     const payload = { reason: this.reportProfileReason };
 
     this.http
-      .post(`http://localhost:8080/reports/create/${this.profile.username}`, payload, {
+      .post(`${environment.apiUrl}/reports/create/${this.profile.username}`, payload, {
         withCredentials: true,
       })
       .subscribe({

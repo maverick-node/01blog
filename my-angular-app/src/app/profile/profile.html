@@ -168,10 +168,10 @@
                          *ngFor="let path of post.mediaPaths; let i = index"
                          (click)="openMediaPreview(path, post.mediaTypes[i])">
                       <img *ngIf="post.mediaTypes[i]?.startsWith('image')"
-                           [src]="'http://localhost:8080' + path"
+                           [src]="environment.apiUrl + path"
                            alt="Post image" />
                       <video *ngIf="post.mediaTypes[i]?.startsWith('video')">
-                        <source [src]="'http://localhost:8080' + path" [type]="post.mediaTypes[i]">
+                        <source [src]="environment.apiUrl + path" [type]="post.mediaTypes[i]">
                       </video>
                       <div class="play-icon" *ngIf="post.mediaTypes[i]?.startsWith('video')">
                         <mat-icon>play_circle</mat-icon>
@@ -215,9 +215,9 @@
                     <p><strong>Current media:</strong></p>
                     <div class="media-grid">
                       <div class="media-item removable" *ngFor="let file of editPostData.currentMedia; let i = index">
-                        <img *ngIf="file.type.startsWith('image')" [src]="'http://localhost:8080' + file.path" />
+                        <img *ngIf="file.type.startsWith('image')" [src]="environment.apiUrl + file.path" />
                         <video *ngIf="file.type.startsWith('video')" controls>
-                          <source [src]="'http://localhost:8080' + file.path" [type]="file.type">
+                          <source [src]="environment.apiUrl + file.path" [type]="file.type">
                         </video>
                         <button mat-icon-button color="warn" class="remove-btn"
                                 (click)="removeExistingMedia(i)">

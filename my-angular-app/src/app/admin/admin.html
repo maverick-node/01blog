@@ -651,24 +651,24 @@
             <div
               class="media-item"
               *ngFor="let path of selectedPost.mediaPaths; let i = index"
-              (click)="openFullMedia('http://localhost:8080' + path, selectedPost.mediaTypes[i])"
+              (click)="openFullMedia(environment.apiUrl + path, selectedPost.mediaTypes[i])"
             >
               <img
                 *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')"
-                [src]="'http://localhost:8080' + path"
+                [src]="environment.apiUrl + path"
                 class="preview-media"
               />
               <div class="video-container" *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')">
                 <video
                   *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')"
-                  [src]="'http://localhost:8080' + path"
+                  [src]="environment.apiUrl + path"
                   class="preview-media"
                   preload="metadata"
                   controls
                   playsinline
                   muted
                   (click)="
-                    openFullMedia('http://localhost:8080' + path, selectedPost.mediaTypes[i])
+                    openFullMedia(environment.apiUrl + path, selectedPost.mediaTypes[i])
                   "
                 ></video>
               </div>

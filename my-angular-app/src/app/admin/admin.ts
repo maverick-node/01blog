@@ -10,6 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { environment } from '../config/environment';
 
 @Component({
   selector: 'app-admin',
@@ -30,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './admin.css',
 })
 export class Admin {
+  environment = environment;
   users: any[] = [];
   posts: any[] = [];
   reports: any[] = [];
@@ -53,7 +55,7 @@ export class Admin {
   }
 
   checkAuthentication() {
-    this.http.get('http://localhost:8080/middleware', { withCredentials: true }).subscribe({
+    this.http.get(`${environment.apiUrl}/middleware`, { withCredentials: true }).subscribe({
       next: (res: any) => {
         if (res.role?.toLowerCase() !== 'admin') {
           this.router.navigate(['/dashboard']);
@@ -93,7 +95,7 @@ export class Admin {
 
 loadUsers() {
   this.http
-    .get<any>('http://localhost:8080/get-users', { withCredentials: true })
+    .get<any>(`${environment.apiUrl}/get-users`, { withCredentials: true })
     .subscribe(
       (res) => {
         this.users = res.users || [];
@@ -108,7 +110,7 @@ loadUsers() {
 
 loadPosts() {
   this.http
-    .get<any[]>('http://localhost:8080/get-posts', { withCredentials: true })
+    .get<any[]>(`${environment.apiUrl}/get-posts`, { withCredentials: true })
     .subscribe(
       (res) => {
         this.posts = res || [];
@@ -122,7 +124,7 @@ loadPosts() {
 
 loadReports() {
   this.http
-    .get<any[]>('http://localhost:8080/admin/reports', { withCredentials: true })
+    .get<any[]>(`${environment.apiUrl}/admin/reports`, { withCredentials: true })
     .subscribe(
       (res) => {
         this.reports = res || [];
@@ -136,7 +138,7 @@ loadReports() {
 
 getSolvedReports() {
   this.http
-    .get<any[]>('http://localhost:8080/admin/reports-resolved', { withCredentials: true })
+    .get<any[]>(`${environment.apiUrl}/admin/reports-resolved`, { withCredentials: true })
     .subscribe(
       (res) => {
         this.reportssolved = res || [];
@@ -212,7 +214,7 @@ getSolvedReports() {
 
   banUser(username: string) {
     this.http
-      .post(`http://localhost:8080/admin/ban-user/${username}`, {}, { withCredentials: true })
+      .post(`${environment.apiUrl}/admin/ban-user/${username}`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
           const user = this.users.find((u) => u.username === username);
@@ -225,7 +227,7 @@ getSolvedReports() {
 
   banUserReport(username: string) {
     this.http
-      .post(`http://localhost:8080/admin/ban-user-report/${username}`, {}, { withCredentials: true })
+      .post(`${environment.apiUrl}/admin/ban-user-report/${username}`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
          
@@ -238,7 +240,7 @@ getSolvedReports() {
  
   deleteUser(username: string) {
     this.http
-      .delete(`http://localhost:8080/admin/delete-user/${username}`, { withCredentials: true })
+      .delete(`${environment.apiUrl}/admin/delete-user/${username}`, { withCredentials: true })
       .subscribe({
         next: () => {
           this.users = this.users.filter((u) => u.username !== username);
@@ -282,8 +284,8 @@ getSolvedReports() {
 
   togglePostVisibility(postId: number, currentlyHidden: boolean, reports: string) {
     const endpoint = currentlyHidden
-      ? `http://localhost:8080/admin/reports/unhide/${postId}`
-      : `http://localhost:8080/admin/reports/hide/${postId}`;
+      ? `${environment.apiUrl}/admin/reports/unhide/${postId}`
+      : `${environment.apiUrl}/admin/reports/hide/${postId}`;
 
     this.http
       .post(endpoint, reports, { withCredentials: true, headers: { 'Content-Type': 'text/plain' } })
@@ -301,7 +303,7 @@ getSolvedReports() {
 
   deletePost(id: number) {
     this.http
-      .delete(`http://localhost:8080/admin/delete-post/${id}`, { withCredentials: true })
+      .delete(`${environment.apiUrl}/admin/delete-post/${id}`, { withCredentials: true })
       .subscribe({
         next: () => {
           this.posts = this.posts.filter((p) => p.id !== id);
@@ -313,7 +315,7 @@ getSolvedReports() {
 
   resolveReport(id: number) {
     this.http
-      .post(`http://localhost:8080/admin/reports/${id}/resolve`, {}, { withCredentials: true })
+      .post(`${environment.apiUrl}/admin/reports/${id}/resolve`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
           const r = this.reports.find((x) => x.id === id);
