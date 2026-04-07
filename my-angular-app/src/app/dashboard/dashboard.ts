@@ -47,6 +47,9 @@ export class Dashboard {
   username = 'User';
   userRole = '';
   token: string = '';
+  suggestedUsers: any[] = [];
+  mediaFiles: File[] = [];
+  mediaFilePreviews: { url: string; type: string }[] = [];
   newPost = {
     title: '',
     content: '',
@@ -67,6 +70,16 @@ export class Dashboard {
   postToDelete: number | null = null;
   showReportBox = false;
   currentPostId: number | null = null;
+  
+  // Edit comment
+  editingCommentId: string | null = null;
+  editCommentText = '';
+  editCommentPostId: number | null = null;
+  
+  // Delete comment
+  showDeleteCommentConfirm = false;
+  commentToDelete: string | null = null;
+  postIdForComment: number | null = null;
 
   reportingPostId: number | null = null;
   reportReason: string = '';
@@ -89,6 +102,7 @@ export class Dashboard {
     this.loadNotifications();
     this.getToken();
     this.getUsernames();
+    this.loadSuggestedUsers();
   }
 
   middleware(): boolean {
@@ -233,8 +247,22 @@ this.loadLikeCount(postId);
   onResize() {
     this.isMobile = window.innerWidth < 1100;
   }
-  getAvatarUrl(seed: string): string {
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+
+  // Rick and Morty character avatar generation (826 total characters)
+  private readonly TOTAL_CHARACTERS = 826;
+
+  getAvatarUrl(userIdentifier: string): string {
+    let index;
+
+    // Hash string to number using character codes
+    let hash = 0;
+    for (let i = 0; i < userIdentifier.length; i++) {
+      hash = (hash + userIdentifier.charCodeAt(i)) % this.TOTAL_CHARACTERS;
+    }
+    index = hash + 1; // API IDs start at 1
+
+    // Return deterministic Rick and Morty character avatar
+    return `https://rickandmortyapi.com/api/character/avatar/${index}.jpeg`;
   }
   showNotification(message: any) {
     this.errorMessage = message;
@@ -388,6 +416,20 @@ this.loadLikeCount(postId);
     }
   }
 
+  getNotificationIcon(message: string): string {
+    const msg = message.toLowerCase();
+    if (msg.includes('follow') || msg.includes('followed')) {
+      return 'person_add';
+    } else if (msg.includes('comment') || msg.includes('commented')) {
+      return 'forum';
+    } else if (msg.includes('post') || msg.includes('posted')) {
+      return 'article';
+    } else if (msg.includes('like') || msg.includes('liked')) {
+      return 'favorite';
+    }
+    return 'mail';
+  }
+
   loadNotifications() {
 
     const api = `${environment.apiUrl}/notifications/get`;
@@ -431,6 +473,72 @@ this.loadLikeCount(postId);
         },
         error: (err: any) => this.showNotification(err.error?.message|| err.error?.error || 'Failed to mark notification as read'),
       });
+  }
+
+  loadSuggestedUsers() {
+    const apiUrl = `${environment.apiUrl}/get-users`; // Fetch all users
+    this.http.get(apiUrl, { withCredentials: true }).subscribe(
+      (response: any) => {
+        // Filter out current user and get first 5-10 suggestions
+        this.suggestedUsers = (response.users || response || []).filter((u: any) => u.username !== this.username).slice(0, 5);
+      },
+      (error: any) => {
+        console.log('Could not load suggested users:', error);
+        this.suggestedUsers = [];
+      }
+    );
+  }
+
+  onMediaSelected(event: any) {
+    const files = event.target.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Validate file type
+      if (!file.type.startsWith('image') && !file.type.startsWith('video')) {
+        this.errorMessage = 'Only images and videos are allowed';
+        setTimeout(() => this.errorMessage = '', 3000);
+        continue;
+      }
+      
+      // Validate file size (100MB max)
+      if (file.size > 100 * 1024 * 1024) {
+        this.errorMessage = 'File size too large (max 100MB)';
+        setTimeout(() => this.errorMessage = '', 3000);
+        continue;
+      }
+
+      this.mediaFiles.push(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.mediaFilePreviews.push({
+          url: e.target.result,
+          type: file.type
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeMediaFile(index: number) {
+    this.mediaFiles.splice(index, 1);
+    this.mediaFilePreviews.splice(index, 1);
+  }
+
+  followUser(userId: number) {
+    const apiUrl = `${environment.apiUrl}/follow/${userId}`;
+    this.http.post(apiUrl, {}, { withCredentials: true }).subscribe(
+      (response: any) => {
+        this.showNotification('User followed successfully!');
+      },
+      (error: any) => {
+        this.showNotification(error.error?.message || 'Failed to follow user');
+      }
+    );
   }
 
   onFileSelected(event: any) {
@@ -636,20 +744,81 @@ this.loadLikeCount(postId);
       this.fileInput.nativeElement.value = '';
     }
   }
-deleteComment(commentid: string, commentpost: string) {
-  const id = Number(commentid);
-  const post = Number(commentpost)
-  this.http
-    .delete(`${environment.apiUrl}/delete-comment/${id}`, {withCredentials: true})
-    .subscribe({
+
+  
+// ==================== COMMENT EDIT & DELETE ====================
+  startEditComment(comment: any, postId: number) {
+    this.editingCommentId = comment.commentID;
+    this.editCommentText = comment.comment;
+    this.editCommentPostId = postId;
+  }
+
+  cancelEditComment() {
+    this.editingCommentId = null;
+    this.editCommentText = '';
+    this.editCommentPostId = null;
+  }
+
+  saveEditComment() {
+    if (!this.editingCommentId || this.editCommentPostId === null || !this.editCommentText.trim()) {
+      this.showNotification('Please enter a comment');
+      return;
+    }
+
+    const payload = { content: this.editCommentText };
+    this.http.put(`${environment.apiUrl}/update-comment/${this.editingCommentId}`, payload, { withCredentials: true }).subscribe({
       next: () => {
-       this.showNotification("Comment Deleted")
-       this.getComments(commentpost)
+        this.showNotification('Comment updated successfully!');
+        this.getComments(this.editCommentPostId!.toString());
+        this.cancelEditComment();
       },
-      error: (err) => {
-         this.showNotification( err.error?.message || err.error?.error  ||"Error Comment Deleted")
+      error: (err: any) => {
+        this.showNotification(err.error?.message || err.error?.error || 'Failed to update comment');
       }
     });
-}
+  }
+
+  openDeleteCommentConfirm(commentId: string, postId: number) {
+    this.commentToDelete = commentId;
+    this.postIdForComment = postId;
+    this.showDeleteCommentConfirm = true;
+  }
+
+  cancelDeleteComment(): void {
+    this.showDeleteCommentConfirm = false;
+    this.commentToDelete = null;
+    this.postIdForComment = null;
+  }
+
+  confirmDeleteCommentAction(): void {
+    if (!this.commentToDelete || this.postIdForComment === null) return;
+
+    this.http.delete(`${environment.apiUrl}/delete-comment/${this.commentToDelete}`, { withCredentials: true }).subscribe({
+      next: () => {
+        this.showNotification('Comment deleted!');
+        this.getComments(this.postIdForComment!.toString());
+        this.cancelDeleteComment();
+      },
+      error: (err: any) => {
+        this.showNotification(err.error?.message || err.error?.error || 'Failed to delete comment');
+      }
+    });
+  }
+
+  deleteComment(commentid: string, commentpost: string) {
+    const id = Number(commentid);
+    const post = Number(commentpost);
+    this.http.delete(`${environment.apiUrl}/delete-comment/${id}`, { withCredentials: true }).subscribe({
+      next: () => {
+        this.showNotification('Comment Deleted');
+        this.getComments(commentpost);
+      },
+      error: (err) => {
+        this.showNotification(err.error?.message || err.error?.error || 'Error Comment Deleted');
+      }
+    });
+  }
+
+// Optional: Improve your existing deleteComment to refresh UI
 
 }

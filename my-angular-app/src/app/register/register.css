@@ -1,167 +1,49 @@
-/* REGISTER 2025 – COMPACT, CLEAN, PERFECT SIZE */
-.register-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  background: #f8fafc;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-
-.bg-animation {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #dbeafe, #c7d2fe);
-  background-size: 400% 400%;
-  animation: gradientMove 18s ease infinite;
-  opacity: 0.4;
-}
-
-@keyframes gradientMove {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* CARD — SMALLER & COMPACT */
-.register-card {
-  width: 100%;
-  max-width: 350px;          /* smaller width */
-  border-radius: 24px !important;
-  background: white;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-  border: none !important;
+/* Material Symbols Icon styling */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-flex;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
   overflow: hidden;
-  z-index: 10;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.register-content {
-  padding: 2rem 1.8rem !important;  /* tighter padding */
-  text-align: center;
+/* Portal Glow Effect */
+.portal-glow {
+  box-shadow: 0 0 40px rgba(162, 212, 94, 0.4);
 }
 
-/* LOGO — TIGHTER */
-.logo {
-  margin-bottom: 1.5rem;
+/* Text Glow Effect */
+.text-glow {
+  text-shadow: 0 0 15px rgba(162, 212, 94, 0.6);
 }
 
-.logo-icon {
-  padding: 0.8rem;
-  background: #f8fafc;
-  border-radius: 20px;
-  margin-bottom: 0.8rem;
-  box-shadow: 0 6px 20px rgba(99,102,241,0.12);
-}
-
-.logo h1 {
-  font-size: 2.2rem;          /* smaller font */
-  font-weight: 800;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin: 0;
-}
-
-
-/* FORM — TIGHT & COMPACT */
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;                 /* smaller gaps */
-  margin: 1.2rem 0;
-}
-
-
-.form-row {
-  display: flex;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.half-width {
-  flex: 1;
-  min-width: 120px;          /* smaller fields */
-}
-
-.full-width {
-  width: 100%;
-}
-
-/* BUTTON */
-.register-btn {
-  height: 48px !important;
-  border-radius: 40px !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-   border: 2px solid #66668cff !important; /* added */
-  background: linear-gradient(90deg, #ffffffff, #ffffffff) !important;
-  box-shadow: 0 8px 25px rgba(99,102,241,0.25) !important;
-  margin-top: 0.4rem;
-}
-
-.register-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(241, 241, 255, 0.3) !important;
-}
-.tagline {
-  font-size: 0.95rem;
-  margin: 0.5rem 0 0;
-}
-/* LOGIN LINK */
-.login-link {
-  margin-top: 1.2rem;
-  color: #535a63ff;
-  font-size: 0.9rem;
-}
-
-.login-text {
-  color: #6d6ebdff;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.login-text:hover {
-  text-decoration: underline;
-}
-
-/* TOAST — CLEAN */
-.toast-container {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 99999;
-  width: 90%;
-  max-width: 320px;
-}
-
-.toast {
-  background: white;
-  color: #1e293b;
-  padding: 0.9rem 1.2rem;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-left: 4px solid #ef4444;
-  opacity: 0;
-  transform: translateY(16px);
+/* Brutalist Input Style */
+.brutalist-input {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 227, 253, 0.25);
   transition: all 0.3s ease;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
+.brutalist-input:focus {
+  border-color: #a2d45e;
+  box-shadow: 0 0 15px rgba(162, 212, 94, 0.4);
+  outline: none;
 }
 
-/* RESPONSIVE */
-@media (max-width: 480px) {
-  .register-content {
-    padding: 1.8rem 1.5rem !important;
-  }
-  
-  .logo h1 { font-size: 2rem; }
-  .form-row { flex-direction: column; gap: 0.8rem; }
+.brutalist-input::placeholder {
+  color: rgba(100, 116, 139, 0.6);
 }
+
+textarea.brutalist-input {
+  resize: none;
+}
+

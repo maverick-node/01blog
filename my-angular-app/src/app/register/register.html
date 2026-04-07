@@ -1,82 +1,155 @@
-<div class="register-wrapper">
-  <div class="bg-animation"></div>
+<main class="flex h-screen w-full">
+  
+  <!-- LEFT SIDE - PORTAL -->
+  <section class="hidden lg:flex lg:w-3/5 relative items-center justify-center overflow-hidden border-r border-portal-cyan/20">
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-gradient-to-tr from-void-purple via-void-purple/40 to-black z-10"></div>
+      <img 
+        alt="Swirling interdimensional portal" 
+        class="w-full h-full object-cover opacity-100 mix-blend-screen" 
+        src="https://4kwallpapers.com/images/walls/thumbs_3t/9531.jpg" />
+    </div>
 
-  <!-- COMPACT & BEAUTIFUL CARD -->
-  <mat-card class="register-card" appearance="outlined">
-    <mat-card-content class="register-content">
+    <div class="relative z-20 px-12 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-void-purple/80 border border-primary/40 backdrop-blur-md mb-8">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-label text-xs tracking-[0.2em] text-primary">ENTITY: CREATION</span>
+      </div>
+      
+      <h1 class="font-mono font-black text-7xl xl:text-8xl text-glow tracking-tighter leading-none mb-6" style="color: #a2d45e;">
+        JOIN THE<br/>MULTIVERSE
+      </h1>
+      
+      <p class="font-label text-portal-cyan/60 tracking-[0.3em] text-sm uppercase">
+        CREATE YOUR DIMENSIONAL ACCESS CREDENTIALS
+      </p>
+    </div>
 
-      <!-- LOGO — SMALLER & CLEANER -->
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 100 100" width="72" height="72">
-            <defs>
-              <linearGradient id="regGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#6366f1" />
-                <stop offset="100%" stop-color="#8b5cf6" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="44" fill="white" stroke="url(#regGrad)" stroke-width="3"/>
-            <path d="M28 38 L50 50 L72 38 M28 62 L50 50 L72 62" 
-                  stroke="url(#regGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="8" fill="url(#regGrad)"/>
-          </svg>
-        </div>
-        <h1>Join BlogFlow</h1>
-        <p class="tagline">Create your account</p>
+    <div class="absolute bottom-10 left-10 font-label text-[10px] text-portal-cyan/30 flex flex-col gap-1 tracking-widest">
+      <span>COORD_X: 208.5421</span>
+      <span>COORD_Y: 442.7812</span>
+      <span>SYSTEM_REV: v.9.4.0_GENESIS</span>
+    </div>
+  </section>
+
+  <!-- RIGHT SIDE - REGISTRATION FORM -->
+  <section class="w-full lg:w-2/5 flex flex-col items-center justify-center p-8 lg:p-16 relative bg-[#120026] overflow-y-auto">
+    
+    <div class="absolute top-10 flex items-center gap-2">
+      <span class="font-headline text-xl font-black italic text-primary tracking-widest">GENESIS_PROTOCOL</span>
+    </div>
+
+    <div class="w-full max-w-md">
+      <div class="mb-8">
+        <h2 class="font-headline text-3xl font-bold text-white mb-2 tracking-tight uppercase">ENTITY_CREATION</h2>
+        <p class="text-slate-400 text-sm">Initialize your dimensional identity credentials.</p>
       </div>
 
-      <form (ngSubmit)="register()" class="register-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username</mat-label>
-          <input matInput [(ngModel)]="user.username" name="username" required />
-          <mat-icon matSuffix>person</mat-icon>
-        </mat-form-field>
+      <!-- ERROR MESSAGE DISPLAY -->
+      <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+        <p class="text-red-300 text-sm font-label tracking-wide">{{ errorMessage }}</p>
+      </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput [(ngModel)]="user.mail" name="mail" type="email" required />
-          <mat-icon matSuffix>alternate_email</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [(ngModel)]="user.password" name="password" type="password" required />
-          <mat-icon matSuffix>lock</mat-icon>
-        </mat-form-field>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Age</mat-label>
-            <input matInput [(ngModel)]="user.age" name="age" type="number" min="13" required />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Bio</mat-label>
-            <textarea matInput [(ngModel)]="user.bio" name="bio" rows="2"></textarea>
-          </mat-form-field>
+      <!-- REGISTRATION FORM -->
+      <form class="space-y-4" (ngSubmit)="register()">
+        <!-- Username -->
+        <div class="space-y-2">
+          <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">ENTITY NAME (USERNAME)</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">person</span>
+            <input 
+              [(ngModel)]="user.username"
+              name="username"
+              type="text"
+              required
+              class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+              placeholder="Username" />
+          </div>
         </div>
 
-        <button mat-raised-button color="primary" type="submit" class="register-btn">
-          <mat-icon>person_add</mat-icon>
-          Create Account
+        <!-- Email -->
+        <div class="space-y-2">
+          <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">CONTACT VECTOR (EMAIL)</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">mail</span>
+            <input 
+              [(ngModel)]="user.mail"
+              name="mail"
+              type="email"
+              required
+              class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+              placeholder="Email address" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-2">
+          <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">SECURITY KEY (PASSWORD)</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">lock</span>
+            <input 
+              [(ngModel)]="user.password"
+              name="password"
+              type="password"
+              required
+              class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+              placeholder="••••••••••••" />
+          </div>
+        </div>
+
+        <!-- Age & Bio Row -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Age -->
+          <div class="space-y-2">
+            <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">AGE</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">calendar_today</span>
+              <input 
+                [(ngModel)]="user.age"
+                name="age"
+                type="number"
+                min="13"
+                required
+                class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+                placeholder="Age" />
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="space-y-2">
+            <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">BIO</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">description</span>
+              <textarea 
+                [(ngModel)]="user.bio"
+                name="bio"
+                rows="1"
+                class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+                placeholder="Bio"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          class="w-full py-4 px-8 font-headline font-black tracking-widest uppercase portal-glow active:scale-[0.98] transition-all relative overflow-hidden group mt-6" style="background-color: #a2d45e; color: #1a1a1a;">
+          <span class="relative z-10">INITIALIZE ENTITY</span>
+          <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
         </button>
       </form>
 
-      <div class="login-link">
-        <p>Already have an account?</p>
-        <a routerLink="/login" class="login-text">Sign in</a>
+      <!-- Footer -->
+      <div class="mt-8 pt-6 border-t border-portal-cyan/10 flex flex-col items-center gap-3">
+        <p class="text-slate-500 text-xs font-label tracking-wider uppercase">
+          Already in the multiverse? <a routerLink="/login" class="text-primary hover:underline ml-1">IDENTIFY_YOURSELF</a>
+        </p>
       </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- TOAST -->
-  <div class="toast-container">
-    <div *ngIf="errorMessage" class="toast error" [class.show]="errorMessage">
-      <mat-icon>error</mat-icon>
-      <span>{{ errorMessage }}</span>
-      <button mat-icon-button (click)="errorMessage = ''">
-        <mat-icon>close</mat-icon>
-      </button>
     </div>
-  </div>
-</div>
+
+    <!-- Grid Pattern -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.03]" 
+         style="background-image: radial-gradient(#00e3fd 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+  </section>
+
+</main>

@@ -1,5 +1,4 @@
-// src/app/config/environment.ts
 export const environment = {
-  apiUrl: '/api',  // Will be proxied by Nginx to backend
+  apiUrl: 'http://localhost:8080',
   production: true
 };

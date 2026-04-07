@@ -1,69 +1,126 @@
-<div class="login-wrapper">
-  <!-- Clean white background -->
-  <div class="bg-white"></div>
+<main class="flex h-screen w-full">
+  
+  <!-- LEFT SIDE - PORTAL -->
+  <section class="hidden lg:flex lg:w-3/5 relative items-center justify-center overflow-hidden border-r border-portal-cyan/20">
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-gradient-to-tr from-void-purple via-void-purple/40 to-black z-10"></div>
+      <img 
+        alt="Swirling interdimensional portal" 
+        class="w-full h-full object-cover opacity-1000 mix-blend-screen" 
+        src="https://images.alphacoders.com/876/876589.jpg" />
+    </div>
 
-  <!-- LOGIN CARD — PURE WHITE & ELEGANT -->
-  <mat-card class="login-card" appearance="outlined">
-    <mat-card-content class="login-content">
+    <div class="relative z-20 px-12 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-void-purple/80 border border-primary/40 backdrop-blur-md mb-8">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-label text-xs tracking-[0.2em] text-primary">NEURAL LINK: STABLE</span>
+      </div>
+      
+      <h1 class="font-mono font-black text-7xl xl:text-8xl text-glow tracking-tighter leading-none mb-6" style="color: #a2d45e;">
+        ACCESS PORTAL<br/>DIMENSION C-137
+      </h1>
+      
+      <p class="font-label text-portal-cyan/60 tracking-[0.3em] text-sm uppercase">
+        AUTHENTICATION SEQUENCE REQUIRED TO PROCEED
+      </p>
+    </div>
 
-      <!-- MODERN WHITE LOGO -->
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 100 100" width="88" height="88">
-            <defs>
-              <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#6366f1" />
-                <stop offset="100%" stop-color="#8b5cf6" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="44" fill="white" stroke="url(#whiteGrad)" stroke-width="3"/>
-            <path d="M28 38 L50 50 L72 38 M28 62 L50 50 L72 62" 
-                  stroke="url(#whiteGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="16" fill="url(#whiteGrad)" opacity="0.2"/>
-            <circle cx="50" cy="50" r="8" fill="url(#whiteGrad)"/>
-          </svg>
-        </div>
-        <h1>BlogFlow</h1>
-        <p class="tagline">Your story starts here</p>
+    <div class="absolute bottom-10 left-10 font-label text-[10px] text-portal-cyan/30 flex flex-col gap-1 tracking-widest">
+      <span>COORD_X: 144.0092</span>
+      <span>COORD_Y: 882.1104</span>
+      <span>SYSTEM_REV: v.9.4.0_OBSERVER</span>
+    </div>
+  </section>
+
+  <!-- RIGHT SIDE - LOGIN FORM -->
+  <section class="w-full lg:w-2/5 flex flex-col items-center justify-center p-8 lg:p-16 relative bg-[#120026]">
+    
+    <div class="absolute top-10 flex items-center gap-2">
+      <span class="font-headline text-xl font-black italic text-primary tracking-widest">MULTIVERSE_OBSERVER</span>
+    </div>
+
+    <div class="w-full max-w-md">
+      <div class="mb-12">
+        <h2 class="font-headline text-3xl font-bold text-white mb-2 tracking-tight uppercase">IDENTITY_VERIFICATION</h2>
+        <p class="text-slate-400 text-sm">Synchronize your neural pathway to the C-137 mainframe.</p>
       </div>
 
-      <form (ngSubmit)="login()" class="login-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email address</mat-label>
-          <input matInput [(ngModel)]="user.email" name="email" type="email" required />
-          <mat-icon matSuffix>mail</mat-icon>
-        </mat-form-field>
+      <!-- ERROR MESSAGE DISPLAY -->
+      <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+        <p class="text-red-300 text-sm font-label tracking-wide">{{ errorMessage }}</p>
+      </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput [(ngModel)]="user.password" name="password" type="password" required />
-          <mat-icon matSuffix>lock</mat-icon>
-        </mat-form-field>
+      <!-- LOGIN FORM -->
+      <form class="space-y-6" (ngSubmit)="login()">
+        <!-- Email -->
+        <div class="space-y-2">
+          <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">IDENTITY TAG (EMAIL)</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">fingerprint</span>
+            <input 
+              [(ngModel)]="user.email"
+              name="email"
+              type="email"
+              required
+              class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+              placeholder="Email" />
+          </div>
+        </div>
 
-        <button mat-raised-button color="primary" type="submit" class="login-btn">
-          <mat-icon>login</mat-icon>
-          Sign In
+        <!-- Password -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-label text-xs text-portal-cyan/70 tracking-widest uppercase">ENCRYPTION KEY (PASSWORD)</label>
+          </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">lock</span>
+            <input 
+              [(ngModel)]="user.password"
+              name="password"
+              type="password"
+              required
+              class="w-full pl-12 pr-4 py-4 brutalist-input rounded-none text-white font-body placeholder:text-slate-600" 
+              placeholder="••••••••••••" />
+          </div>
+        </div>
+
+        <!-- Options -->
+        <!-- <div class="flex items-center justify-between py-2">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input class="peer appearance-none w-4 h-4 border border-portal-cyan/40 bg-transparent rounded-sm checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+              <span class="material-symbols-outlined absolute text-[12px] text-void-purple font-bold opacity-0 peer-checked:opacity-100 left-0.5" style="font-variation-settings: 'FILL' 1;">check</span>
+            </div>
+            <span class="text-xs text-slate-400 font-label tracking-wide uppercase group-hover:text-slate-200 transition-colors">Remember neural link</span>
+          </label>
+          <a routerLink="/forgot-password" class="text-xs text-portal-cyan/60 hover:text-primary transition-colors font-label tracking-wide uppercase">Lost Encryption?</a>
+        </div> -->
+
+        <!-- Button -->
+        <button 
+          type="submit"
+          class="w-full py-4 px-8 font-headline font-black tracking-widest uppercase portal-glow active:scale-[0.98] transition-all relative overflow-hidden group" style="background-color: #a2d45e; color: #1a1a1a;">
+          <span class="relative z-10">INITIATE SEQUENCE</span>
+          <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
         </button>
       </form>
 
-      <div class="bottom-text">
-        <p>New to BlogFlow?</p>
-        <a routerLink="/register" class="register-link">Create your account</a>
+      <!-- Footer -->
+      <div class="mt-12 pt-8 border-t border-portal-cyan/10 flex flex-col items-center gap-4">
+        <p class="text-slate-500 text-xs font-label tracking-wider uppercase">
+          New lifeform? <a routerLink="/register" class="text-primary hover:underline ml-1">REGISTER_ENTITY</a>
+        </p>
+        <div class="flex gap-6 mt-4">
+          <span class="material-symbols-outlined text-slate-600 hover:text-portal-cyan cursor-pointer transition-colors" title="Terminal Access">terminal</span>
+          <span class="material-symbols-outlined text-slate-600 hover:text-portal-cyan cursor-pointer transition-colors" title="Dimension Status">public</span>
+          <span class="material-symbols-outlined text-slate-600 hover:text-portal-cyan cursor-pointer transition-colors" title="Security Protocol">shield</span>
+        </div>
       </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- WHITE-STYLE TOAST -->
-  <div class="toast-container">
-    <div *ngIf="errorMessage" class="toast error" [class.show]="errorMessage">
-      <mat-icon class="toast-icon">error</mat-icon>
-      <div class="toast-content">
-        <strong>Login failed</strong>
-        <p>{{ errorMessage }}</p>
-      </div>
-      <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-        <mat-icon>close</mat-icon>
-      </button>
     </div>
-  </div>
-</div>
+
+    <!-- Grid Pattern -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.03]" 
+         style="background-image: radial-gradient(#00e3fd 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+  </section>
+
+</main>
