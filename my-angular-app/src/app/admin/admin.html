@@ -1,702 +1,415 @@
-<!-- admin.component.html – FINAL 2025 ADMIN PANEL – PURE PREVIEW MODAL (NO ACTIONS INSIDE) -->
-<div class="toast-container">
-  <div *ngIf="errorMessage" class="toast error" [class.show]="errorMessage">
-    <mat-icon>error</mat-icon>
-    <span>{{ errorMessage }}</span>
-    <button mat-icon-button (click)="errorMessage = ''">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-</div>
-<div class="admin-wrapper">
-  <!-- HEADER -->
-  <header class="admin-header">
-    <h1>Admin Panel</h1>
-    <div class="header-actions">
-      <button mat-stroked-button (click)="router.navigate(['/dashboard'])">
-        <mat-icon>dashboard</mat-icon> Dashboard
+<div class="min-h-screen text-[#f1dfff] font-body overflow-hidden" [style.backgroundImage]="'url(/4k.jpg)'" [style.backgroundSize]="'cover'" [style.backgroundPosition]="'center'" [style.backgroundAttachment]="'fixed'">
+  <!-- Dark Overlay with Blur -->
+  <div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-0 pointer-events-none"></div>
+
+  <!-- TOP NAVIGATION -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#00e3fd]/20 bg-[#190033] backdrop-blur-2xl px-4 md:px-8 h-20 flex justify-between items-center">
+    <div class="flex items-center gap-4 md:gap-8">
+      <button (click)="toggleSidebar()" class="md:hidden text-[#A2D45E] hover:text-[#00e3fd] transition-colors">
+        <span class="material-symbols-outlined text-2xl">menu</span>
       </button>
-      <button mat-raised-button color="primary" (click)="loadUsers()">
-        <mat-icon>refresh</mat-icon> Refresh Users
-      </button>
-      <button mat-raised-button color="accent" (click)="loadPosts()">
-        <mat-icon>refresh</mat-icon> Refresh Posts
+      <span class="text-xl md:text-2xl font-black italic text-[#A2D45E] tracking-widest uppercase"><span class="material-symbols-outlined">lock</span> ADMIN CONSOLE</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button (click)="router.navigate(['/dashboard'])" class="text-slate-400 hover:text-[#A2D45E] px-3 md:px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-widest transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-base md:text-lg">dashboard</span>
+        <span class="hidden md:inline">DASHBOARD</span>
       </button>
     </div>
-  </header>
+  </nav>
 
-  <!-- TOAST -->
+  <!-- Mobile Sidebar Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden" (click)="toggleSidebar()"></div>
 
-  <!-- SUMMARY CARDS -->
-  <div class="stats-grid">
-    <mat-card class="stat-card purple">
-      <mat-card-content>
-        <div class="stat-icon"><mat-icon>block</mat-icon></div>
-        <div class="stat-info">
-          <div class="stat-label">Banned Users</div>
-          <div class="stat-value">{{ bannedUsersCount }}</div>
+  <!-- LEFT SIDEBAR -->
+  <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#00e3fd]/15 bg-[#190033]/50 backdrop-blur-md flex flex-col pt-24 z-40 transition-transform duration-300" [ngClass]="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+    <div class="px-6 space-y-8">
+      <div class="flex items-center gap-3 pb-6 border-b border-[#563d70]">
+        <div class="w-10 h-10 flex items-center justify-center text-[#A2D45E]">
+          <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
         </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card blue">
-      <mat-card-content>
-        <div class="stat-icon"><mat-icon>article</mat-icon></div>
-        <div class="stat-info">
-          <div class="stat-label">Total Posts</div>
-          <div class="stat-value">{{ postsCount }}</div>
+        <div>
+          <h2 class="text-[#A2D45E] font-black tracking-widest uppercase text-lg">PORTAL NAV</h2>
+          <p class="text-[10px] text-[#00e3fd] tracking-widest">ADMIN MODE</p>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
 
-    <mat-card class="stat-card green">
-      <mat-card-content>
-        <div class="stat-icon"><mat-icon>people</mat-icon></div>
-        <div class="stat-info">
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value">{{ usersCount }}</div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+      <nav class="flex flex-col gap-1">
+        <a (click)="navigateTo('dashboard'); sidebarOpen = false" [ngClass]="currentSection === 'dashboard' ? 'bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E]' : 'text-slate-400 hover:text-[#A2D45E] border-l-4 border-transparent hover:bg-[#00e3fd]/5'" class="pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-all">
+          <span class="material-symbols-outlined">dashboard</span>
+          DASHBOARD
+        </a>
+        <a (click)="navigateTo('users'); sidebarOpen = false" [ngClass]="currentSection === 'users' ? 'bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E]' : 'text-slate-400 hover:text-[#A2D45E] border-l-4 border-transparent hover:bg-[#00e3fd]/5'" class="pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-all">
+          <span class="material-symbols-outlined">people</span>
+          USERS
+        </a>
+        <a (click)="navigateTo('posts'); sidebarOpen = false" [ngClass]="currentSection === 'posts' ? 'bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E]' : 'text-slate-400 hover:text-[#A2D45E] border-l-4 border-transparent hover:bg-[#00e3fd]/5'" class="pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-all">
+          <span class="material-symbols-outlined">article</span>
+          POSTS
+        </a>
+        <a (click)="navigateTo('reports'); sidebarOpen = false" [ngClass]="currentSection === 'reports' ? 'bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E]' : 'text-slate-400 hover:text-[#A2D45E] border-l-4 border-transparent hover:bg-[#00e3fd]/5'" class="pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-all">
+          <span class="material-symbols-outlined">flag</span>
+          REPORTS
+        </a>
+        <a (click)="navigateTo('settings'); sidebarOpen = false" [ngClass]="currentSection === 'settings' ? 'bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E]' : 'text-slate-400 hover:text-[#A2D45E] border-l-4 border-transparent hover:bg-[#00e3fd]/5'" class="pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-all">
+          <span class="material-symbols-outlined">settings</span>
+          SETTINGS
+        </a>
+      </nav>
+    </div>
 
-    <mat-card class="stat-card orange">
-      <mat-card-content>
-        <div class="stat-icon"><mat-icon>flag</mat-icon></div>
-        <div class="stat-info">
-          <div class="stat-label">Reports</div>
-          <div class="report">
-            <span class="pending">Pending: {{ unsolvedReports.length }}</span>
-            <span class="done">Solved: {{ solvedReports.length }}</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="mt-auto px-6 pb-6">
+      <button (click)="logout(); sidebarOpen = false" class="w-full text-slate-400 hover:text-red-400 pl-5 py-3 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer transition-colors bg-transparent border-none">
+        <span class="material-symbols-outlined">logout</span>
+        LOGOUT
+      </button>
+    </div>
+  </aside>
+
+  <!-- Toast Notifications -->
+  <div class="fixed top-24 right-4 z-50" *ngIf="errorMessage">
+    <div class="bg-red-600/90 border border-red-400 text-white px-6 py-3 rounded-lg flex items-center gap-3 animate-pulse">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
   </div>
 
-  <!-- ALL USERS -->
-  <mat-card class="section-card">
-    <mat-card-header>
-      <mat-card-title><mat-icon>people</mat-icon> All Users</mat-card-title>
-      <mat-card-subtitle>{{ users.length || 0 }} users</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <!-- Desktop Table -->
-      <table mat-table [dataSource]="users" class="desktop-table mat-elevation-z2">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let i = index">{{ i + 1 }}</td>
-        </ng-container>
-        <ng-container matColumnDef="username">
-          <th mat-header-cell *matHeaderCellDef>Username</th>
-          <td mat-cell *matCellDef="let user">
-            <a (click)="goToProfile(user.username)" class="username-link">{{ user.username }}</a>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>Email</th>
-          <td mat-cell *matCellDef="let user">{{ user.mail }}</td>
-        </ng-container>
-        <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef>Role</th>
-          <td mat-cell *matCellDef="let user">
-            <span class="role-chip" [class.admin]="user.role === 'admin'">{{ user.role }}</span>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="age">
-          <th mat-header-cell *matHeaderCellDef>Age</th>
-          <td mat-cell *matCellDef="let user">{{ user.age || '-' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let user">
-            <button
-              mat-icon-button
-              [color]="user.banned ? 'warn' : 'primary'"
-              (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')"
-              matTooltip="{{ user.banned ? 'Unban' : 'Ban' }} user"
-            >
-              <mat-icon>{{ user.banned ? 'lock_open' : 'lock' }}</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              color="warn"
-              (click)="confirmUserAction(user.username, 'delete')"
-              matTooltip="Delete user"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+  <!-- MAIN CONTENT -->
+  <main class="relative z-10 ml-0 md:ml-64 pt-20 md:pt-24 px-4 md:px-8 pb-12">
+    <div class="max-w-7xl">
+      <!-- HEADER WITH ACTIONS -->
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-8 mb-6 md:mb-8">
+        <h1 class="text-3xl md:text-5xl font-black tracking-tighter text-[#A2D45E]">CENTRAL CONSOLE</h1>
+        <div class="flex flex-wrap gap-2 md:gap-3">
+          <button (click)="loadUsers()" class="bg-[#A2D45E] text-[#190033] px-4 md:px-6 py-2 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all flex items-center gap-2 text-xs md:text-sm">
+            <span class="material-symbols-outlined text-base md:text-lg">refresh</span>
+            <span class="hidden md:inline">REFRESH USERS</span>
+          </button>
+          <button (click)="loadPosts()" class="bg-[#00e3fd] text-[#190033] px-4 md:px-6 py-2 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#00e3fd]/50 transition-all flex items-center gap-2 text-xs md:text-sm">
+            <span class="material-symbols-outlined text-base md:text-lg">refresh</span>
+            <span class="hidden md:inline">REFRESH POSTS</span>
+          </button>
+        </div>
+      </div>
 
-        <tr
-          mat-header-row
-          *matHeaderRowDef="['id', 'username', 'email', 'role', 'age', 'actions']"
-        ></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: ['id', 'username', 'email', 'role', 'age', 'actions']"
-        ></tr>
-      </table>
-
-      <!-- Mobile Cards -->
-      <div class="mobile-table-cards">
-        <div class="mobile-card" *ngFor="let user of users; let i = index">
-          <div class="mobile-card-header">
-            <div class="mobile-card-title">
-              #{{ i + 1 }} –
-              <a (click)="goToProfile(user.username)" class="username-link">{{ user.username }}</a>
+      <!-- STATS GRID - Show on dashboard and when filtering -->
+      <div *ngIf="currentSection === 'dashboard'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Banned Users -->
+        <div class="bg-[#270646] border-2 border-[#A2D45E]/30 rounded-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#A2D45E]/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-[#A2D45E] text-2xl">block</span>
             </div>
-            <div class="mobile-card-actions">
-              <button
-                mat-icon-button
-                [color]="user.banned ? 'warn' : 'primary'"
-                (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')"
-              >
-                <mat-icon>{{ user.banned ? 'lock_open' : 'lock' }}</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="confirmUserAction(user.username, 'delete')"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+            <div>
+              <p class="text-[#00e3fd]/70 text-xs uppercase tracking-widest">BANNED USERS</p>
+              <p class="text-3xl font-black text-[#A2D45E]">{{ bannedUsersCount }}</p>
             </div>
           </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Email</span><span class="mobile-value">{{ user.mail }}</span>
+        </div>
+
+        <!-- Total Posts -->
+        <div class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#00e3fd]/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-[#00e3fd] text-2xl">article</span>
+            </div>
+            <div>
+              <p class="text-[#ffe483]/70 text-xs uppercase tracking-widest">TOTAL POSTS</p>
+              <p class="text-3xl font-black text-[#ffe483]">{{ postsCount }}</p>
+            </div>
           </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Role</span>
-            <span class="mobile-value"
-              ><span class="role-chip" [class.admin]="user.role === 'admin'">{{
-                user.role
-              }}</span></span
-            >
+        </div>
+
+        <!-- Total Users -->
+        <div class="bg-[#270646] border-2 border-[#ffe483]/30 rounded-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#ffe483]/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-[#ffe483] text-2xl">people</span>
+            </div>
+            <div>
+              <p class="text-[#A2D45E]/70 text-xs uppercase tracking-widest">TOTAL USERS</p>
+              <p class="text-3xl font-black text-[#A2D45E]">{{ usersCount }}</p>
+            </div>
           </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Age</span
-            ><span class="mobile-value">{{ user.age || '-' }}</span>
+        </div>
+
+        <!-- Reports -->
+        <div class="bg-[#270646] border-2 border-red-500/30 rounded-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-red-500 text-2xl">flag</span>
+            </div>
+            <div>
+              <p class="text-red-500/70 text-xs uppercase tracking-widest">REPORTS</p>
+              <div class="flex gap-3 text-sm font-bold">
+                <span class="text-[#A2D45E]">P: {{ unsolvedReports.length }}</span>
+                <span class="text-[#00e3fd]">R: {{ solvedReports.length }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- REPORTS MANAGEMENT -->
-  <mat-card class="section-card">
-    <mat-card-header>
-      <mat-card-title><mat-icon>flag</mat-icon> Reports Management</mat-card-title>
-      <mat-card-subtitle>{{ unsolvedReports.length }} pending</mat-card-subtitle>
-    </mat-card-header>
-
-    <mat-tab-group animationDuration="300ms">
-      <!-- PROFILE REPORTS -->
-      <mat-tab label="Profile Reports ({{ reportedUsers.length || 0 }})">
-        <div class="tab-content">
-          <!-- Desktop Table -->
-          <table mat-table [dataSource]="reportedUsers" class="desktop-table mat-elevation-z2">
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef>ID</th>
-              <td mat-cell *matCellDef="let r">{{ r.id }}</td>
-            </ng-container>
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef>Reporter</th>
-              <td mat-cell *matCellDef="let r">{{ r.reporterName }}</td>
-            </ng-container>
-            <ng-container matColumnDef="target">
-              <th mat-header-cell *matHeaderCellDef>Target User</th>
-              <td mat-cell *matCellDef="let r">
-                <a (click)="goToProfile(r.targetUserName)" class="username-link">{{
-                  r.targetUserName
-                }}</a>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef>Reason</th>
-              <td mat-cell *matCellDef="let r">{{ r.reason }}</td>
-            </ng-container>
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef>Date</th>
-              <td mat-cell *matCellDef="let r">{{ r.createdAt | date : 'short' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let r">
-                <button mat-icon-button color="primary" (click)="confirmResolveReport(r.id)">
-                  <mat-icon>check_circle</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  color="warn"
-                  (click)="confirmUserAction(r.targetUserName, 'banreport')"
-                >
-                  <mat-icon>block</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  color="warn"
-                  (click)="confirmUserAction(r.targetUserName, 'delete')"
-                >
-                  <mat-icon>person_remove</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <tr
-              mat-header-row
-              *matHeaderRowDef="['id', 'reporter', 'target', 'reason', 'date', 'actions']"
-            ></tr>
-            <tr
-              mat-row
-              *matRowDef="
-                let row;
-                columns: ['id', 'reporter', 'target', 'reason', 'date', 'actions']
-              "
-            ></tr>
-          </table>
-
-          <!-- Mobile Cards -->
-          <div class="mobile-table-cards">
-            <div class="mobile-card" *ngFor="let r of reportedUsers">
-              <div class="mobile-card-header">
-                <div class="mobile-card-title">
-                  #{{ r.id }} –
-                  <a (click)="goToProfile(r.targetUserName)" class="username-link">{{
-                    r.targetUserName
-                  }}</a>
-                </div>
-                <div class="mobile-card-actions">
-                  <button mat-icon-button color="primary" (click)="confirmResolveReport(r.id)">
-                    <mat-icon>check_circle</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="confirmUserAction(r.targetUserName, 'banreport')"
-                  >
-                    <mat-icon>block</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="confirmUserAction(r.targetUserName, 'delete')"
-                  >
-                    <mat-icon>person_remove</mat-icon>
-                  </button>
-                </div>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reporter</span
-                ><span class="mobile-value">{{ r.reporterName }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reason</span
-                ><span class="mobile-value">{{ r.reason }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Date</span
-                ><span class="mobile-value">{{ r.createdAt | date : 'short' }}</span>
-              </div>
-            </div>
+      <!-- ALL USERS SECTION -->
+      <div *ngIf="currentSection === 'dashboard' || currentSection === 'users'" class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-lg p-6 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-[#A2D45E] text-2xl">people</span>
+          <div>
+            <h2 class="text-2xl font-black text-[#A2D45E] uppercase">All Users</h2>
+            <p class="text-[#00e3fd]/60 text-sm">{{ users.length }} users</p>
           </div>
         </div>
-      </mat-tab>
 
-      <!-- POST REPORTS -->
-      <mat-tab label="Post Reports ({{ reportedPosts.length }})">
-        <div class="tab-content">
-          <!-- Desktop Table -->
-          <table mat-table [dataSource]="reportedPosts" class="desktop-table mat-elevation-z2">
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef>ID</th>
-              <td mat-cell *matCellDef="let p">{{ p.id }}</td>
-            </ng-container>
-            <ng-container matColumnDef="postId">
-              <th mat-header-cell *matHeaderCellDef>Post ID</th>
-              <td mat-cell *matCellDef="let p">
-                <a (click)="viewReportedPost(p.reportedPostId)" class="post-link"
-                  >#{{ p.reportedPostId }}</a
-                >
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef>Reporter</th>
-              <td mat-cell *matCellDef="let p">{{ p.reporterName }}</td>
-            </ng-container>
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef>Reason</th>
-              <td mat-cell *matCellDef="let p">{{ p.reason }}</td>
-            </ng-container>
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef>Date</th>
-              <td mat-cell *matCellDef="let p">{{ p.createdAt | date : 'short' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let p">
-                <button mat-icon-button color="primary" (click)="confirmResolveReport(p.id)">
-                  <mat-icon>check_circle</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  [color]="p.hidden ? 'primary' : 'accent'"
-                  (click)="confirmToggleVisibility(p.reportedPostId, p.hidden, 'reports')"
-                >
-                  <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="confirmDeletePost(p.reportedPostId)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <tr
-              mat-header-row
-              *matHeaderRowDef="['id', 'postId', 'reporter', 'reason', 'date', 'actions']"
-            ></tr>
-            <tr
-              mat-row
-              *matRowDef="
-                let row;
-                columns: ['id', 'postId', 'reporter', 'reason', 'date', 'actions']
-              "
-            ></tr>
+        <!-- Users Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#00e3fd]/30">
+              <tr class="text-[#A2D45E] uppercase tracking-widest font-bold text-xs">
+                <th class="text-left py-4 px-4">ID</th>
+                <th class="text-left py-4 px-4">Username</th>
+                <th class="text-left py-4 px-4">Email</th>
+                <th class="text-left py-4 px-4">Role</th>
+                <th class="text-left py-4 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#00e3fd]/10">
+              <tr *ngFor="let user of users; let i = index" class="hover:bg-[#2e0b50]/50 transition-colors border-[#00e3fd]/10">
+                <td class="py-4 px-4 text-[#00e3fd]">{{ i + 1 }}</td>
+                <td class="py-4 px-4">
+                  <a (click)="goToProfile(user.username)" class="text-[#A2D45E] hover:text-[#ffe483] cursor-pointer font-bold">{{ user.username }}</a>
+                </td>
+                <td class="py-4 px-4 text-[#f1dfff]/80">{{ user.mail }}</td>
+                <td class="py-4 px-4">
+                  <span class="px-3 py-1 rounded text-xs font-bold uppercase tracking-widest" [ngClass]="user.role === 'admin' ? 'bg-[#A2D45E]/20 text-[#A2D45E]' : 'bg-[#00e3fd]/20 text-[#00e3fd]'">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 flex gap-2">
+                  <button (click)="confirmUserAction(user.username, user.banned ? 'unban' : 'ban')" class="px-3 py-1 bg-orange-600/30 border border-orange-600 text-orange-400 hover:bg-orange-600/60 rounded text-xs font-bold transition-all">
+                    {{ user.banned ? 'UNBAN' : 'BAN' }}
+                  </button>
+                  <button (click)="confirmUserAction(user.username, 'delete')" class="px-3 py-1 bg-red-600/30 border border-red-600 text-red-400 hover:bg-red-600/60 rounded text-xs font-bold transition-all">
+                    DELETE
+                  </button>
+                </td>
+              </tr>
+            </tbody>
           </table>
-
-          <!-- Mobile Cards -->
-          <div class="mobile-table-cards">
-            <div class="mobile-card" *ngFor="let p of reportedPosts">
-              <div class="mobile-card-header">
-                <div class="mobile-card-title">
-                  Post
-                  <a (click)="viewReportedPost(p.reportedPostId)" class="post-link"
-                    >#{{ p.reportedPostId }}</a
-                  >
-                </div>
-                <div class="mobile-card-actions">
-                  <button mat-icon-button color="primary" (click)="confirmResolveReport(p.id)">
-                    <mat-icon>check_circle</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    [color]="p.hidden ? 'primary' : 'accent'"
-                    (click)="confirmToggleVisibility(p.reportedPostId, p.hidden, 'reports')"
-                  >
-                    <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="confirmDeletePost(p.reportedPostId)"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reporter</span
-                ><span class="mobile-value">{{ p.reporterName }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reason</span
-                ><span class="mobile-value">{{ p.reason }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Date</span
-                ><span class="mobile-value">{{ p.createdAt | date : 'short' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </mat-tab>
-
-      <!-- SOLVED REPORTS -->
-      <mat-tab label="Solved ({{ solvedReports.length }})">
-        <div class="tab-content">
-          <!-- Desktop Table -->
-          <table mat-table [dataSource]="solvedReports" class="desktop-table mat-elevation-z2">
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef>ID</th>
-              <td mat-cell *matCellDef="let s">{{ s.id }}</td>
-            </ng-container>
-            <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef>Type</th>
-              <td mat-cell *matCellDef="let s">
-                <mat-chip [color]="s.targetUserName ? 'primary' : 'accent'" selected>
-                  {{ s.reportedPostId ? 'Post' : 'User' }}
-                </mat-chip>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="target">
-              <th mat-header-cell *matHeaderCellDef>Target</th>
-              <td mat-cell *matCellDef="let s">
-                {{ s.targetUserName || s.reportedPostId }}
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef>Reporter</th>
-              <td mat-cell *matCellDef="let s">{{ s.reporterName }}</td>
-            </ng-container>
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef>Reason</th>
-              <td mat-cell *matCellDef="let s">{{ s.reason }}</td>
-            </ng-container>
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef>Resolved</th>
-              <td mat-cell *matCellDef="let s">{{ s.createdAt | date : 'short' }}</td>
-            </ng-container>
-            <tr
-              mat-header-row
-              *matHeaderRowDef="['id', 'type', 'target', 'reporter', 'reason', 'date']"
-            ></tr>
-            <tr
-              mat-row
-              *matRowDef="let row; columns: ['id', 'type', 'target', 'reporter', 'reason', 'date']"
-            ></tr>
-          </table>
-
-          <!-- Mobile Cards -->
-          <div class="mobile-table-cards">
-            <div class="mobile-card" *ngFor="let s of solvedReports">
-              <div class="mobile-card-header">
-                <div class="mobile-card-title">
-                  #{{ s.id }} – {{ s.targetUserName || 'Post #' + s.reportedPostId }}
-                </div>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Type</span>
-                <span class="mobile-value"
-                  ><mat-chip [color]="s.targetUserName ? 'primary' : 'accent'" selected>{{
-                    s.reportedPostId ? 'Post' : 'User'
-                  }}</mat-chip></span
-                >
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reporter</span
-                ><span class="mobile-value">{{ s.reporterName }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Reason</span
-                ><span class="mobile-value">{{ s.reason }}</span>
-              </div>
-              <div class="mobile-row">
-                <span class="mobile-label">Resolved</span
-                ><span class="mobile-value">{{ s.createdAt | date : 'short' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-  </mat-card>
-
-  <!-- ALL POSTS -->
-  <mat-card class="section-card">
-    <mat-card-header>
-      <mat-card-title><mat-icon>article</mat-icon> All Posts</mat-card-title>
-      <mat-card-subtitle>{{ posts.length || 0 }} posts</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <!-- Desktop Table -->
-      <table mat-table [dataSource]="posts" class="desktop-table mat-elevation-z2">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let p">{{ p.id }}</td>
-        </ng-container>
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let p">{{ p.title }}</td>
-        </ng-container>
-        <ng-container matColumnDef="author">
-          <th mat-header-cell *matHeaderCellDef>Author</th>
-          <td mat-cell *matCellDef="let p">
-            <a (click)="goToProfile(p.author)" class="username-link">{{ p.author }}</a>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="content">
-          <th mat-header-cell *matHeaderCellDef>Content</th>
-          <td mat-cell *matCellDef="let p">
-            {{ (p.content || '').slice(0, 60) }}{{ p.content?.length > 60 ? '...' : '' }}
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let p">
-            <mat-chip [color]="p.hidden ? 'warn' : 'primary'" selected>{{
-              p.hidden ? 'Hidden' : 'Visible'
-            }}</mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let p" (click)="$event.stopPropagation()">
-            <button
-              mat-icon-button
-              [color]="p.hidden ? 'primary' : 'accent'"
-              (click)="confirmToggleVisibility(p.id, p.hidden, 'not-reports')"
-            >
-              <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="confirmDeletePost(p.id)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <tr
-          mat-header-row
-          *matHeaderRowDef="['id', 'title', 'author', 'content', 'status', 'actions']"
-        ></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: ['id', 'title', 'author', 'content', 'status', 'actions']"
-          class="clickable-row"
-          (click)="viewPost(row)"
-        ></tr>
-      </table>
-
-      <!-- Mobile Cards -->
-      <div class="mobile-table-cards">
-        <div class="mobile-card clickable-card" *ngFor="let p of posts" (click)="viewPost(p)">
-          <div class="mobile-card-header">
-            <div class="mobile-card-title">{{ p.title || 'Untitled Post' }}</div>
-            <div class="mobile-card-actions">
-              <button
-                mat-icon-button
-                [color]="p.hidden ? 'primary' : 'accent'"
-                (click)="
-                  $event.stopPropagation(); confirmToggleVisibility(p.id, p.hidden, 'not-reports')
-                "
-              >
-                <mat-icon>{{ p.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="$event.stopPropagation(); confirmDeletePost(p.id)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </div>
-          <div class="mobile-row">
-            <span class="mobile-label">ID</span><span class="mobile-value">#{{ p.id }}</span>
-          </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Author</span>
-            <span class="mobile-value"
-              ><a (click)="$event.stopPropagation(); goToProfile(p.author)" class="username-link">{{
-                p.author
-              }}</a></span
-            >
-          </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Content</span
-            ><span class="mobile-value">{{ (p.content || '').slice(0, 80) }}...</span>
-          </div>
-          <div class="mobile-row">
-            <span class="mobile-label">Status</span>
-            <span class="mobile-value"
-              ><mat-chip [color]="p.hidden ? 'warn' : 'primary'" selected>{{
-                p.hidden ? 'Hidden' : 'Visible'
-              }}</mat-chip></span
-            >
-          </div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- GLOBAL CONFIRM DIALOG -->
-  <div class="confirm-overlay" *ngIf="confirmDialog.show" (click)="confirmDialog.show = false">
-    <div class="confirm-box" (click)="$event.stopPropagation()">
-      <div class="confirm-header">
-        <mat-icon color="warn" class="warn-icon">warning</mat-icon>
-        <h3>{{ confirmDialog.title }}</h3>
+      <!-- REPORTS SECTION -->
+      <div *ngIf="currentSection === 'dashboard' || currentSection === 'reports'" class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-lg p-6 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-red-500 text-2xl">flag</span>
+          <div>
+            <h2 class="text-2xl font-black text-red-500 uppercase">Reports Management</h2>
+            <p class="text-[#00e3fd]/60 text-sm">{{ unsolvedReports.length }} pending</p>
+          </div>
+        </div>
+
+        <!-- Tabs for Reports -->
+        <div class="border-b border-[#00e3fd]/20 mb-6">
+          <div class="flex gap-8">
+            <button (click)="currentTab = 'profile'" [class.active]="currentTab === 'profile'" class="py-3 px-4 uppercase text-sm font-bold tracking-widest transition-all border-b-2" [ngClass]="currentTab === 'profile' ? 'border-[#A2D45E] text-[#A2D45E]' : 'border-transparent text-[#00e3fd]/60 hover:text-[#00e3fd]'">
+              PROFILE ({{ reportedUsers.length }})
+            </button>
+            <button (click)="currentTab = 'post'" [class.active]="currentTab === 'post'" class="py-3 px-4 uppercase text-sm font-bold tracking-widest transition-all border-b-2" [ngClass]="currentTab === 'post' ? 'border-[#A2D45E] text-[#A2D45E]' : 'border-transparent text-[#00e3fd]/60 hover:text-[#00e3fd]'">
+              POST ({{ reportedPosts.length }})
+            </button>
+            <button (click)="currentTab = 'solved'" [class.active]="currentTab === 'solved'" class="py-3 px-4 uppercase text-sm font-bold tracking-widest transition-all border-b-2" [ngClass]="currentTab === 'solved' ? 'border-[#A2D45E] text-[#A2D45E]' : 'border-transparent text-[#00e3fd]/60 hover:text-[#00e3fd]'">
+              SOLVED ({{ solvedReports.length }})
+            </button>
+          </div>
+        </div>
+
+        <!-- Profile Reports Table -->
+        <div *ngIf="currentTab === 'profile'" class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#00e3fd]/30">
+              <tr class="text-[#A2D45E] uppercase tracking-widest font-bold text-xs">
+                <th class="text-left py-4 px-4">ID</th>
+                <th class="text-left py-4 px-4">Reporter</th>
+                <th class="text-left py-4 px-4">Target User</th>
+                <th class="text-left py-4 px-4">Reason</th>
+                <th class="text-left py-4 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#00e3fd]/10">
+              <tr *ngFor="let r of reportedUsers" class="hover:bg-[#2e0b50]/50 transition-colors">
+                <td class="py-4 px-4 text-[#00e3fd]">{{ r.id }}</td>
+                <td class="py-4 px-4 text-[#A2D45E]">{{ r.reporterName }}</td>
+                <td class="py-4 px-4 text-[#ffe483]">{{ r.targetUserName }}</td>
+                <td class="py-4 px-4 text-[#f1dfff]/80">{{ r.reason }}</td>
+                <td class="py-4 px-4 flex gap-2">
+                  <button (click)="confirmResolveReport(r.id)" class="px-3 py-1 bg-[#A2D45E]/20 border border-[#A2D45E] text-[#A2D45E] hover:bg-[#A2D45E]/40 rounded text-xs font-bold transition-all">
+                    RESOLVE
+                  </button>
+                  <button (click)="confirmUserAction(r.targetUserName, 'banreport')" class="px-3 py-1 bg-red-600/30 border border-red-600 text-red-400 hover:bg-red-600/60 rounded text-xs font-bold transition-all">
+                    BAN USER
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Post Reports Table -->
+        <div *ngIf="currentTab === 'post'" class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#00e3fd]/30">
+              <tr class="text-[#A2D45E] uppercase tracking-widest font-bold text-xs">
+                <th class="text-left py-4 px-4">ID</th>
+                <th class="text-left py-4 px-4">Post ID</th>
+                <th class="text-left py-4 px-4">Reporter</th>
+                <th class="text-left py-4 px-4">Reason</th>
+                <th class="text-left py-4 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#00e3fd]/10">
+              <tr *ngFor="let r of reportedPosts" class="hover:bg-[#2e0b50]/50 transition-colors">
+                <td class="py-4 px-4 text-[#00e3fd]">{{ r.id }}</td>
+                <td class="py-4 px-4 text-[#A2D45E]">{{ r.reportedPostId }}</td>
+                <td class="py-4 px-4 text-[#ffe483]">{{ r.reporterName }}</td>
+                <td class="py-4 px-4 text-[#f1dfff]/80">{{ r.reason }}</td>
+                <td class="py-4 px-4 flex gap-2">
+                  <button (click)="viewReportedPost(r.reportedPostId)" class="px-3 py-1 bg-[#00e3fd]/20 border border-[#00e3fd] text-[#00e3fd] hover:bg-[#00e3fd]/40 rounded text-xs font-bold transition-all">
+                    VIEW
+                  </button>
+                  <button (click)="confirmResolveReport(r.id)" class="px-3 py-1 bg-[#A2D45E]/20 border border-[#A2D45E] text-[#A2D45E] hover:bg-[#A2D45E]/40 rounded text-xs font-bold transition-all">
+                    RESOLVE
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Solved Reports Table -->
+        <div *ngIf="currentTab === 'solved'" class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#00e3fd]/30">
+              <tr class="text-[#A2D45E] uppercase tracking-widest font-bold text-xs">
+                <th class="text-left py-4 px-4">ID</th>
+                <th class="text-left py-4 px-4">Type</th>
+                <th class="text-left py-4 px-4">Reporter</th>
+                <th class="text-left py-4 px-4">Reason</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#00e3fd]/10">
+              <tr *ngFor="let r of solvedReports" class="hover:bg-[#2e0b50]/50 transition-colors opacity-70">
+                <td class="py-4 px-4 text-[#00e3fd]">{{ r.id }}</td>
+                <td class="py-4 px-4">
+                  <span class="px-2 py-1 bg-[#00e3fd]/20 text-[#00e3fd] text-xs rounded font-bold">{{ r.reportedPostId ? 'POST' : 'USER' }}</span>
+                </td>
+                <td class="py-4 px-4 text-[#A2D45E]">{{ r.reporterName }}</td>
+                <td class="py-4 px-4 text-[#f1dfff]/60">{{ r.reason }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <p class="confirm-message" [innerHTML]="confirmDialog.message"></p>
-      <div class="confirm-actions">
-        <button mat-button (click)="confirmDialog.show = false">Cancel</button>
-        <button mat-raised-button [color]="confirmDialog.color" (click)="confirmDialog.action()">
-          <mat-icon>{{ confirmDialog.icon }}</mat-icon>
-          {{ confirmDialog.confirmText }}
+
+      <!-- ALL POSTS SECTION -->
+      <div *ngIf="currentSection === 'dashboard' || currentSection === 'posts'" class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-lg p-6 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-[#ffe483] text-2xl">article</span>
+          <div>
+            <h2 class="text-2xl font-black text-[#ffe483] uppercase">All Posts</h2>
+            <p class="text-[#00e3fd]/60 text-sm">{{ posts.length }} posts</p>
+          </div>
+        </div>
+
+        <!-- Posts Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#00e3fd]/30">
+              <tr class="text-[#A2D45E] uppercase tracking-widest font-bold text-xs">
+                <th class="text-left py-4 px-4">ID</th>
+                <th class="text-left py-4 px-4">Title</th>
+                <th class="text-left py-4 px-4">Author</th>
+                <th class="text-left py-4 px-4">Status</th>
+                <th class="text-left py-4 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#00e3fd]/10">
+              <tr *ngFor="let p of posts" class="hover:bg-[#2e0b50]/50 transition-colors cursor-pointer" (click)="viewPost(p)">
+                <td class="py-4 px-4 text-[#00e3fd]">{{ p.id }}</td>
+                <td class="py-4 px-4 text-[#A2D45E] font-bold">{{ p.title }}</td>
+                <td class="py-4 px-4 text-[#ffe483]">{{ p.author }}</td>
+                <td class="py-4 px-4">
+                  <span class="px-3 py-1 rounded text-xs font-bold uppercase tracking-widest" [ngClass]="p.hidden ? 'bg-red-600/20 text-red-400' : 'bg-[#A2D45E]/20 text-[#A2D45E]'">
+                    {{ p.hidden ? 'HIDDEN' : 'PUBLISHED' }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 flex gap-2" (click)="$event.stopPropagation()">
+                  <button (click)="confirmToggleVisibility(p.id, p.hidden, '')" class="px-3 py-1 bg-[#00e3fd]/20 border border-[#00e3fd] text-[#00e3fd] hover:bg-[#00e3fd]/40 rounded text-xs font-bold transition-all">
+                    {{ p.hidden ? 'UNHIDE' : 'HIDE' }}
+                  </button>
+                  <button (click)="confirmDeletePost(p.id)" class="px-3 py-1 bg-red-600/30 border border-red-600 text-red-400 hover:bg-red-600/60 rounded text-xs font-bold transition-all">
+                    DELETE
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM DIALOG -->
+    <div *ngIf="confirmDialog.show" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000]" (click)="confirmDialog.show = false">
+      <div class="bg-[#270646] border-2 border-[#A2D45E] rounded-lg p-8 max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-red-500 text-3xl">warning</span>
+          <h3 class="text-2xl font-black text-[#A2D45E] uppercase">{{ confirmDialog.title }}</h3>
+        </div>
+        <p class="text-[#f1dfff]/80 mb-6 text-sm leading-relaxed" [innerHTML]="confirmDialog.message"></p>
+        <div class="flex gap-4">
+          <button (click)="confirmDialog.show = false" class="flex-1 px-4 py-2 border border-[#00e3fd] text-[#00e3fd] hover:bg-[#00e3fd]/10 rounded font-bold uppercase tracking-widest transition-all">
+            CANCEL
+          </button>
+          <button (click)="confirmDialog.action()" [ngClass]="confirmDialog.color === 'warn' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-[#A2D45E] hover:bg-[#7faf3d] text-[#190033]'" class="flex-1 px-4 py-2 rounded font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">{{ confirmDialog.icon }}</span>
+            {{ confirmDialog.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POST PREVIEW MODAL -->
+    <div *ngIf="selectedPost" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000]" (click)="selectedPost = null">
+      <div class="bg-[#270646] border-2 border-[#00e3fd] rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-y-auto relative" (click)="$event.stopPropagation()">
+        <button (click)="selectedPost = null" class="absolute top-4 right-4 text-[#00e3fd] hover:text-[#A2D45E] transition-colors">
+          <span class="material-symbols-outlined text-2xl">close</span>
         </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- POST PREVIEW MODAL – READ-ONLY (NO ACTIONS) -->
-  <div class="post-preview-overlay" *ngIf="selectedPost" (click)="selectedPost = null">
-    <div class="post-preview-modal" (click)="$event.stopPropagation()">
-      <button mat-icon-button class="close-preview-btn" (click)="selectedPost = null">
-        <mat-icon>close</mat-icon>
-      </button>
+        <div class="p-8">
+          <h2 class="text-2xl font-black text-[#A2D45E] mb-2 uppercase">{{ selectedPost.title || 'Untitled' }}</h2>
+          <p class="text-[#00e3fd]/60 text-sm mb-6">by <span class="text-[#ffe483]">{{ selectedPost.author }}</span></p>
 
-      <mat-card class="preview-card">
-        <mat-card-header>
-          <div
-            mat-card-avatar
-            class="preview-avatar"
-            [style.background-image]="'url(' + getAvatarUrl(selectedPost.author) + ')'"
-          ></div>
-          <mat-card-title>{{ selectedPost.title || 'Untitled Post' }}</mat-card-title>
-          <mat-card-subtitle>
-            {{ selectedPost.author }} • {{ selectedPost.createdAt | date : 'medium' }}
-          </mat-card-subtitle>
-        </mat-card-header>
-
-        <mat-card-content>
-          <p class="preview-content">{{ selectedPost.content }}</p>
+          <p class="text-[#f1dfff]/80 mb-6 leading-relaxed">{{ selectedPost.content }}</p>
 
           <!-- Media Grid -->
-          <div class="media-grid" *ngIf="selectedPost.mediaPaths?.length > 0">
-            <div
-              class="media-item"
-              *ngFor="let path of selectedPost.mediaPaths; let i = index"
-              (click)="openFullMedia(environment.apiUrl + path, selectedPost.mediaTypes[i])"
-            >
-              <img
-                *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')"
-                [src]="environment.apiUrl + path"
-                class="preview-media"
-              />
-              <div class="video-container" *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')">
-                <video
-                  *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')"
-                  [src]="environment.apiUrl + path"
-                  class="preview-media"
-                  preload="metadata"
-                  controls
-                  playsinline
-                  muted
-                  (click)="
-                    openFullMedia(environment.apiUrl + path, selectedPost.mediaTypes[i])
-                  "
-                ></video>
-              </div>
+          <div *ngIf="selectedPost.mediaPaths?.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <div *ngFor="let path of selectedPost.mediaPaths; let i = index" 
+                 (click)="openFullMedia(environment.apiUrl + path, selectedPost.mediaTypes?.[i])"
+                 class="cursor-pointer rounded overflow-hidden border border-[#00e3fd]/30 hover:border-[#A2D45E] transition-all hover:shadow-lg hover:shadow-[#A2D45E]/20">
+              <img *ngIf="selectedPost.mediaTypes?.[i]?.startsWith('image')" [src]="environment.apiUrl + path" class="w-full h-32 object-cover" />
+              <video *ngIf="selectedPost.mediaTypes?.[i]?.startsWith('video')" [src]="environment.apiUrl + path" class="w-full h-32 object-cover"></video>
             </div>
           </div>
-        </mat-card-content>
-
-        <!-- REMOVED: mat-card-actions with Hide/Unhide and Delete buttons -->
-        <!-- Now it's purely a preview -->
-      </mat-card>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- FULL SCREEN MEDIA PREVIEW -->
-  <div class="media-preview-overlay" *ngIf="fullMediaUrl" (click)="closeFullMedia()">
-    <div class="media-preview-container" (click)="$event.stopPropagation()">
-      <button mat-icon-button class="close-preview" (click)="closeFullMedia()">
-        <mat-icon>close</mat-icon>
+    <!-- FULL MEDIA PREVIEW -->
+    <div *ngIf="fullMediaUrl" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[10001]" (click)="closeFullMedia()">
+      <button (click)="closeFullMedia()" class="absolute top-8 right-8 text-white hover:text-[#A2D45E] transition-colors">
+        <span class="material-symbols-outlined text-3xl">close</span>
       </button>
-      <img *ngIf="fullMediaType?.startsWith('image')" [src]="fullMediaUrl" class="full-media" />
-      <video
-        *ngIf="fullMediaType?.startsWith('video')"
-        [src]="fullMediaUrl"
-        class="full-media"
-        controls
-        autoplay
-        loop
-      ></video>
+      <img *ngIf="fullMediaType?.startsWith('image')" [src]="fullMediaUrl" class="max-w-4xl max-h-screen object-contain" />
+      <video *ngIf="fullMediaType?.startsWith('video')" [src]="fullMediaUrl" class="max-w-4xl max-h-screen object-contain" controls autoplay loop></video>
     </div>
-  </div>
+  </main>
 </div>

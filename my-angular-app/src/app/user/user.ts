@@ -1,16 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 import { ProfileService } from '../services/profile.service';
 import { environment } from '../config/environment';
 
@@ -21,19 +13,14 @@ import { environment } from '../config/environment';
     CommonModule,
     HttpClientModule,
     FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatDividerModule,
+    RouterModule,
   ],
   templateUrl: './user.html',
   styleUrls: ['./user.css'],
 })
 export class User {
+  private readonly TOTAL_CHARACTERS = 826;
+  myusermame= ""; 
   environment = environment;
   usernameParam: string | null = null;
   profile: any = { username: '', bio: '', age: null, id: null, followers: 0, following: 0 };
@@ -45,6 +32,11 @@ export class User {
   showReportProfileBox = false;
   reportProfileReason = '';
 
+  unreadCount = 0;
+  sidebarOpen = false;
+  showNotificationPopup = false;
+  notifications: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -54,7 +46,7 @@ export class User {
 
   ngOnInit() {
     this.middleware();
-
+this.loadNotifications()
     this.route.paramMap.subscribe((params) => {
       this.usernameParam = params.get('username')?.toLowerCase()+"";
 
@@ -67,7 +59,9 @@ export class User {
   middleware() {
     const apiMiddleware = `${environment.apiUrl}/middleware`;
     this.http.get(apiMiddleware, { withCredentials: true }).subscribe(
-      () => {},
+      (response: any) => {
+        this.myusermame = response.username 
+      },
       (error) => {
         if (error.status === 401 || error.status === 403) {
           this.router.navigate(['/login']);
@@ -199,8 +193,70 @@ export class User {
     this.router.navigate(['/dashboard']);
   }
 
-  getAvatarUrl(seed: string): string {
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  toggleNotifications() {
+    this.showNotificationPopup = !this.showNotificationPopup;
+    if (this.showNotificationPopup) {
+      this.loadNotifications();
+    }
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  getNotificationIcon(message: string): string {
+    const msg = message.toLowerCase();
+    if (msg.includes('follow') || msg.includes('followed')) {
+      return 'person_add';
+    } else if (msg.includes('comment') || msg.includes('commented')) {
+      return 'forum';
+    } else if (msg.includes('post') || msg.includes('posted')) {
+      return 'article';
+    } else if (msg.includes('like') || msg.includes('liked')) {
+      return 'favorite';
+    }
+    return 'mail';
+  }
+
+  loadNotifications() {
+    this.profileService.getNotifications().subscribe(
+      (response: any) => {
+        this.notifications = response.sort(
+          (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        this.unreadCount = this.notifications.filter((n) => !n.read).length;
+      },
+      (error: any) => {
+        this.showNotification(error.error?.message || 'Error loading notifications');
+      }
+    );
+  }
+
+  markRead(id: number) {
+    this.profileService.markNotificationRead(id).subscribe({
+      next: (res) => {
+        const notif = this.notifications.find((n) => n.id === id);
+        if (notif) {
+          notif.read = !notif.read;
+        }
+        this.unreadCount = this.notifications.filter((n) => !n.read).length;
+      },
+      error: (err: any) => this.showNotification(err.error?.message || err.error?.error || 'Failed to mark notification as read'),
+    });
+  }
+
+  getAvatarUrl(userIdentifier: string): string {
+    let index;
+
+    // Hash string to number using character codes
+    let hash = 0;
+    for (let i = 0; i < userIdentifier.length; i++) {
+      hash = (hash + userIdentifier.charCodeAt(i)) % this.TOTAL_CHARACTERS;
+    }
+    index = hash + 1; // API IDs start at 1
+
+    // Return deterministic Rick and Morty character avatar
+    return `https://rickandmortyapi.com/api/character/avatar/${index}.jpeg`;
   }
   loadFollowersandFollowing(username: string) {
     this.profileService.getFollowersAndFollowing(username).subscribe((res: any) => {

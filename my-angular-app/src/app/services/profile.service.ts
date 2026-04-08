@@ -56,4 +56,19 @@ export class ProfileService {
       { withCredentials: true }
     );
   }
+
+  /* =========================
+     NOTIFICATIONS
+  ========================= */
+  getNotifications() {
+    return this.http.get(`${this.API}/notifications/get`, {
+      withCredentials: true
+    });
+  }
+
+  markNotificationRead(id: number) {
+    return this.http.post(`${this.API}/notifications/mark-as-read/${id}`, {}, {
+      withCredentials: true
+    });
+  }
 }

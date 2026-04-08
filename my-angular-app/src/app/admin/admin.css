@@ -1,12 +1,43 @@
-/* ADMIN PANEL 2025 – FULLY RESPONSIVE & MODERN */
+/* ADMIN PANEL 2025 – CYBERPUNK THEME */
 
-.admin-wrapper {
-  min-height: 100vh;
-  background: #f8fafc;
-  color: #1e293b;
-  padding: 2rem;
-  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+/* MATERIAL SYMBOLS ICON FONT */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 400;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
+
+/* SCROLLBAR STYLING */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A2D45E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00e3fd;
+}
+
 
 /* HEADER */
 .admin-header {

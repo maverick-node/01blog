@@ -1,215 +1,313 @@
-<div class="toast-container">
-  <div *ngIf="errorMessage" class="toast-notification error" [class.show]="errorMessage" (click)="errorMessage = ''">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ errorMessage }}</span>
-    <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-      <mat-icon>close</mat-icon>
-    </button>
+<div class="min-h-screen text-[#f1dfff] font-body overflow-hidden" [style.backgroundImage]="'url(/4k.jpg)'" [style.backgroundSize]="'cover'" [style.backgroundPosition]="'center'" [style.backgroundAttachment]="'fixed'">
+  <!-- Dark Overlay -->
+  <div class="fixed inset-0 bg-black/75 z-0 pointer-events-none"></div>
+
+  <!-- Top Navigation -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#00e3fd]/20 bg-[#190033] backdrop-blur-2xl px-4 md:px-8 h-20 flex justify-between items-center">
+    <div class="flex items-center gap-4 md:gap-8">
+      <button (click)="toggleSidebar()" class="md:hidden text-[#A2D45E] hover:text-[#00e3fd] transition-colors">
+        <span class="material-symbols-outlined text-2xl">menu</span>
+      </button>
+      <span class="text-xl md:text-2xl font-black italic text-[#A2D45E] tracking-widest uppercase">VIEWING: {{ profile.username }}</span>
+    </div>
+    <div class="flex items-center gap-4 md:gap-6">
+      <button (click)="toggleNotifications()" class="text-white relative hover:text-cyan-300 transition-colors">
+        <span class="material-symbols-outlined text-2xl">notifications</span>
+        <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ unreadCount }}</span>
+      </button>
+      <a routerLink="/dashboard" class="w-8 md:w-9 h-8 md:h-9 border border-[#A2D45E]/50 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#A2D45E] block">
+        <img [src]="getAvatarUrl(myusermame)" class="w-full h-full object-cover" alt="Profile"/>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden" (click)="toggleSidebar()"></div>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#00e3fd]/15 bg-[#190033]/50 backdrop-blur-md flex flex-col pt-24 z-40 transition-transform duration-300" [ngClass]="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+    <div class="px-6 space-y-8">
+      <div class="flex items-center gap-3 pb-6 border-b border-[#563d70]">
+        <div class="w-10 h-10 flex items-center justify-center text-[#00e3fd]">
+          <span class="material-symbols-outlined text-3xl">person_search</span>
+        </div>
+        <div>
+          <h2 class="text-[#00e3fd] font-black tracking-widest uppercase text-lg">PROFILE VIEWER</h2>
+          <p class="text-[10px] text-[#ffe483] tracking-widest">{{ profile.username?.toUpperCase() }}</p>
+        </div>
+      </div>
+
+      <nav class="flex flex-col gap-1">
+        <a class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5 cursor-pointer" routerLink="/dashboard" (click)="sidebarOpen = false">
+          <span class="material-symbols-outlined">dashboard</span>
+          MY DASHBOARD
+        </a>
+        <a class="bg-[#00e3fd]/10 text-[#00e3fd] border-l-4 border-[#00e3fd] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer">
+          <span class="material-symbols-outlined">person</span>
+          VIEWING PROFILE
+        </a>
+      </nav>
+    </div>
+
+    <div class="mt-auto px-6 pb-6">
+      <a (click)="goBack(); sidebarOpen = false" class="text-slate-400 hover:text-red-400 pl-5 py-3 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer">
+        <span class="material-symbols-outlined">logout</span>
+        BACK
+      </a>
+    </div>
+  </aside>
+
+  <!-- Toast Notifications -->
+  <div class="fixed top-24 right-4 z-50" *ngIf="errorMessage">
+    <div class="bg-red-600/90 border border-red-400 text-white px-6 py-3 rounded-lg flex items-center gap-3 animate-pulse">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
   </div>
-</div>
-<!-- user.component.html – 2025 ELITE USER PROFILE + POST PREVIEW MODAL -->
-<div class="user-profile-wrapper">
-  <!-- HEADER -->
-  <header class="profile-header">
-    <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Back">
-      <mat-icon>arrow_back_ios_new</mat-icon>
-    </button>
-    <h1>@{{ profile.username || 'Loading...' }}</h1>
-    <div class="header-spacer"></div>
-  </header>
 
-  <!-- MAIN CONTENT -->
-  <main class="profile-content">
-    <!-- FLOATING TOAST NOTIFICATIONS -->
-
-
-    <!-- PROFILE CARD -->
-    <!-- PROFILE CARD – FULLY RESPONSIVE -->
-    <mat-card class="hero-card" appearance="outlined">
-      <mat-card-content class="hero-content">
-
-        <!-- Avatar + Username -->
-        <div class="top-section">
-          <div class="avatar-large" [style.background-image]="'url(' + getAvatarUrl(profile.username) + ')'"></div>
-
-          <div class="user-info">
-            <h2 class="username">@{{ profile.username }}</h2>
-            <p class="bio" *ngIf="profile.bio">{{ profile.bio }}</p>
-            <p class="no-bio" *ngIf="!profile.bio">No bio yet</p>
-
-            <!-- Move action buttons here on mobile for better flow -->
-      
+  <!-- Notification Popup -->
+  <div *ngIf="showNotificationPopup" class="fixed top-20 right-8 w-96 bg-[#270646] rounded-lg shadow-2xl z-[9999] max-h-96 overflow-y-auto">
+    <div class="p-6 sticky top-0 bg-[#270646]">
+      <h3 class="text-xl font-bold text-[#A2D45E]">NOTIFICATIONS</h3>
+    </div>
+    
+    <div *ngIf="notifications.length > 0" class="divide-y divide-transparent">
+      <div *ngFor="let notif of notifications" 
+           (click)="markRead(notif.id)" 
+           class="p-4 cursor-pointer transition-all border-l-8"
+           [ngClass]="{
+             'border-l-[#A2D45E] bg-[#2e0b50]/80': !notif.read,
+             'border-l-[#00e3fd]/30 bg-[#270646] opacity-70 hover:opacity-100': notif.read
+           }">
+        <div class="flex gap-3 items-start">
+          <span class="material-symbols-outlined text-[#A2D45E] mt-1">{{ getNotificationIcon(notif.message) }}</span>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <p class="text-sm" [ngClass]="{'text-[#f1dfff] font-semibold': !notif.read, 'text-[#00e3fd]/60': notif.read}">
+                {{ notif.message }}
+              </p>
+              <span *ngIf="!notif.read" class="w-2 h-2 bg-[#A2D45E] rounded-full mt-1 flex-shrink-0"></span>
+            </div>
+            <small class="text-[#00e3fd]/50">{{ notif.timestamp | date:'short' }}</small>
           </div>
         </div>
+      </div>
+    </div>
+    
+    <div *ngIf="notifications.length === 0" class="p-6 text-center text-[#00e3fd]/60">
+      <p>No notifications yet</p>
+    </div>
+  </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat">
-            <div class="value">{{ posts.length }}</div>
-            <div class="label">Posts</div>
-          </div>
-          <div class="stat">
-            <div class="value">{{ profile.followers || 0 }}</div>
-            <div class="label">Followers</div>
-          </div>
-          <div class="stat">
-            <div class="value">{{ profile.following || 0 }}</div>
-            <div class="label">Following</div>
-          </div>
+  <!-- Main Content -->
+  <main class="relative z-10 ml-0 md:ml-64 pt-20 md:pt-24 px-4 md:px-8 pb-12">
+    <!-- Hero Profile Card -->
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-2xl overflow-hidden mb-8">
+        <!-- Hero Banner -->
+        <div class="relative h-40 md:h-64 bg-gradient-to-br from-[#A2D45E]/20 to-[#00e3fd]/20 overflow-hidden">
+          <div class="absolute inset-0 opacity-20" [style.backgroundImage]="'url(/4k.jpg)'" [style.backgroundSize]="'cover'"></div>
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#270646]"></div>
         </div>
 
-        <!-- Action Buttons (Desktop/Tablet) -->
-        <div class="action-buttons desktop-only">
-          <button mat-raised-button [color]="isFollowing ? 'warn' : 'primary'" (click)="follow()" class="follow-btn">
-            <mat-icon>{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
-            {{ isFollowing ? 'Unfollow' : 'Follow' }}
-          </button>
+        <!-- Profile Info Section -->
+        <div class="px-4 md:px-8 pb-6 md:pb-8 relative z-10">
+          <!-- Avatar + Info Row -->
+          <div class="flex flex-col md:flex-row gap-4 md:gap-8 lg:gap-12 items-start -mt-16 md:-mt-20 mb-6 md:mb-8">
+            <!-- Avatar -->
+            <div class="w-24 md:w-32 h-24 md:h-32 rounded-full border-4 border-[#A2D45E] overflow-hidden shadow-2xl flex-shrink-0" [style.backgroundImage]="'url(' + getAvatarUrl(profile.username) + ')'" [style.backgroundSize]="'cover'"></div>
 
-          <button mat-stroked-button color="warn" (click)="reportProfile()" class="report-btn">
-            <mat-icon>flag</mat-icon>
-            Report Profile
-          </button>
-        </div>
+            <!-- User Info -->
+            <div class="flex-1 pt-4 md:pt-8">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
+                <div>
+                  <h1 class="text-2xl md:text-4xl font-black text-[#A2D45E] uppercase tracking-widest">{{ profile.username }}</h1>
+                  <p class="text-[#00e3fd] text-xs md:text-sm tracking-widest uppercase mt-1">C-137 MEMBER</p>
+                </div>
 
-        <!-- Info Grid -->
-        <div class="info-grid">
-          <div class="info-item">
-            <mat-icon>cake</mat-icon>
-            <span *ngIf="profile.age">Age {{ profile.age }}</span>
-            <span *ngIf="!profile.age" class="muted">Age not set</span>
-          </div>
-          <div class="info-item">
-            <mat-icon>alternate_email</mat-icon>
-            <span class="muted">{{ profile.email }}</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- POSTS SECTION -->
-    <mat-card class="posts-card" appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>grid_on</mat-icon>
-          Posts
-        </mat-card-title>
-        <mat-card-subtitle>{{ posts.length }} posts</mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div *ngIf="posts.length === 0" class="empty-posts">
-          <mat-icon class="big-icon">mood_bad</mat-icon>
-          <p>No posts yet</p>
-        </div>
-
-        <!-- POSTS GRID -->
-        <div class="posts-grid" *ngIf="posts.length > 0">
-          <div class="post-item" *ngFor="let post of posts" (click)="viewPost(post)">
-            <div class="post-media-container" *ngIf="post.mediaPaths?.length > 0">
-              <img *ngIf="post.mediaTypes[0]?.startsWith('image')" [src]="environment.apiUrl + post.mediaPaths[0]"
-                class="post-thumb" />
-              <video *ngIf="post.mediaTypes[0]?.startsWith('video')" class="post-thumb" preload="metadata">
-                <source [src]="environment.apiUrl + post.mediaPaths[0]" [type]="post.mediaTypes[0]" />
-              </video>
-              <div class="play-overlay" *ngIf="post.mediaTypes[0]?.startsWith('video')">
-                <mat-icon>play_circle</mat-icon>
+                <!-- Action Buttons -->
+                <div class="flex gap-2 md:gap-3 flex-wrap">
+                  <button (click)="follow()" class="bg-[#A2D45E] text-[#190033] px-4 md:px-8 py-2 md:py-3 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all text-xs md:text-base">
+                    <span class="material-symbols-outlined mr-2 inline">{{ isFollowing ? 'person_remove' : 'person_add' }}</span>
+                    <span class="hidden md:inline">{{ isFollowing ? 'UNFOLLOW' : 'FOLLOW' }}</span>
+                  </button>
+                  <button (click)="reportProfile()" class="border-2 border-red-500 text-red-500 px-4 md:px-6 py-2 md:py-3 font-bold uppercase tracking-widest hover:bg-red-500/10 transition-all">
+                    <span class="material-symbols-outlined">flag</span>
+                  </button>
+                </div>
               </div>
-              <div class="media-count" *ngIf="post.mediaPaths.length > 1">
-                <mat-icon>collections</mat-icon>
+
+              <!-- Bio -->
+              <p class="text-[#f1dfff]/90 text-base md:text-lg leading-relaxed mb-4" *ngIf="profile.bio">{{ profile.bio }}</p>
+              <p class="text-[#00e3fd]/60 italic text-sm md:text-base" *ngIf="!profile.bio">No bio yet - A mystery across dimensions</p>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
+            <!-- Posts -->
+            <div class="bg-[#190033] border border-[#A2D45E]/30 p-3 md:p-4 rounded-lg">
+              <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#00e3fd]/70 mb-2">TRANSMISSIONS</div>
+              <div class="text-2xl md:text-3xl font-black text-[#A2D45E]">{{ posts.length }}</div>
+              <div class="mt-2 h-0.5 bg-gradient-to-r from-[#A2D45E] to-[#7faf3d] rounded-full"></div>
+            </div>
+
+            <!-- Followers -->
+            <div class="bg-[#190033] border border-[#00e3fd]/30 p-3 md:p-4 rounded-lg">
+              <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#00e3fd]/70 mb-2">FOLLOWERS</div>
+              <div class="text-2xl md:text-3xl font-black text-[#00e3fd]">{{ profile.followers || 0 }}</div>
+              <div class="mt-2 h-0.5 bg-gradient-to-r from-[#00e3fd] to-[#0099cc] rounded-full"></div>
+            </div>
+
+            <!-- Following -->
+            <div class="bg-[#190033] border border-[#ffe483]/30 p-3 md:p-4 rounded-lg">
+              <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#ffe483]/70 mb-2">FOLLOWING</div>
+              <div class="text-2xl md:text-3xl font-black text-[#ffe483]">{{ profile.following || 0 }}</div>
+              <div class="mt-2 h-0.5 bg-gradient-to-r from-[#ffe483] to-[#ffc857] rounded-full"></div>
+            </div>
+          </div>
+
+          <!-- Info Details -->
+          <div class="flex flex-wrap gap-6 text-sm">
+            <div class="flex items-center gap-2 text-[#00e3fd]">
+              <span class="material-symbols-outlined">cake</span>
+              <span *ngIf="profile.age">Age {{ profile.age }}</span>
+              <span *ngIf="!profile.age" class="text-[#00e3fd]/60">Age not specified</span>
+            </div>
+            <div class="flex items-center gap-2 text-[#00e3fd]">
+              <span class="material-symbols-outlined">alternate_email</span>
+              <span class="text-[#00e3fd]/60">{{ profile.email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts Section -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-black text-[#A2D45E] uppercase tracking-widest mb-6 flex items-center gap-3">
+          <span class="material-symbols-outlined">grid_on</span>
+          TRANSMISSIONS GRID
+        </h2>
+
+        <!-- Empty State -->
+        <div *ngIf="posts.length === 0" class="bg-[#270646] border-2 border-[#00e3fd]/20 rounded-lg p-12 text-center">
+          <span class="material-symbols-outlined text-5xl text-[#00e3fd]/40 block mb-4">sentiment_satisfied</span>
+          <p class="text-[#00e3fd]/60 text-lg">No transmissions yet</p>
+        </div>
+
+        <!-- Posts Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" *ngIf="posts.length > 0">
+          <div *ngFor="let post of posts" 
+               class="group bg-[#270646] border border-[#00e3fd]/20 hover:border-[#A2D45E]/60 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:shadow-[#A2D45E]/20 hover:scale-105"
+               (click)="viewPost(post)">
+            
+            <!-- Media Container -->
+            <div class="aspect-square relative overflow-hidden bg-[#190033]" *ngIf="post.mediaPaths?.length > 0">
+              <img *ngIf="post.mediaTypes[0]?.startsWith('image')" 
+                   [src]="environment.apiUrl + post.mediaPaths[0]"
+                   class="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+              <video *ngIf="post.mediaTypes[0]?.startsWith('video')" 
+                     [src]="environment.apiUrl + post.mediaPaths[0]"
+                     class="w-full h-full object-cover" muted preload="metadata"></video>
+              
+              <!-- Play Icon for Videos -->
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40" *ngIf="post.mediaTypes[0]?.startsWith('video')">
+                <span class="material-symbols-outlined text-5xl text-white">play_circle</span>
+              </div>
+
+              <!-- Media Count Badge -->
+              <div class="absolute top-2 right-2 bg-[#A2D45E] text-[#190033] px-2 py-1 rounded text-xs font-bold" *ngIf="post.mediaPaths.length > 1">
+                <span class="material-symbols-outlined text-sm inline mr-1">collections</span>
                 {{ post.mediaPaths.length }}
               </div>
             </div>
 
-            <div class="post-info">
-              <h3>{{ post.title || 'Untitled' }}</h3>
-              <p>
-                {{ post.content | slice : 0 : 100 }}{{ post.content.length > 100 ? '...' : '' }}
-              </p>
-              <small class="date">{{ post.createdAt | date : 'mediumDate' }}</small>
+            <!-- No Media Placeholder -->
+            <div class="aspect-square bg-gradient-to-br from-[#A2D45E]/10 to-[#00e3fd]/10 flex items-center justify-center" *ngIf="!post.mediaPaths?.length">
+              <span class="material-symbols-outlined text-4xl text-[#A2D45E]/40">article</span>
+            </div>
+
+            <!-- Post Info -->
+            <div class="p-3 bg-[#190033]">
+              <h3 class="font-bold text-[#A2D45E] text-sm truncate">{{ post.title || 'Untitled' }}</h3>
+              <p class="text-[#00e3fd]/60 text-xs line-clamp-2 mt-1">{{ post.content | slice:0:50 }}...</p>
+              <small class="text-[#ffe483]/60 block mt-2">{{ post.createdAt | date:'short' }}</small>
             </div>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
   </main>
 
-  <!-- GLOBAL REPORT PROFILE BOX -->
-  <div class="global-report-overlay" *ngIf="showReportProfileBox" (click)="showReportProfileBox = false">
-    <div class="global-report-box" (click)="$event.stopPropagation()">
-      <div class="report-header">
-        <mat-icon color="warn">warning</mat-icon>
-        <h3>Report Profile @{{ profile.username }}</h3>
+  <!-- Report Profile Modal -->
+  <div class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" *ngIf="showReportProfileBox" (click)="showReportProfileBox = false">
+    <div class="bg-[#270646] border-2 border-red-500 rounded-lg p-8 max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="material-symbols-outlined text-3xl text-red-500">warning</span>
+        <h3 class="text-2xl font-black text-red-500 uppercase">Report User</h3>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Reason</mat-label>
-        <textarea matInput rows="4" [(ngModel)]="reportProfileReason"
-          placeholder="Why are you reporting this user?"></textarea>
-      </mat-form-field>
+      <textarea [(ngModel)]="reportProfileReason" 
+                placeholder="Describe the reason for reporting..."
+                class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-4 text-white rounded-lg mb-6 resize-none h-24"></textarea>
 
-      <div class="report-actions">
-        <button mat-button (click)="showReportProfileBox = false">Cancel</button>
-        <button mat-raised-button color="warn" (click)="sendProfileReport()">
-          <mat-icon>flag</mat-icon> Report User
+      <div class="flex gap-3">
+        <button (click)="showReportProfileBox = false" class="flex-1 py-3 border border-[#00e3fd]/40 text-[#00e3fd] font-bold uppercase hover:bg-[#00e3fd]/10 transition-all rounded">
+          CANCEL
+        </button>
+        <button (click)="sendProfileReport()" class="flex-1 py-3 bg-red-600 text-white font-bold uppercase hover:bg-red-700 transition-all rounded">
+          <span class="material-symbols-outlined inline mr-2">flag</span>
+          REPORT
         </button>
       </div>
     </div>
   </div>
 
-  <!-- POST PREVIEW MODAL (READ-ONLY) -->
-  <div class="post-preview-overlay" *ngIf="selectedPost" (click)="selectedPost = null">
-    <div class="post-preview-modal" (click)="$event.stopPropagation()">
-      <button mat-icon-button class="close-preview-btn" (click)="selectedPost = null">
-        <mat-icon>close</mat-icon>
-      </button>
+  <!-- Post Preview Modal -->
+  <div class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" *ngIf="selectedPost" (click)="selectedPost = null">
+    <button (click)="selectedPost = null" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-2 rounded-full hover:shadow-lg hover:shadow-[#A2D45E]/50 z-60">
+      <span class="material-symbols-outlined">close</span>
+    </button>
 
-      <mat-card class="preview-card">
-        <mat-card-header>
-          <div mat-card-avatar class="preview-avatar"
-            [style.background-image]="'url(' + getAvatarUrl(selectedPost.author) + ')'"></div>
-          <mat-card-title>{{ selectedPost.title || 'Untitled Post' }}</mat-card-title>
-          <mat-card-subtitle>
-            {{ selectedPost.author }} • {{ selectedPost.createdAt | date : 'medium' }}
-          </mat-card-subtitle>
-        </mat-card-header>
+    <div class="bg-[#270646] border-2 border-[#A2D45E]/50 rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Post Header -->
+      <div class="p-6 border-b border-[#00e3fd]/20">
+        <h2 class="text-2xl font-black text-[#A2D45E] mb-2">{{ selectedPost.title }}</h2>
+        <p class="text-[#00e3fd]/70 text-sm">{{ selectedPost.author }} • {{ selectedPost.createdAt | date:'medium' }}</p>
+      </div>
 
-        <mat-card-content>
-          <p class="preview-content">{{ selectedPost.content }}</p>
+      <!-- Post Content -->
+      <div class="p-6">
+        <p class="text-[#f1dfff]/90 leading-relaxed mb-6">{{ selectedPost.content }}</p>
 
-          <!-- Media Grid -->
-          <!-- Media Grid – BIGGER & BETTER -->
-          <div class="media-grid" *ngIf="selectedPost.mediaPaths?.length > 0">
-            <div class="media-item" *ngFor="let path of selectedPost.mediaPaths; let i = index">
-              <!-- Image -->
-              <img *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')" [src]="environment.apiUrl + path"
-                class="preview-media" (click)="
-                  openMediaPreview(environment.apiUrl + path, selectedPost.mediaTypes[i])
-                " />
-
-              <!-- Video -->
-              <video *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')" [src]="environment.apiUrl + path"
-                class="preview-media" preload="metadata" controls muted playsinline loop></video>
+        <!-- Media Gallery -->
+        <div class="grid grid-cols-2 gap-4" *ngIf="selectedPost.mediaPaths?.length > 0">
+          <div *ngFor="let path of selectedPost.mediaPaths; let i = index" 
+               class="relative cursor-pointer group"
+               (click)="openMediaPreview(environment.apiUrl + path, selectedPost.mediaTypes[i])">
+            <img *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')" 
+                 [src]="environment.apiUrl + path"
+                 class="w-full h-48 object-cover rounded-lg group-hover:scale-105 transition-transform" />
+            <video *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')" 
+                   [src]="environment.apiUrl + path"
+                   class="w-full h-48 object-cover rounded-lg" muted preload="metadata"></video>
+            <!-- Fullscreen icon on hover -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
+              <span class="material-symbols-outlined text-3xl text-white">fullscreen</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- FULL SCREEN MEDIA PREVIEW (with click overlay fix) -->
-  <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
-    <div class="media-preview-container" (click)="$event.stopPropagation()">
-      <button mat-icon-button class="close-preview" (click)="closePreview()">
-        <mat-icon>close</mat-icon>
-      </button>
+  <!-- Full Screen Media Preview -->
+  <div class="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4" *ngIf="previewUrl" (click)="closePreview()">
+    <button (click)="closePreview()" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-3 rounded-full hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+      <span class="material-symbols-outlined">close</span>
+    </button>
 
-      <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="full-media" />
-
-      <div class="video-wrapper" *ngIf="previewType?.startsWith('video')">
-        <video [src]="previewUrl" class="full-media" controls autoplay loop muted playsinline
-          crossorigin="anonymous"></video>
-        <div class="video-click-overlay" (click)="closePreview()"></div>
-      </div>
-    </div>
+    <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="max-w-4xl max-h-screen object-contain rounded-lg" (click)="$event.stopPropagation()" />
+    <video *ngIf="previewType?.startsWith('video')" [src]="previewUrl" class="max-w-4xl max-h-screen rounded-lg" controls autoplay muted playsinline (click)="$event.stopPropagation()"></video>
   </div>
 </div>

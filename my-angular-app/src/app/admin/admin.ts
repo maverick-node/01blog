@@ -2,14 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { environment } from '../config/environment';
 
 @Component({
@@ -18,14 +11,7 @@ import { environment } from '../config/environment';
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule,
-    MatButtonModule,
     HttpClientModule,
-    MatIconModule,
-    MatTableModule,
-    MatTabsModule,
-    MatChipsModule,
-    MatTooltipModule,
   ],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
@@ -37,6 +23,9 @@ export class Admin {
   reports: any[] = [];
   reportssolved: any[] = [];
   errorMessage = '';
+  currentTab = 'profile';
+  currentSection = 'dashboard'; // Track which sidebar section is active
+  sidebarOpen = false;
 
   confirmDialog = {
     show: false,
@@ -68,6 +57,14 @@ export class Admin {
       },
       error: () => {},
     });
+  }
+
+  navigateTo(section: string) {
+    this.currentSection = section;
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
   // GETTERS
@@ -220,6 +217,7 @@ getSolvedReports() {
           const user = this.users.find((u) => u.username === username);
           if (user) user.banned = !user.banned;
           this.showNotification(user?.banned ? 'User banned' : 'User unbanned');
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification(error.error?.message || error.error?.error ||  'Action failed'),
       });
@@ -230,9 +228,8 @@ getSolvedReports() {
       .post(`${environment.apiUrl}/admin/ban-user-report/${username}`, {}, { withCredentials: true })
       .subscribe({
         next: () => {
-         
-
           this.showNotification('User banned' );
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification(error.error?.message || error.error?.error ||  'Action failed'),
       });
@@ -245,6 +242,7 @@ getSolvedReports() {
         next: () => {
           this.users = this.users.filter((u) => u.username !== username);
           this.showNotification('User deleted');
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification( error.error?.message  || error.error?.error || 'Delete failed'),
       });
@@ -287,15 +285,17 @@ getSolvedReports() {
       ? `${environment.apiUrl}/admin/reports/unhide/${postId}`
       : `${environment.apiUrl}/admin/reports/hide/${postId}`;
 
+    // Send a proper request body with reason for the action
+    const body = "Admin action";
+
     this.http
-      .post(endpoint, reports, { withCredentials: true, headers: { 'Content-Type': 'text/plain' } })
+      .post(endpoint, body, { withCredentials: true, headers: { 'Content-Type': 'text/plain' } })
       .subscribe({
         next: () => {
-
           const post = this.posts.find((p) => p.id === postId);
           if (post) post.hidden = !currentlyHidden;
           this.showNotification(currentlyHidden ? 'Post unhidden' : 'Post hidden');
-          this.loadReports();
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification(error.error?.error ||  error.error?.message || 'Failed'),
       });
@@ -308,6 +308,7 @@ getSolvedReports() {
         next: () => {
           this.posts = this.posts.filter((p) => p.id !== id);
           this.showNotification('Post deleted');
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification(error.error?.error || error.error?.message || 'Delete failed'),
       });
@@ -321,6 +322,7 @@ getSolvedReports() {
           const r = this.reports.find((x) => x.id === id);
           if (r) r.resolved = true;
           this.showNotification('Report resolved');
+          setTimeout(() => location.reload(), 500);
         },
         error: (error) => this.showNotification(error.error?.message ||error.error?.error || 'Failed'),
       });
@@ -351,11 +353,21 @@ getSolvedReports() {
     this.fullMediaUrl = null;
     this.fullMediaType = null;
   }
+  
   viewReportedPost(postId: number) {
+    this.selectedPost = this.posts.find((p) => p.id === postId);
+  }
 
-        this.selectedPost = this.posts.find((p) => p.id === postId);
-    
-}
-
+  logout() {
+    const apiLogout = `${environment.apiUrl}/logout`;
+    this.http.post(apiLogout, {}, { withCredentials: true }).subscribe(
+      () => {
+        this.router.navigate(['/login']);
+      },
+      () => {
+        this.router.navigate(['/login']);
+      }
+    );
+  }
 }
 

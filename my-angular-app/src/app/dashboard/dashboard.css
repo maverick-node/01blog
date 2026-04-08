@@ -20,7 +20,7 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--outline) transparent;
+  scrollbar-color: #A2D45E transparent;
 }
 
 *::-webkit-scrollbar {
@@ -171,15 +171,27 @@ textarea:focus {
   }
 }
 
+@keyframes animated-progress {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-progress {
+  background-size: 200% 200%;
+  animation: animated-progress 2s ease-in-out infinite;
+}
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1024px) {
-  aside {
-    width: 60px !important;
-  }
-
   main {
     margin-left: 60px !important;
-    
   }
 
   .col-span-12 {
@@ -192,31 +204,6 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
-  aside {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    max-height: 60px;
-    border-right: none;
-    border-bottom: 1px solid var(--outline-variant);
-    flex-direction: row;
-    padding: 0.5rem 1rem;
-  }
-
-  main {
-    margin-left: 0 !important;
-    margin-top: 60px;
-    padding-top: 60px !important;
-    
-  }
-
-  nav {
-    height: 60px !important;
-    flex-wrap: wrap;
-  }
-
   .col-span-12 {
     grid-column: span 12;
   }
@@ -226,11 +213,125 @@ textarea:focus {
     grid-column: span 12;
   }
 
-  .hidden.md\:flex {
-    display: none;
+  .lg\:space-y-8 > * + * {
+    margin-top: 1.5rem !important;
   }
 
-  .hidden.lg\:flex {
-    display: none;
+  .lg\:pt-6 {
+    padding-top: 1rem !important;
   }
+
+  .lg\:p-6 {
+    padding: 1rem !important;
+  }
+
+  .lg\:max-h-80 {
+    max-height: 60vh !important;
+  }
+}
+
+/* ===================== SEARCH & USERS ===================== */
+.search-input {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-color: rgba(162, 212, 94, 0.3) !important;
+  background: rgba(25, 0, 51, 0.8) !important;
+  position: relative;
+}
+
+.search-input::placeholder {
+  color: rgba(148, 163, 184, 0.6) !important;
+}
+
+.search-input:hover {
+  border-color: rgba(162, 212, 94, 0.6) !important;
+  background: rgba(25, 0, 51, 0.95) !important;
+}
+
+.search-input:focus {
+  border-color: #A2D45E !important;
+  background: rgba(25, 0, 51, 1) !important;
+  box-shadow: 0 0 20px rgba(162, 212, 94, 0.25) !important;
+  outline: none !important;
+}
+
+.search-input:focus::placeholder {
+  color: rgba(148, 163, 184, 0.4) !important;
+}
+
+/* Search icon animation */
+.search-input:focus ~ span,
+.search-input:not(:placeholder-shown) ~ span {
+  color: #A2D45E !important;
+}
+
+input:focus + span {
+  animation: pulse-glow 0.6s ease-out;
+}
+
+@keyframes pulse-glow {
+  0% {
+    text-shadow: 0 0 0 rgba(162, 212, 94, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 8px rgba(162, 212, 94, 0.2);
+  }
+}
+
+/* ===================== PROMOTIONS SECTION ===================== */
+.promotion-card {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.promotion-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(162, 212, 94, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.promotion-card:hover::before {
+  opacity: 1;
+}
+
+.promotion-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(162, 212, 94, 0.6) !important;
+  box-shadow: 0 8px 24px rgba(162, 212, 94, 0.2);
+}
+
+/* ===================== STATS BAR ===================== */
+.animated-progress {
+  background-size: 200% 200%;
+  animation: animated-progress 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .grid-cols-3 {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(162, 212, 94, 0.4);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }

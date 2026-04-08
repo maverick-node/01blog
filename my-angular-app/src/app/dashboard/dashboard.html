@@ -2,24 +2,44 @@
   <!-- Dark Overlay -->
   <div class="fixed inset-0 bg-black/75 z-0 pointer-events-none"></div>
   
-  <!-- Top Navigation -->
-  <nav class="fixed top-0 w-full z-50 border-b border-[#00e3fd]/20 bg-[#190033] backdrop-blur-2xl px-8 h-20 flex justify-between items-center">
-    <div class="flex items-center gap-8">
-      <span class="text-2xl font-black italic text-[#A2D45E] tracking-widest uppercase">MULTIVERSE_OBSERVER</span>
+  <!-- Error/Notification Toast - Bottom Right -->
+  <div class="fixed bottom-6 right-6 z-[9999]" *ngIf="errorMessage">
+    <div class="bg-gradient-to-br from-red-600/90 to-red-700/90 border-2 border-red-400/60 text-white px-6 py-4 rounded-xl shadow-2xl shadow-red-600/50 flex items-start gap-4 max-w-sm backdrop-blur-sm animate-in fade-in slide-in-from-bottom-3 duration-300">
+      <span class="material-symbols-outlined text-3xl flex-shrink-0 text-red-300 mt-0.5">error_outline</span>
+      <div class="flex-1 min-w-0">
+        <p class="font-black uppercase tracking-widest text-sm mb-1">Error Alert</p>
+        <p class="text-sm leading-relaxed break-words">{{ errorMessage }}</p>
+      </div>
+      <button (click)="errorMessage = ''" class="ml-2 text-white/70 hover:text-white transition-colors flex-shrink-0 p-1">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <div class="flex items-center gap-6">
+  </div>
+  
+  <!-- Top Navigation -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#00e3fd]/20 bg-[#190033] backdrop-blur-2xl px-4 md:px-8 h-20 flex justify-between items-center">
+    <div class="flex items-center gap-4 md:gap-8">
+      <button (click)="toggleSidebar()" class="md:hidden text-[#A2D45E] hover:text-[#00e3fd] transition-colors">
+        <span class="material-symbols-outlined text-2xl">menu</span>
+      </button>
+      <span class="text-xl md:text-2xl font-black italic text-[#A2D45E] tracking-widest uppercase">MULTIVERSE_OBSERVER</span>
+    </div>
+    <div class="flex items-center gap-4 md:gap-6">
       <button mat-icon-button (click)="toggleNotifications()" class="text-white relative">
         <span class="material-symbols-outlined">notifications</span>
         <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ unreadCount }}</span>
       </button>
-      <div (click)="viewProfile()" class="w-9 h-9 border border-[#A2D45E]/50 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#A2D45E]">
+      <div (click)="viewProfile()" class="w-8 md:w-9 h-8 md:h-9 border border-[#A2D45E]/50 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#A2D45E]">
         <img [src]="getAvatarUrl(username)" class="w-full h-full object-cover" alt="Profile"/>
       </div>
     </div>
   </nav>
 
+  <!-- Mobile Sidebar Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden" (click)="toggleSidebar()"></div>
+
   <!-- LEFT SIDEBAR -->
-  <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#00e3fd]/15 bg-[#190033] flex flex-col pt-24 z-40">
+  <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#00e3fd]/15 bg-[#190033] flex flex-col pt-24 z-40 transition-transform duration-300" [ngClass]="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
     <div class="px-6 space-y-8">
       <div class="flex items-center gap-3 pb-6 border-b border-[#563d70]">
         <div class="w-10 h-10 flex items-center justify-center text-[#A2D45E]">
@@ -32,15 +52,15 @@
       </div>
 
       <nav class="flex flex-col gap-1">
-        <a class="bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest" routerLink="/dashboard">
+        <a class="bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer" routerLink="/dashboard" (click)="sidebarOpen = false">
           <span class="material-symbols-outlined">dashboard</span>
           DASHBOARD
         </a>
-        <a class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5" (click)="viewProfile()">
+        <a class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5 cursor-pointer" (click)="viewProfile(); sidebarOpen = false">
           <span class="material-symbols-outlined">person</span>
           PROFILE
         </a>
-        <a *ngIf="userRole === 'admin'" class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5" (click)="goToAdminPanel()">
+        <a *ngIf="userRole === 'admin'" class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5 cursor-pointer" (click)="goToAdminPanel(); sidebarOpen = false">
           <span class="material-symbols-outlined">admin_panel_settings</span>
           ADMIN PANEL
         </a>
@@ -61,26 +81,26 @@
   </aside>
 
   <!-- MAIN CONTENT -->
-  <main class="ml-64 pt-24 px-8 pb-12 relative z-10">
-    <div class="grid grid-cols-12 gap-8">
+  <main class="ml-0 md:ml-64 pt-20 md:pt-24 px-4 md:px-8 pb-12 relative z-10">
+    <div class="grid grid-cols-12 gap-4 md:gap-8">
       
       <!-- Feed -->
-      <div class="col-span-12 lg:col-span-8 space-y-8">
-        <h1 class="text-5xl font-black tracking-tighter text-[#A2D45E]">INTERDIMENSIONAL THOUGHTS</h1>
+      <div class="col-span-12 lg:col-span-8 space-y-6 md:space-y-8">
+        <h1 class="text-3xl md:text-5xl font-black tracking-tighter text-[#A2D45E]">INTERDIMENSIONAL THOUGHTS</h1>
 
         <!-- Create Post -->
-        <div class="bg-[#270646] p-6">
-          <div class="flex gap-4">
-            <div (click)="viewProfile()" class="w-12 h-12 border-2 border-[#00e3fd]/50 overflow-hidden cursor-pointer">
+        <div class="bg-[#270646] p-4 md:p-6">
+          <div class="flex gap-3 md:gap-4">
+            <div (click)="viewProfile()" class="w-10 md:w-12 h-10 md:h-12 border-2 border-[#00e3fd]/50 overflow-hidden cursor-pointer rounded">
               <img [src]="getAvatarUrl(username)" class="w-full h-full object-cover"/>
             </div>
-            <div class="flex-1 space-y-4">
-              <input type="text" [(ngModel)]="newPost.title" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-4 text-white placeholder:text-slate-500" placeholder="TRANSMISSION TITLE..."/>
-              <textarea [(ngModel)]="newPost.content" rows="4" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-4 text-white placeholder:text-slate-500" placeholder="WHAT'S SQUANCHING TODAY?"></textarea>
+            <div class="flex-1 space-y-3 md:space-y-4 w-full">
+              <input type="text" [(ngModel)]="newPost.title" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 md:p-4 text-white placeholder:text-slate-500 text-sm md:text-base rounded" placeholder="TRANSMISSION TITLE..."/>
+              <textarea [(ngModel)]="newPost.content" rows="3" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 md:p-4 text-white placeholder:text-slate-500 text-sm md:text-base rounded" placeholder="WHAT'S SQUANCHING TODAY?"></textarea>
 
-              <div class="flex items-center gap-4">
-                <button (click)="fileInput.click()" class=" text-[#00e3fd] px-5 py-2 hover:bg-[#00e3fd]/10 flex items-center gap-2">
-                  <span class="material-symbols-outlined">image</span>
+              <div class="flex items-center gap-3 md:gap-4 flex-wrap">
+                <button (click)="fileInput.click()" class=" text-[#00e3fd] px-4 md:px-5 py-2 hover:bg-[#00e3fd]/10 flex items-center gap-2 text-sm md:text-base">
+                  <span class="material-symbols-outlined text-sm md:text-base">image</span>
                   Add Media
                 </button>
                 <input #fileInput type="file" multiple (change)="onFilesSelected($event)" accept="image/*,video/*" style="display:none"/>
@@ -116,11 +136,17 @@
               </div>
             </div>
 
-            <div *ngIf="username?.trim() === post.author?.trim()" class="flex gap-1">
-              <button (click)="startEditPost(post)" class="text-[#A2D45E] hover:text-white flex items-center">
+            <div class="flex gap-2 items-center">
+              <!-- Report Icon (only for non-authors) -->
+              <button *ngIf="username?.trim() !== post.author?.trim()" (click)="reportPost(post)" title="Report this post" class="text-[#ffe483] hover:text-orange-500 flex items-center transition-colors">
+                <span class="material-symbols-outlined">flag</span>
+              </button>
+              
+              <!-- Edit/Delete (only for author) -->
+              <button *ngIf="username?.trim() === post.author?.trim()" (click)="startEditPost(post)" class="text-[#A2D45E] hover:text-white flex items-center">
                 <span class="material-symbols-outlined">edit</span>
               </button>
-              <button (click)="openDeleteConfirm(post.id)" class="text-red-400 hover:text-red-500 flex items-center">
+              <button *ngIf="username?.trim() === post.author?.trim()" (click)="openDeleteConfirm(post.id)" class="text-red-400 hover:text-red-500 flex items-center">
                 <span class="material-symbols-outlined">delete</span>
               </button>
             </div>
@@ -129,13 +155,29 @@
           <h4 class="mt-4 text-xl font-bold">{{ post.title }}</h4>
           <p class="mt-3 text-[#f1dfff]/90 leading-relaxed">{{ post.content }}</p>
 
-          <!-- Media -->
-          <div class="grid grid-cols-2 gap-3 mt-6" *ngIf="post.mediaPaths?.length > 0">
-            <div *ngFor="let path of post.mediaPaths; let i = index" 
-                 class="aspect-video overflow-hidden  cursor-pointer relative group"
-                 (click)="openMediaPreview(environment.apiUrl + path, post.mediaTypes[i])">
-              <img *ngIf="post.mediaTypes[i]?.startsWith('image')" [src]="environment.apiUrl + path" class="w-full h-full object-cover hover:scale-105 transition-transform">
-              <video *ngIf="post.mediaTypes[i]?.startsWith('video')" [src]="environment.apiUrl + path" class="w-full h-full object-cover" muted></video>
+          <!-- Media Grid with Blur on Extra Images -->
+          <div class="grid gap-3 mt-6" *ngIf="post.mediaPaths?.length > 0" [ngClass]="post.mediaPaths.length === 1 ? 'grid-cols-1' : 'grid-cols-2'">
+            <!-- First Image/Video -->
+            <div class="aspect-video overflow-hidden cursor-pointer relative group rounded-lg"
+                 (click)="openPostWithMedia(post)">
+              <img *ngIf="post.mediaTypes[0]?.startsWith('image')" [src]="environment.apiUrl + post.mediaPaths[0]" class="w-full h-full object-cover hover:scale-105 transition-transform">
+              <video *ngIf="post.mediaTypes[0]?.startsWith('video')" [src]="environment.apiUrl + post.mediaPaths[0]" class="w-full h-full object-cover" muted></video>
+              <!-- Hover overlay for first image -->
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                <span class="material-symbols-outlined text-3xl text-white">expand</span>
+              </div>
+            </div>
+
+            <!-- Second Image/Video or Blur Overlay if more than 2 -->
+            <div *ngIf="post.mediaPaths.length > 1" class="aspect-video overflow-hidden cursor-pointer relative group rounded-lg"
+                 (click)="openPostWithMedia(post)">
+              <img *ngIf="post.mediaTypes[1]?.startsWith('image')" [src]="environment.apiUrl + post.mediaPaths[1]" class="w-full h-full object-cover hover:scale-105 transition-transform">
+              <video *ngIf="post.mediaTypes[1]?.startsWith('video')" [src]="environment.apiUrl + post.mediaPaths[1]" class="w-full h-full object-cover" muted></video>
+              
+              <!-- Blur Overlay if more than 2 items -->
+              <div *ngIf="post.mediaPaths.length > 2" class="absolute inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-black/50 transition-colors">
+                <span class="text-3xl font-black text-white">+{{ post.mediaPaths.length - 2 }}</span>
+              </div>
             </div>
           </div>
 
@@ -192,17 +234,110 @@
         </div>
       </div>
 
-      <!-- Right Sidebar - All Users -->
-      <aside class="col-span-12 lg:col-span-4 space-y-6">
-        <h2 class="uppercase text-xs tracking-[2px] text-[#00e3fd]/70 mb-4">ALL USERS IN C-137 NETWORK</h2>
-        <div *ngFor="let user of allusernames" class="bg-[#270646] p-4 flex items-center gap-4 hover:bg-[#2e0b50] transition-colors">
-          <div (click)="goToUser(user)" class="w-11 h-11 overflow-hidden border border-[#A2D45E]/40 cursor-pointer">
-            <img [src]="getAvatarUrl(user)" class="w-full h-full object-cover"/>
+      <!-- Right Sidebar - All Users & Promotions -->
+      <aside class="col-span-12 lg:col-span-4 space-y-4 md:space-y-6 lg:space-y-8">
+        
+        <!-- Users Section -->
+        <div class="p-3 md:p-4 lg:p-6">
+          <h2 class="uppercase text-[10px] md:text-xs tracking-[1.5px] md:tracking-[2px] text-[#00e3fd]/70 mb-3 md:mb-4">SEARCH & FIND USERS</h2>
+          
+          <!-- Search Input - Modern -->
+          <div class="mb-3 md:mb-4 relative group">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#A2D45E] pointer-events-none text-lg md:text-xl">search</span>
+            <input 
+              [(ngModel)]="searchUsers" 
+              type="text" 
+              placeholder="Search users..." 
+              class="search-input w-full bg-[#190033]/80 backdrop-blur-sm border-2 border-[#A2D45E]/30 focus:border-[#A2D45E] pl-10 md:pl-11 pr-3 md:pr-4 py-2 md:py-3 text-white placeholder:text-slate-400 text-xs md:text-sm rounded-lg transition-all duration-300 focus:shadow-[0_0_20px_rgba(162,212,94,0.3)]"
+            />
           </div>
-          <div class="flex-1">
-            <p (click)="goToUser(user)" class="font-medium cursor-pointer hover:text-[#A2D45E]">{{ user }}</p>
+
+          <!-- Users List - Scrollable -->
+          <div class="max-h-48 md:max-h-64 lg:max-h-80 overflow-y-auto space-y-1.5 md:space-y-2 mb-4 md:mb-6">
+            <div *ngIf="filteredUsers.length === 0" class="text-center py-6 md:py-8 text-[#00e3fd]/60">
+              <p class="text-xs md:text-sm">No users found</p>
+            </div>
+            <div *ngFor="let user of filteredUsers" class="bg-[#190033] p-2 md:p-3 flex items-center gap-3 md:gap-4 hover:bg-[#2e0b50] transition-colors cursor-pointer rounded-lg">
+              <div (click)="goToUser(user)" class="w-10 md:w-11 h-10 md:h-11 overflow-hidden border border-[#A2D45E]/40 rounded flex-shrink-0">
+                <img [src]="getAvatarUrl(user)" class="w-full h-full object-cover"/>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p (click)="goToUser(user)" class="font-medium cursor-pointer hover:text-[#A2D45E] text-xs md:text-sm truncate">{{ user }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Statistics Bar - At Bottom -->
+          <div class="space-y-2 border-t border-[#00e3fd]/20 pt-3 md:pt-4">
+            <!-- Users Stat -->
+            <div class="bg-[#270646]/50 p-2 md:p-3 rounded-lg border border-[#00e3fd]/20 hover:border-[#A2D45E]/40 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[8px] md:text-[10px] uppercase tracking-widest text-[#00e3fd]/70">C-137 CITIZENS</span>
+                <span class="material-symbols-outlined text-xs md:text-sm text-[#A2D45E]">people</span>
+              </div>
+              <div class="text-base md:text-lg font-black text-[#A2D45E]">{{ blogStats.usersCount }}</div>
+              <div class="mt-1.5 h-0.5 bg-[#190033] rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#A2D45E] to-[#7faf3d] animated-progress" [style.width]="'100%'"></div>
+              </div>
+            </div>
+
+            <!-- Posts Stat -->
+            <div class="bg-[#270646]/50 p-2 md:p-3 rounded-lg border border-[#00e3fd]/20 hover:border-[#A2D45E]/40 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[8px] md:text-[10px] uppercase tracking-widest text-[#00e3fd]/70">BURP-TRANSMISSIONS</span>
+                <span class="material-symbols-outlined text-xs md:text-sm text-[#00e3fd]">feed</span>
+              </div>
+              <div class="text-base md:text-lg font-black text-[#00e3fd]">{{ blogStats.postsCount }}</div>
+              <div class="mt-1.5 h-0.5 bg-[#190033] rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#00e3fd] to-[#0099cc] animated-progress" [style.width]="'100%'"></div>
+              </div>
+            </div>
+
+            <!-- Comments Stat -->
+            <div class="bg-[#270646]/50 p-2 md:p-3 rounded-lg border border-[#00e3fd]/20 hover:border-[#A2D45E]/40 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[8px] md:text-[10px] uppercase tracking-widest text-[#00e3fd]/70">SQUANCH FACTOR</span>
+                <span class="material-symbols-outlined text-xs md:text-sm text-[#ffe483]">chat</span>
+              </div>
+              <div class="text-base md:text-lg font-black text-[#ffe483]">{{ (comments | keyvalue)?.length || 0 }}</div>
+              <div class="mt-1.5 h-0.5 bg-[#190033] rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#ffe483] to-[#ffc857] animated-progress" [style.width]="'100%'"></div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Promotions Section -->
+        <div class="p-3 md:p-4 lg:p-6">
+          <h3 class="uppercase text-[10px] md:text-xs tracking-[1.5px] md:tracking-[2px] text-[#A2D45E] mb-3 md:mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-xs md:text-sm">shopping_bag</span>
+            SPONSORED_VIBES
+          </h3>
+          
+          <div class="space-y-2 md:space-y-3 lg:space-y-4">
+            <div *ngFor="let promo of promotions" class="promotion-card bg-gradient-to-br p-3 md:p-4 border border-[#00e3fd]/20 hover:border-[#A2D45E]/40 hover:shadow-lg hover:shadow-[#A2D45E]/20 transition-all cursor-pointer group" [ngClass]="promo.color">
+              
+              <!-- Badge -->
+              <div class="flex items-start justify-between mb-2 md:mb-3">
+                <span class="text-[8px] md:text-[10px] font-black tracking-widest text-[#A2D45E] uppercase">{{ promo.badge }}</span>
+                <span class="material-symbols-outlined text-xs md:text-sm text-[#A2D45E]">trending_up</span>
+              </div>
+
+              <!-- Title & Subtitle -->
+              <h4 class="text-sm md:text-lg font-black text-white mb-1 group-hover:text-[#A2D45E] transition-colors">{{ promo.title }}</h4>
+              <p class="text-[10px] md:text-[11px] text-[#00e3fd]/70 tracking-widest mb-2 md:mb-3">{{ promo.subtitle }}</p>
+
+              <!-- Description -->
+              <p class="text-[11px] md:text-xs text-[#f1dfff]/80 mb-3 md:mb-4 leading-relaxed">{{ promo.description }}</p>
+
+              <!-- CTA Button -->
+              <button class="w-full border border-[#A2D45E]/60 text-[#A2D45E] py-2 md:py-2.5 text-[10px] md:text-xs font-bold tracking-widest uppercase hover:bg-[#A2D45E]/10 transition-colors">
+                LEARN MORE
+              </button>
+            </div>
+          </div>
+        </div>
+
       </aside>
     </div>
   </main>
@@ -319,6 +454,129 @@
     
     <div *ngIf="notifications.length === 0" class="p-6 text-center text-[#00e3fd]/60">
       <p>No notifications yet</p>
+    </div>
+  </div>
+
+  <!-- POST WITH ALL MEDIA MODAL -->
+  <div *ngIf="selectedPostForModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4" (click)="closePostModal()">
+    <div class="bg-[#270646] border-2 border-[#00e3fd] rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Close Button -->
+      <button (click)="closePostModal()" class="absolute top-4 right-4 text-[#00e3fd] hover:text-[#A2D45E] z-10">
+        <span class="material-symbols-outlined text-3xl">close</span>
+      </button>
+
+      <!-- Post Header -->
+      <div class="p-6 border-b border-[#00e3fd]/20">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 border border-[#A2D45E]/40 overflow-hidden rounded-lg">
+            <img [src]="getAvatarUrl(selectedPostForModal.author)" class="w-full h-full object-cover"/>
+          </div>
+          <div>
+            <h3 class="font-bold text-[#A2D45E]">{{ selectedPostForModal.author }}</h3>
+            <p class="text-xs text-[#00e3fd]/70">{{ selectedPostForModal.createdAt | date:'mediumDate' }}</p>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold text-[#A2D45E] mb-3">{{ selectedPostForModal.title }}</h2>
+        <p class="text-[#f1dfff]/90 leading-relaxed">{{ selectedPostForModal.content }}</p>
+      </div>
+
+      <!-- All Media Gallery -->
+      <div *ngIf="selectedPostForModal.mediaPaths?.length > 0" class="p-6">
+        <p class="text-xs uppercase tracking-widest text-[#00e3fd]/70 mb-4">All Media ({{ selectedPostForModal.mediaPaths.length }})</p>
+        <div class="grid gap-4" [ngClass]="selectedPostForModal.mediaPaths.length === 1 ? 'grid-cols-1' : selectedPostForModal.mediaPaths.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'">
+          <div *ngFor="let path of selectedPostForModal.mediaPaths; let i = index" 
+               class="aspect-square md:aspect-video overflow-hidden rounded-lg border border-[#00e3fd]/30 hover:border-[#A2D45E] transition-all cursor-pointer group"
+               (click)="openMediaPreview(path, selectedPostForModal.mediaTypes[i])">
+            <img *ngIf="selectedPostForModal.mediaTypes[i]?.startsWith('image')" [src]="environment.apiUrl + path" class="w-full h-full object-cover hover:scale-105 transition-transform"/>
+            <video *ngIf="selectedPostForModal.mediaTypes[i]?.startsWith('video')" [src]="environment.apiUrl + path" class="w-full h-full object-cover" muted preload="metadata"></video>
+            <!-- Fullscreen icon on hover -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+              <span class="material-symbols-outlined text-3xl text-white">fullscreen</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Screen Media Preview Modal -->
+  <div class="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4" *ngIf="previewUrl" (click)="closePreview()">
+    <button (click)="closePreview()" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-3 rounded-full hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+      <span class="material-symbols-outlined text-2xl">close</span>
+    </button>
+
+    <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="max-w-4xl max-h-screen object-contain rounded-lg" (click)="$event.stopPropagation()" />
+    <video *ngIf="previewType?.startsWith('video')" [src]="previewUrl" class="max-w-4xl max-h-screen rounded-lg" controls autoplay muted playsinline (click)="$event.stopPropagation()"></video>
+  </div>
+
+  <!-- Report Post Modal -->
+  <div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4" *ngIf="reportingPost" (click)="closeReportModal()">
+    <div class="bg-[#270646] border-2 border-red-500/50 rounded-lg max-w-md w-full" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-red-600/20 to-red-500/10 p-6 border-b border-red-500/30 flex items-center gap-3">
+        <span class="material-symbols-outlined text-3xl text-red-500">flag</span>
+        <div>
+          <h3 class="text-2xl font-black text-red-500 uppercase">REPORT POST</h3>
+          <p class="text-xs text-red-400/70 tracking-widest">Help keep the community safe</p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6 space-y-4">
+        <!-- Post Info -->
+        <div class="bg-[#190033] border border-[#00e3fd]/20 rounded-lg p-4">
+          <p class="text-xs uppercase tracking-widest text-[#00e3fd]/70 mb-2">Post Author</p>
+          <p class="text-[#A2D45E] font-bold">{{ reportingPost.author }}</p>
+          <p class="text-[#f1dfff]/70 text-sm mt-2 line-clamp-2">{{ reportingPost.title }}</p>
+        </div>
+
+        <!-- Reason Textarea -->
+        <div>
+          <label class="text-xs uppercase tracking-widest text-[#00e3fd]/70 block mb-2">
+            Reason for Report <span class="text-red-500">*</span>
+          </label>
+          <textarea 
+            [(ngModel)]="reportReason"
+            placeholder="Describe why you're reporting this post (minimum 10 characters)..."
+            class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-red-500 focus:ring-1 focus:ring-red-500/30 p-3 text-white placeholder:text-slate-500 text-sm rounded-lg resize-none"
+            rows="4"
+            [disabled]="isSubmittingReport"></textarea>
+          <p class="text-xs text-[#00e3fd]/60 mt-1">{{ reportReason.length }}/500 characters</p>
+        </div>
+
+        <!-- Status Message -->
+        <div *ngIf="reportMessage" class="p-3 rounded-lg text-sm font-semibold" 
+             [ngClass]="{
+               'bg-green-600/20 border border-green-500/50 text-green-300': reportMessageType === 'success',
+               'bg-red-600/20 border border-red-500/50 text-red-300': reportMessageType === 'error'
+             }">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">
+              {{ reportMessageType === 'success' ? 'check_circle' : 'error' }}
+            </span>
+            {{ reportMessage }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bg-[#190033]/50 border-t border-[#00e3fd]/10 p-4 flex gap-3">
+        <button 
+          (click)="closeReportModal()"
+          [disabled]="isSubmittingReport"
+          class="flex-1 py-3 border border-[#00e3fd]/40 text-[#00e3fd] font-bold uppercase tracking-widest hover:bg-[#00e3fd]/10 transition-all rounded disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined inline mr-2 text-base">close</span>
+          CANCEL
+        </button>
+        <button 
+          (click)="submitReport()"
+          [disabled]="isSubmittingReport || !reportReason.trim()"
+          class="flex-1 py-3 bg-gradient-to-br from-red-600 to-red-700 text-white font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-red-600/50 hover:from-red-500 hover:to-red-600 transition-all rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined inline text-base" *ngIf="!isSubmittingReport">flag</span>
+          <span class="material-symbols-outlined inline text-base animate-spin" *ngIf="isSubmittingReport">progress_activity</span>
+          {{ isSubmittingReport ? 'SUBMITTING...' : 'REPORT POST' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

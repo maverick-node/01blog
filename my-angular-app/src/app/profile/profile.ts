@@ -1,20 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { ProfileService } from '../services/profile.service';
 import { environment } from '../config/environment';
-
-// Material
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-profile',
@@ -22,22 +12,14 @@ import { MatDividerModule } from '@angular/material/divider';
   imports: [
     CommonModule,
     FormsModule,
-
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatDividerModule,
-
-
+    RouterModule,
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
+  private readonly TOTAL_CHARACTERS = 826;
+
   /* =========================
      STATE
   ========================= */
@@ -63,6 +45,12 @@ export class Profile implements OnInit {
   previewUrl: string | null = null;
   previewType: string | null = null;
 
+  unreadCount = 0;
+  sidebarOpen = false;
+  showNotificationPopup = false;
+  notifications: any[] = [];
+  selectedPost: any = null;
+
   constructor(private profileService: ProfileService, private router: Router) {}
 
   /* =========================
@@ -70,7 +58,7 @@ export class Profile implements OnInit {
   ========================= */
   ngOnInit() {
     this.checkAuthAndLoadProfile();
-
+this.loadNotifications()
   }
 
   /* =========================
@@ -98,7 +86,7 @@ export class Profile implements OnInit {
     this.userProfile.email = response.mail || 'user@example.com';
     this.userProfile.age = response.age || null;
     this.userProfile.bio = response.bio || 'No bio available';
-    this.userProfile.userRole = response.role;
+    this.userProfile.userRole = response.role.toLowerCase();
 
     this.loading = false;
     this.loadUserPosts();
@@ -130,8 +118,18 @@ export class Profile implements OnInit {
     this.editProfile = {};
   }
 
-  getAvatarUrl(seed: string): string {
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  getAvatarUrl(userIdentifier: string): string {
+    let index;
+
+    // Hash string to number using character codes
+    let hash = 0;
+    for (let i = 0; i < userIdentifier.length; i++) {
+      hash = (hash + userIdentifier.charCodeAt(i)) % this.TOTAL_CHARACTERS;
+    }
+    index = hash + 1; // API IDs start at 1
+
+    // Return deterministic Rick and Morty character avatar
+    return `https://rickandmortyapi.com/api/character/avatar/${index}.jpeg`;
   }
 
   /* =========================
@@ -208,14 +206,75 @@ export class Profile implements OnInit {
     this.errorMessage = message;
     setTimeout(() => (this.errorMessage = ''), 5000);
   }
-  openMediaPreview(path: string, type: string) {
-    this.previewUrl = environment.apiUrl + path;
+
+  toggleNotifications() {
+    this.showNotificationPopup = !this.showNotificationPopup;
+    if (this.showNotificationPopup) {
+      this.loadNotifications();
+    }
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  getNotificationIcon(message: string): string {
+    const msg = message.toLowerCase();
+    if (msg.includes('follow') || msg.includes('followed')) {
+      return 'person_add';
+    } else if (msg.includes('comment') || msg.includes('commented')) {
+      return 'forum';
+    } else if (msg.includes('post') || msg.includes('posted')) {
+      return 'article';
+    } else if (msg.includes('like') || msg.includes('liked')) {
+      return 'favorite';
+    }
+    return 'mail';
+  }
+
+  loadNotifications() {
+    const api = `${environment.apiUrl}/notifications/get`;
+    this.profileService.getNotifications().subscribe(
+      (response: any) => {
+        this.notifications = response.sort(
+          (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        this.unreadCount = this.notifications.filter((n) => !n.read).length;
+      },
+      (error: any) => {
+        this.showNotification(error.error?.message || 'Error loading notifications');
+      }
+    );
+  }
+
+  markRead(id: number) {
+    this.profileService.markNotificationRead(id).subscribe({
+      next: (res) => {
+        const notif = this.notifications.find((n) => n.id === id);
+        if (notif) {
+          notif.read = !notif.read;
+        }
+        this.unreadCount = this.notifications.filter((n) => !n.read).length;
+      },
+      error: (err: any) => this.showNotification(err.error?.message || err.error?.error || 'Failed to mark notification as read'),
+    });
+  }
+  openMediaPreview(url: string, type: string) {
+    this.previewUrl = url;
     this.previewType = type;
   }
 
   closePreview() {
     this.previewUrl = null;
     this.previewType = null;
+  }
+
+  viewPost(post: any) {
+    this.selectedPost = post;
+  }
+
+  closePostModal() {
+    this.selectedPost = null;
   }
   startEditPost(post: any) {
     this.editingPostId = post.id;

@@ -1,15 +1,245 @@
-<div class="not-found-container">
-  <div class="not-found-content">
-    <h1 class="error-code">404</h1>
-    <h2>Page Not Found</h2>
-    <p>The page you're looking for doesn't exist or has been moved.</p>
-    
-    <div class="actions">
-      <button mat-raised-button color="primary" routerLink="/dashboard">
-        <mat-icon>home</mat-icon>
-        Go to Dashboard
-      </button>
-     
-    </div>
-  </div>
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>C-137_OS | 404_DIMENSION_NOT_FOUND</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#635200",
+                    "on-error": "#450900",
+                    "tertiary-container": "#fdd400",
+                    "surface-container-highest": "#36105b",
+                    "surface-container-high": "#2e0b50",
+                    "inverse-surface": "#fff7ff",
+                    "surface-tint": "#c4f97d",
+                    "on-tertiary-fixed": "#433700",
+                    "surface": "#190033",
+                    "primary-fixed-dim": "#b7ea71",
+                    "error-container": "#b92902",
+                    "on-primary-fixed-variant": "#436a00",
+                    "background": "#190033",
+                    "outline": "#856aa1",
+                    "surface-container-lowest": "#000000",
+                    "secondary-dim": "#00d4ec",
+                    "tertiary-dim": "#edc600",
+                    "on-background": "#f1dfff",
+                    "on-secondary-container": "#e8fbff",
+                    "on-secondary": "#004d57",
+                    "outline-variant": "#563d70",
+                    "primary-fixed": "#c4f97d",
+                    "on-surface-variant": "#bd9fda",
+                    "primary-container": "#7faf3d",
+                    "tertiary-fixed": "#fdd400",
+                    "secondary-fixed": "#26e6ff",
+                    "error-dim": "#d53d18",
+                    "tertiary-fixed-dim": "#edc600",
+                    "inverse-primary": "#436a00",
+                    "on-tertiary-container": "#594a00",
+                    "on-surface": "#f1dfff",
+                    "error": "#ff7351",
+                    "on-secondary-fixed": "#003a42",
+                    "primary": "#c4f97d",
+                    "on-error-container": "#ffd2c8",
+                    "surface-container-low": "#1f023c",
+                    "surface-dim": "#190033",
+                    "on-primary": "#3b5f00",
+                    "inverse-on-surface": "#644a7f",
+                    "on-primary-container": "#162700",
+                    "tertiary": "#ffe483",
+                    "secondary-fixed-dim": "#00d7f0",
+                    "secondary-container": "#006875",
+                    "secondary": "#00e3fd",
+                    "primary-dim": "#b7ea71",
+                    "on-secondary-fixed-variant": "#005964",
+                    "on-primary-fixed": "#2e4b00",
+                    "on-tertiary-fixed-variant": "#645300",
+                    "surface-bright": "#3e1566",
+                    "surface-variant": "#36105b",
+                    "surface-container": "#270646"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": [
+                            "Space Grotesk"
+                    ],
+                    "body": [
+                            "Manrope"
+                    ],
+                    "label": [
+                            "Space Grotesk"
+                    ]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hazard-bg {
+            background: repeating-linear-gradient(
+                45deg,
+                #ffe483,
+                #ffe483 10px,
+                #190033 10px,
+                #190033 20px
+            );
+        }
+        .glitch-text {
+            text-shadow: 2px 0 #00e3fd, -2px 0 #ff7351;
+        }
+        .grid-pattern {
+            background-image: radial-gradient(circle, #c4f97d 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+        }
+        @keyframes portal-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-portal-spin {
+            animation: portal-spin 20s linear infinite;
+        }
+        .vignette {
+            box-shadow: inset 0 0 100px rgba(25, 0, 51, 1);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary min-h-screen overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-8 py-4 sticky top-0 z-50 backdrop-blur-xl bg-black border-b border-primary/10 font-['Space_Grotesk'] tracking-tight">
+<div class="text-2xl font-black text-[#c4f97d] tracking-tighter uppercase">C-137_OS</div>
+<nav class="hidden md:flex items-center space-x-8">
+</nav>
+<div class="flex items-center space-x-6">
+
+<div class="w-10 h-10 rounded-full border-2 border-[#c4f97d] p-0.5">
+<img alt="Rick Sanchez Avatar" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApEAChDDt8kkuz8eJZ10Tr6vVZmiI2uwlp6DB_y2Q4alpsQQOrSgEcDE2kE_xLPO35-EzCTRlNMnWMhGEWKAcVeeINcKUIkwPU_eJPfEJ6tEsmCu5PSISnrVdkYgH3N8r3DJFDTQ-N7fLTK_mre-25KfC_C_2jeKnkfVl46j-iJNut1Y99xn9OzqSt5wOz6v2ofF34PXmNqUb-hTZ7B2zFo2zRE4h3NZDYvDFKrMckhiJUKTsU7rFHh9X_-YWMi_3LbfJ8mhwYSc0"/>
 </div>
+</div>
+</header>
+<main class="relative pt-8 pb-32 px-6 flex flex-col items-center justify-center min-h-[calc(100vh-140px)]">
+<!-- Background elements -->
+<div class="absolute inset-0 grid-pattern pointer-events-none"></div>
+<!-- Cinematic Background Portal -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none  z-0">
+<div class="absolute inset-0">
+<img alt="4K Background" class="w-full h-full object-cover blur-md rotate-180" src="/5k.jpg"/>
+</div>
+</div>
+<div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+<!-- Left Side: Typography Content -->
+<div class="lg:col-span-5 space-y-8 order-2 lg:order-1">
+<div class="inline-flex items-center space-x-4 bg-surface-container-high px-4 py-2 border-l-4 border-secondary shadow-[0_0_15px_rgba(0,227,253,0.1)]">
+<span class="material-symbols-outlined text-white animate-pulse text-sm">warning</span>
+<span class="font-mono text-xs text-white tracking-[0.2em] uppercase">Status: 404_DIMENSION_MISSING</span>
+</div>
+<div class="relative">
+<h1 class="font-headline font-black text-9xl md:text-[10rem] lg:text-[12rem] leading-none tracking-tighter text-on-surface glitch-text">
+                    404
+                </h1>
+<div class="absolute -top-4 -right-4 md:right-12 hazard-bg w-24 h-6 rotate-12 flex items-center justify-center">
+<span class="text-[10px] font-mono font-black text-surface px-2">CRITICAL_ERR</span>
+</div>
+</div>
+<div class="space-y-6 max-w-lg">
+<p class="font-headline text-3xl md:text-4xl text-primary font-bold leading-tight">
+                    Way to go, Morty! You crashed the website! This dimension doesn't even exist!
+                </p>
+<p class="text-white text-lg leading-relaxed font-mono">
+<span class="text-secondary font-bold text-white-600">&gt;</span> Reality check failed. Dimension C-137 data stream interrupted. The server is currently being digested by a Kronenberg organism or Rick is avoiding his debts again.
+                </p>
+</div>
+<div class="pt-8 flex flex-wrap gap-4">
+<a href="/dashboard" class="group relative px-8 py-5 bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline font-black text-lg tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(196,249,125,0.4)] inline-block">
+                    RETURN TO REALITY
+                    <div class="absolute inset-0 border-2 border-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</a>
+
+</div>
+</div>
+<!-- Right Side: Cinematic Panicked Portal View -->
+<div class="lg:col-span-7 relative order-1 lg:order-2 flex justify-center items-center py-8">
+<!-- High-Tech Monitor Frame -->
+<div class="relative w-full max-w-[650px] p-1 bg-gradient-to-br from-secondary/50 via-outline/20 to-primary/50 shadow-[0_0_50px_rgba(0,227,253,0.15)] rounded-sm">
+<div class="bg-surface p-2 lg:p-4 rounded-sm relative overflow-hidden">
+<!-- Scanner Lines Overlay -->
+<div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,118,0.06))] bg-[length:100%_4px,3px_100%] z-20 pointer-events-none"></div>
+<div class="relative aspect-video overflow-hidden group">
+<!-- THE IMAGE: Panicked Rick and Morty in Green Vortex -->
+<img alt="Rick and Morty Panicked in Vortex" class="w-full h-full object-cover scale-110 group-hover:scale-125 transition-transform duration-[10s] ease-linear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbQuUASDCg1eE27cRd0NPuCA79YnohZ6INmV06WxOjkN2K6FdBM9SDctVWZF-AbLbImEH95i0zuSaxCI_2X4e-I6oY9K41Fp5KIgf2AWWpJ1yct0MM53gZI8gOdwesMs9U52_FzK1KJ-QcnFofyLPTw1rroIX3RGvABpYo4JmdwxeXr8rt2zy-3tJBfYaawR301Nc4CXcv_96Ja729zw_Zkb2bowJAdvoECc9F6ghKM-LwEqGptaeSH41642GhH_Ln8P-I7xhMnl8"/>
+<!-- HUD Overlays -->
+<div class="absolute inset-0 border-[20px] border-transparent border-t-primary/10 border-b-secondary/10 pointer-events-none z-10"></div>
+<div class="absolute top-4 left-4 z-30 flex items-center space-x-2">
+<div class="w-3 h-3 rounded-full bg-error animate-ping"></div>
+<span class="font-mono text-[10px] text-error font-bold uppercase tracking-widest bg-error/10 px-2 py-1">Target_Lost_In_Void</span>
+</div>
+<div class="absolute bottom-4 right-4 z-30 text-right">
+<div class="font-mono text-[8px] text-white/80 mb-1">COORDINATES: NaN_NaN_NaN</div>
+<div class="flex items-center justify-end space-x-2">
+<div class="w-12 h-1 bg-outline-variant/30 rounded-full overflow-hidden">
+<div class="w-1/3 h-full bg-primary animate-pulse"></div>
+</div>
+<span class="font-mono text-[10px] text-primary">SCANNING...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Terminal Component -->
+<div class="absolute -bottom-10 -left-6 lg:-left-12 bg-surface-container-highest/95 backdrop-blur-2xl p-6 border border-primary/30 shadow-2xl z-40 max-w-[280px]">
+<div class="flex justify-between items-center mb-4">
+<div class="flex space-x-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-error/80"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary/80"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary/80"></div>
+</div>
+<span class="text-[8px] font-mono text-white/50">CONSOLE_V4.2</span>
+</div>
+<div class="space-y-1">
+<p class="font-mono text-[10px] text-primary leading-tight flex items-start">
+<span class="mr-2 text-secondary opacity-70">&gt;</span>
+<span>portal_gun.recalibrate()</span>
+</p>
+<p class="font-mono text-[10px] text-error leading-tight flex items-start">
+<span class="mr-2 opacity-70">!</span>
+<span class="text-white">ERROR: FLUID_EMPTY</span>
+</p>
+<p class="font-mono text-[10px] text-white italic leading-tight pt-2">
+                            "Rick: "M-Morty, we're stuck in a 404, Morty! It's a website void! We're data, Morty!""
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Data Bar -->
+
+</main>
+<!-- Footer -->
+<footer class="bg-[#0a001a] flex flex-col md:flex-row justify-between items-center px-12 py-6 w-full fixed bottom-0 z-50 text-[#ffe483] font-mono text-[10px] uppercase tracking-widest">
+<div class="bg-secondary/20 h-[1.5px] w-full absolute top-0 left-0"></div>
+<div class="mb-4 md:mb-0 opacity-60">
+        © 2024 DIMENSION_C-137_STRICT_DATA_RECOVERY_PROTOCOL
+    </div>
+<div class="flex space-x-10">
+<a class="text-[#7faf3d] hover:text-[#00e3fd] transition-colors duration-200 flex items-center" href="#">
+<span class="material-symbols-outlined text-[12px] mr-2">restart_alt</span>SYS_REBOOT
+        </a>
+
+</div>
+</footer>
+</body></html>

@@ -1,303 +1,439 @@
-<!-- profile.component.html – FINAL 2025 MASTERPIECE -->
-<div class="profile-wrapper">
+<div class="min-h-screen text-[#f1dfff] font-body overflow-hidden" [style.backgroundImage]="'url(/4k.jpg)'" [style.backgroundSize]="'cover'" [style.backgroundPosition]="'center'" [style.backgroundAttachment]="'fixed'">
+  <!-- Dark Overlay with Blur -->
+  <div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-0 pointer-events-none"></div>
 
-  <!-- HEADER -->
-  <header class="profile-header">
-    <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Back to Dashboard">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <h1>User Profile</h1>
-    <div class="header-spacer"></div>
-  </header>
+  <!-- Top Navigation -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#00e3fd]/20 bg-[#190033] backdrop-blur-2xl px-4 md:px-8 h-20 flex justify-between items-center">
+    <div class="flex items-center gap-4 md:gap-8">
+      <button (click)="toggleSidebar()" class="md:hidden text-[#A2D45E] hover:text-[#00e3fd] transition-colors">
+        <span class="material-symbols-outlined text-2xl">menu</span>
+      </button>
+      <span class="text-xl md:text-2xl font-black italic text-[#A2D45E] tracking-widest uppercase">MY PROFILE</span>
+    </div>
+    <div class="flex items-center gap-4 md:gap-6">
+      <button (click)="toggleNotifications()" class="text-white relative hover:text-cyan-300 transition-colors">
+        <span class="material-symbols-outlined text-2xl">notifications</span>
+        <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ unreadCount }}</span>
+      </button>
+      <div class="w-8 md:w-9 h-8 md:h-9 border border-[#A2D45E]/50 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#A2D45E]">
+        <img [src]="getAvatarUrl(userProfile.username)" class="w-full h-full object-cover" alt="Profile"/>
+      </div>
+    </div>
+  </nav>
 
+  <!-- Mobile Sidebar Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden" (click)="toggleSidebar()"></div>
 
-  <!-- MAIN -->
-  <main class="profile-content">
+  <!-- LEFT SIDEBAR -->
+  <aside class="fixed left-0 top-0 h-full w-64 border-r border-[#00e3fd]/15 bg-[#190033]/50 backdrop-blur-md flex flex-col pt-24 z-40 transition-transform duration-300" [ngClass]="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+    <div class="px-6 space-y-8">
+      <div class="flex items-center gap-3 pb-6 border-b border-[#563d70]">
+        <div class="w-10 h-10 flex items-center justify-center text-[#A2D45E]">
+          <span class="material-symbols-outlined text-3xl">science</span>
+        </div>
+        <div>
+          <h2 class="text-[#A2D45E] font-black tracking-widest uppercase text-lg">C-137 STATION</h2>
+          <p class="text-[10px] text-[#00e3fd] tracking-widest">STATUS: STABLE</p>
+        </div>
+      </div>
 
-    <!-- ERROR -->
-  <!-- FLOATING TOAST NOTIFICATIONS – ALWAYS VISIBLE WHEN SCROLLING -->
-<div class="toast-container">
-  <div *ngIf="errorMessage" class="toast-notification error" 
-       [class.show]="errorMessage" 
-       (click)="errorMessage = ''">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ errorMessage }}</span>
-    <button mat-icon-button class="close-toast" (click)="errorMessage = ''">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-</div>
-
-    <!-- LOADING -->
-    <div *ngIf="loading" class="loading-state">
-      <mat-spinner diameter="60"></mat-spinner>
-      <p>Loading your profile...</p>
+      <nav class="flex flex-col gap-1">
+        <a class="text-slate-400 hover:text-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#00e3fd]/5 cursor-pointer" routerLink="/dashboard" (click)="sidebarOpen = false">
+          <span class="material-symbols-outlined">dashboard</span>
+          DASHBOARD
+        </a>
+        <a class="bg-[#A2D45E]/10 text-[#A2D45E] border-l-4 border-[#A2D45E] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer">
+          <span class="material-symbols-outlined">person</span>
+          MY PROFILE
+        </a>
+        <a *ngIf="userProfile.userRole === 'admin'" class="text-slate-400 hover:text-[#ffe483] pl-5 py-3.5 flex items-center gap-3 text-sm font-bold tracking-widest hover:bg-[#ffe483]/5 cursor-pointer" routerLink="/admin" (click)="sidebarOpen = false">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          ADMIN PANEL
+        </a>
+      </nav>
     </div>
 
-    <!-- PROFILE LOADED -->
-    <div *ngIf="!loading" class="profile-body">
+    <div class="mt-auto px-6 pb-6">
+      <a (click)="goBack(); sidebarOpen = false" class="text-slate-400 hover:text-red-400 pl-5 py-3 flex items-center gap-3 text-sm font-bold tracking-widest cursor-pointer">
+        <span class="material-symbols-outlined">logout</span>
+        BACK
+      </a>
+    </div>
+  </aside>
 
-      <!-- USER CARD -->
-      <mat-card class="user-card" appearance="outlined">
-        <mat-card-content class="user-card-content">
-          <div class="avatar-section">
-            <div class="avatar-large"
-                 [style.background-image]="'url(' + getAvatarUrl(userProfile.username) + ')'">
+  <!-- Toast Notifications -->
+  <div class="fixed top-24 right-4 z-50" *ngIf="errorMessage">
+    <div class="bg-red-600/90 border border-red-400 text-white px-6 py-3 rounded-lg flex items-center gap-3 animate-pulse">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Notification Popup -->
+  <div *ngIf="showNotificationPopup" class="fixed top-20 right-8 w-96 bg-[#270646] rounded-lg shadow-2xl z-[9999] max-h-96 overflow-y-auto">
+    <div class="p-6 sticky top-0 bg-[#270646]">
+      <h3 class="text-xl font-bold text-[#A2D45E]">NOTIFICATIONS</h3>
+    </div>
+    
+    <div *ngIf="notifications.length > 0" class="divide-y divide-transparent">
+      <div *ngFor="let notif of notifications" 
+           (click)="markRead(notif.id)" 
+           class="p-4 cursor-pointer transition-all border-l-8"
+           [ngClass]="{
+             'border-l-[#A2D45E] bg-[#2e0b50]/80': !notif.read,
+             'border-l-[#00e3fd]/30 bg-[#270646] opacity-70 hover:opacity-100': notif.read
+           }">
+        <div class="flex gap-3 items-start">
+          <span class="material-symbols-outlined text-[#A2D45E] mt-1">{{ getNotificationIcon(notif.message) }}</span>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <p class="text-sm" [ngClass]="{'text-[#f1dfff] font-semibold': !notif.read, 'text-[#00e3fd]/60': notif.read}">
+                {{ notif.message }}
+              </p>
+              <span *ngIf="!notif.read" class="w-2 h-2 bg-[#A2D45E] rounded-full mt-1 flex-shrink-0"></span>
             </div>
-            <h2>@{{ userProfile.username }}</h2>
-            <p class="user-role" *ngIf="userProfile.userRole === 'admin'">Administrator</p>
+            <small class="text-[#00e3fd]/50">{{ notif.timestamp | date:'short' }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="notifications.length === 0" class="p-6 text-center text-[#00e3fd]/60">
+      <p>No notifications yet</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="relative z-10 ml-0 md:ml-64 pt-20 md:pt-24 px-4 md:px-8 pb-12">
+    <div class="max-w-6xl mx-auto">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-2xl p-12 text-center">
+        <div class="flex justify-center mb-4">
+          <span class="material-symbols-outlined text-5xl text-[#A2D45E] animate-spin">sync</span>
+        </div>
+        <p class="text-[#00e3fd] text-lg animate-pulse">Loading your profile...</p>
+      </div>
+
+      <!-- Profile Content -->
+      <div *ngIf="!loading">
+        <!-- Hero Profile Card -->
+        <div class="bg-[#270646] border-2 border-[#00e3fd]/30 rounded-2xl overflow-hidden mb-8">
+          <!-- Hero Banner -->
+          <div class="relative h-40 md:h-64 bg-gradient-to-br from-[#A2D45E]/20 to-[#00e3fd]/20 overflow-hidden">
+            <div class="absolute inset-0 opacity-20" [style.backgroundImage]="'url(/4k.jpg)'" [style.backgroundSize]="'cover'"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#270646]"></div>
           </div>
 
-          <div class="user-stats">
-            <div class="stat">
-              <strong>{{ userPosts.length }}</strong>
-              <span>Posts</span>
+          <!-- Profile Info Section -->
+          <div class="px-4 md:px-8 pb-6 md:pb-8 relative z-10">
+            <!-- Avatar + Info Row -->
+            <div class="flex flex-col md:flex-row gap-4 md:gap-8 lg:gap-12 items-start -mt-16 md:-mt-20 mb-6 md:mb-8">
+              <!-- Avatar -->
+              <div class="w-24 md:w-32 h-24 md:h-32 rounded-full border-4 border-[#A2D45E] overflow-hidden shadow-2xl flex-shrink-0" [style.backgroundImage]="'url(' + getAvatarUrl(userProfile.username) + ')'" [style.backgroundSize]="'cover'"></div>
+
+              <!-- User Info -->
+              <div class="flex-1 pt-4 md:pt-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
+                  <div>
+                    <h1 class="text-2xl md:text-4xl font-black text-[#A2D45E] uppercase tracking-widest">{{ userProfile.username }}</h1>
+                    <p class="text-[#00e3fd] text-xs md:text-sm tracking-widest uppercase mt-1" *ngIf="userProfile.userRole === 'admin'">ADMINISTRATOR</p>
+                    <p class="text-[#ffe483] text-xs md:text-sm tracking-widest uppercase mt-1" *ngIf="userProfile.userRole !== 'admin'">C-137 MEMBER</p>
+                  </div>
+
+                  <!-- Edit Button -->
+                  <button (click)="toggleEdit()" *ngIf="!isEditing" class="bg-[#A2D45E] text-[#190033] px-6 md:px-8 py-2 md:py-3 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all text-sm md:text-base">
+                    <span class="material-symbols-outlined mr-2 inline">edit</span>
+                    EDIT PROFILE
+                  </button>
+                </div>
+
+                <!-- Bio -->
+                <p class="text-[#f1dfff]/90 text-base md:text-lg leading-relaxed mb-4" *ngIf="userProfile.bio && !isEditing">{{ userProfile.bio }}</p>
+                <textarea *ngIf="isEditing" [(ngModel)]="editProfile.bio" placeholder="Edit your bio..." class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 md:p-4 text-white rounded-lg h-20 md:h-24 mb-4 text-sm md:text-base" style="color: #f1dfff;"></textarea>
+              </div>
             </div>
-            <div class="stat">
-              <strong>{{ userProfile.followers || 0 }}</strong>
-              <span>Followers</span>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
+              <!-- Posts -->
+              <div class="bg-[#190033] border border-[#A2D45E]/30 p-3 md:p-4 rounded-lg">
+                <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#00e3fd]/70 mb-2">TRANSMISSIONS</div>
+                <div class="text-2xl md:text-3xl font-black text-[#A2D45E]">{{ userPosts.length }}</div>
+                <div class="mt-2 h-0.5 bg-gradient-to-r from-[#A2D45E] to-[#7faf3d] rounded-full"></div>
+              </div>
+
+              <!-- Followers -->
+              <div class="bg-[#190033] border border-[#00e3fd]/30 p-3 md:p-4 rounded-lg">
+                <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#00e3fd]/70 mb-2">FOLLOWERS</div>
+                <div class="text-2xl md:text-3xl font-black text-[#00e3fd]">{{ userProfile.followers || 0 }}</div>
+                <div class="mt-2 h-0.5 bg-gradient-to-r from-[#00e3fd] to-[#0099cc] rounded-full"></div>
+              </div>
+
+              <!-- Following -->
+              <div class="bg-[#190033] border border-[#ffe483]/30 p-3 md:p-4 rounded-lg">
+                <div class="text-[10px] md:text-sm uppercase tracking-widest text-[#ffe483]/70 mb-2">FOLLOWING</div>
+                <div class="text-2xl md:text-3xl font-black text-[#ffe483]">{{ userProfile.following || 0 }}</div>
+                <div class="mt-2 h-0.5 bg-gradient-to-r from-[#ffe483] to-[#ffc857] rounded-full"></div>
+              </div>
             </div>
-            <div class="stat">
-              <strong>{{ userProfile.following || 0 }}</strong>
-              <span>Following</span>
+
+            <!-- Info Details - Edit Mode -->
+            <div *ngIf="isEditing" class="space-y-4 mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-[#00e3fd] text-sm font-bold uppercase tracking-widest block mb-2">Email</label>
+                  <input [(ngModel)]="editProfile.email" type="email" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="text-[#00e3fd] text-sm font-bold uppercase tracking-widest block mb-2">Age</label>
+                  <input [(ngModel)]="editProfile.age" type="number" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 text-white rounded-lg" />
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <button (click)="saveProfile()" class="flex-1 bg-[#A2D45E] text-[#190033] px-6 py-3 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+                  <span class="material-symbols-outlined inline mr-2">save</span>
+                  SAVE CHANGES
+                </button>
+                <button (click)="cancelEdit()" class="flex-1 border-2 border-[#00e3fd]/40 text-[#00e3fd] px-6 py-3 font-bold uppercase tracking-widest hover:bg-[#00e3fd]/10 transition-all">
+                  CANCEL
+                </button>
+              </div>
+            </div>
+
+            <!-- Info Details - View Mode -->
+            <div *ngIf="!isEditing" class="flex flex-wrap gap-6 text-sm">
+              <div class="flex items-center gap-2 text-[#00e3fd]">
+                <span class="material-symbols-outlined">alternate_email</span>
+                <span class="text-[#00e3fd]/60">{{ userProfile.email }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[#00e3fd]" *ngIf="userProfile.age">
+                <span class="material-symbols-outlined">cake</span>
+                <span class="text-[#00e3fd]/60">Age {{ userProfile.age }}</span>
+              </div>
             </div>
           </div>
-        </mat-card-content>
+        </div>
 
-        <mat-card-actions align="end">
-          <button mat-raised-button color="primary" (click)="toggleEdit()" *ngIf="!isEditing">
-            <mat-icon>edit</mat-icon> Edit Profile
-          </button>
-        </mat-card-actions>
-      </mat-card>
+        <!-- My Posts Section -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-black text-[#A2D45E] uppercase tracking-widest mb-6 flex items-center gap-3">
+            <span class="material-symbols-outlined">grid_on</span>
+            TRANSMISSIONS GRID
+          </h2>
 
-      <!-- PERSONAL INFO -->
-      <mat-card class="info-card" appearance="outlined">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>person</mat-icon> Personal Information
-          </mat-card-title>
-          <div class="card-actions" *ngIf="isEditing">
-            <button mat-flat-button color="primary" (click)="saveProfile()">
-              <mat-icon>save</mat-icon> Save Changes
-            </button>
-            <button mat-button (click)="cancelEdit()">Cancel</button>
-          </div>
-        </mat-card-header>
-
-        <mat-card-content>
-          <div class="info-grid">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Username</mat-label>
-              <input matInput [value]="userProfile.username" [readonly]="true">
-              <mat-icon matSuffix>verified_user</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
-              <input matInput
-                     [value]="isEditing ? editProfile.email : userProfile.email"
-                     (input)="isEditing && (editProfile.email = $any($event.target).value)"
-                     [readonly]="!isEditing"
-                     type="email">
-              <mat-icon matSuffix>mail</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Age</mat-label>
-              <input matInput type="number"
-                     [value]="isEditing ? editProfile.age : userProfile.age"
-                     (input)="isEditing && (editProfile.age = +$any($event.target).value)"
-                     [readonly]="!isEditing">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="bio-field">
-              <mat-label>Bio</mat-label>
-              <textarea matInput rows="4"
-                        [value]="isEditing ? editProfile.bio : userProfile.bio"
-                        (input)="isEditing && (editProfile.bio = $any($event.target).value)"
-                        [readonly]="!isEditing"></textarea>
-            </mat-form-field>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- MY POSTS -->
-      <mat-card class="posts-card" appearance="outlined">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>article</mat-icon> My Posts ({{ userPosts.length }})
-          </mat-card-title>
-          <button mat-icon-button (click)="loadUserPosts()" matTooltip="Refresh">
-            <mat-icon>refresh</mat-icon>
-          </button>
-        </mat-card-header>
-
-        <mat-card-content>
-
-          <!-- EMPTY STATE -->
-          <div *ngIf="userPosts.length === 0" class="empty-state">
-            <mat-icon class="big-icon">post_add</mat-icon>
-            <h3>No posts yet</h3>
-            <p>Start sharing your thoughts!</p>
-            <button mat-raised-button color="primary" (click)="goToDashboard()">
-              <mat-icon>add</mat-icon> Create First Post
-            </button>
+          <!-- Empty State -->
+          <div *ngIf="userPosts.length === 0" class="bg-[#270646] border-2 border-[#00e3fd]/20 rounded-lg p-12 text-center">
+            <span class="material-symbols-outlined text-5xl text-[#00e3fd]/40 block mb-4">sentiment_satisfied</span>
+            <p class="text-[#00e3fd]/60 text-lg mb-4">No transmissions yet</p>
+            <a routerLink="/dashboard" class="inline-block bg-[#A2D45E] text-[#190033] px-8 py-3 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+              <span class="material-symbols-outlined inline mr-2">add</span>
+              CREATE FIRST POST
+            </a>
           </div>
 
-          <!-- POSTS GRID -->
-          <div class="posts-grid" *ngIf="userPosts.length > 0">
-            <mat-card class="post-item" *ngFor="let post of userPosts" appearance="outlined">
+          <!-- Posts Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="userPosts.length > 0">
+            <!-- View Mode -->
+            <div *ngFor="let post of userPosts" 
+                 [class.hidden]="editingPostId === post.id"
+                 class="group bg-[#270646] border border-[#00e3fd]/20 hover:border-[#A2D45E]/60 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:shadow-[#A2D45E]/20">
+              
+              <!-- Media Container -->
+              <div class="aspect-square relative overflow-hidden bg-[#190033]" *ngIf="post.mediaPaths?.length > 0">
+                <img *ngIf="post.mediaTypes[0]?.startsWith('image')" 
+                     [src]="environment.apiUrl + post.mediaPaths[0]"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <video *ngIf="post.mediaTypes[0]?.startsWith('video')" 
+                       [src]="environment.apiUrl + post.mediaPaths[0]"
+                       class="w-full h-full object-cover" muted preload="metadata"></video>
+                
+                <!-- Play Icon for Videos -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40" *ngIf="post.mediaTypes[0]?.startsWith('video')">
+                  <span class="material-symbols-outlined text-5xl text-white">play_circle</span>
+                </div>
 
-              <!-- VIEW MODE -->
-              <div *ngIf="editingPostId !== post.id">
+                <!-- Media Count Badge -->
+                <div class="absolute top-2 right-2 bg-[#A2D45E] text-[#190033] px-2 py-1 rounded text-xs font-bold" *ngIf="post.mediaPaths.length > 1">
+                  <span class="material-symbols-outlined text-sm inline mr-1">collections</span>
+                  {{ post.mediaPaths.length }}
+                </div>
+              </div>
 
-                <mat-card-header>
-                  <mat-card-title class="post-title">{{ post.title || 'Untitled' }}</mat-card-title>
-                  <mat-card-subtitle>{{ post.createdAt | date:'mediumDate' }}</mat-card-subtitle>
-                </mat-card-header>
+              <!-- No Media Placeholder -->
+              <div class="aspect-square bg-gradient-to-br from-[#A2D45E]/10 to-[#00e3fd]/10 flex items-center justify-center" *ngIf="!post.mediaPaths?.length">
+                <span class="material-symbols-outlined text-4xl text-[#A2D45E]/40">article</span>
+              </div>
 
-                <mat-card-content>
-                  <p class="post-preview">
-                    {{ post.content | slice:0:150 }}{{ post.content.length > 150 ? '...' : '' }}
-                  </p>
+              <!-- Post Info -->
+              <div class="p-4 bg-[#190033]">
+                <h3 class="font-bold text-[#A2D45E] text-sm truncate">{{ post.title || 'Untitled' }}</h3>
+                <p class="text-[#00e3fd]/60 text-xs line-clamp-2 mt-1">{{ post.content | slice:0:60 }}...</p>
+                <small class="text-[#ffe483]/60 block mt-2">{{ post.createdAt | date:'short' }}</small>
 
-                  <!-- CLICKABLE MEDIA GRID -->
-                  <div class="media-grid" *ngIf="post.mediaPaths?.length > 0">
-                    <div class="media-item"
-                         *ngFor="let path of post.mediaPaths; let i = index"
-                         (click)="openMediaPreview(path, post.mediaTypes[i])">
-                      <img *ngIf="post.mediaTypes[i]?.startsWith('image')"
-                           [src]="environment.apiUrl + path"
-                           alt="Post image" />
-                      <video *ngIf="post.mediaTypes[i]?.startsWith('video')">
-                        <source [src]="environment.apiUrl + path" [type]="post.mediaTypes[i]">
+                <!-- Actions -->
+                <div class="flex gap-2 mt-3">
+                  <button (click)="viewPost(post)" class="flex-1 text-xs bg-[#00e3fd]/20 text-[#00e3fd] px-2 py-1 rounded hover:bg-[#00e3fd]/40 transition-all">
+                    <span class="material-symbols-outlined text-sm inline mr-1">visibility</span>VIEW
+                  </button>
+                  <button (click)="startEditPost(post)" class="flex-1 text-xs bg-[#A2D45E]/20 text-[#A2D45E] px-2 py-1 rounded hover:bg-[#A2D45E]/40 transition-all">
+                    <span class="material-symbols-outlined text-sm inline mr-1">edit</span>EDIT
+                  </button>
+                  <button (click)="openDeleteBox(post.id)" class="flex-1 text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/40 transition-all">
+                    <span class="material-symbols-outlined text-sm inline mr-1">delete</span>DELETE
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit Mode Card -->
+            <div *ngIf="editingPostId" class="lg:col-span-2 bg-[#270646] border-2 border-[#A2D45E]/50 rounded-lg p-6">
+              <h3 class="text-2xl font-black text-[#A2D45E] mb-4">EDIT TRANSMISSION</h3>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="text-[#00e3fd] text-sm font-bold uppercase tracking-widest block mb-2">Title</label>
+                  <input [(ngModel)]="editPostData.title" type="text" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 text-white rounded-lg" />
+                </div>
+
+                <div>
+                  <label class="text-[#00e3fd] text-sm font-bold uppercase tracking-widest block mb-2">Content</label>
+                  <textarea [(ngModel)]="editPostData.content" rows="5" class="w-full bg-[#190033] border border-[#00e3fd]/40 focus:border-[#A2D45E] p-3 text-white rounded-lg" style="color: #f1dfff;"></textarea>
+                </div>
+
+                <!-- Current Media -->
+                <div *ngIf="editPostData.currentMedia?.length > 0">
+                  <p class="text-[#00e3fd] text-sm font-bold uppercase tracking-widest mb-2">Current Media</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div *ngFor="let file of editPostData.currentMedia; let i = index" class="relative group">
+                      <img *ngIf="file.type.startsWith('image')" [src]="environment.apiUrl + file.path" class="w-full h-24 object-cover rounded" />
+                      <video *ngIf="file.type.startsWith('video')" class="w-full h-24 object-cover rounded">
+                        <source [src]="environment.apiUrl + file.path" [type]="file.type">
                       </video>
-                      <div class="play-icon" *ngIf="post.mediaTypes[i]?.startsWith('video')">
-                        <mat-icon>play_circle</mat-icon>
-                      </div>
+                      <button (click)="removeExistingMedia(i)" class="absolute top-1 right-1 bg-red-600 text-white p-1 rounded hidden group-hover:block">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                      </button>
                     </div>
                   </div>
-                </mat-card-content>
+                </div>
 
-                <mat-card-actions>
-                  <button mat-stroked-button color="primary" (click)="startEditPost(post)">
-                    <mat-icon>edit</mat-icon> Edit
+                <!-- Add New Media -->
+                <div>
+                  <input type="file" #fileInput multiple (change)="onFilesSelected($event)" accept="image/*,video/*" style="display:none" />
+                  <button (click)="fileInput.click()" class="w-full bg-[#00e3fd]/20 text-[#00e3fd] px-4 py-3 rounded font-bold uppercase hover:bg-[#00e3fd]/40 transition-all">
+                    <span class="material-symbols-outlined inline mr-2">photo_library</span>
+                    {{ editPostData.newFilePreviews.length > 0 ? editPostData.newFilePreviews.length + ' Selected' : 'Add Photos/Videos' }}
                   </button>
-             <button mat-stroked-button color="warn" (click)="openDeleteBox(post.id)">
-  <mat-icon>delete</mat-icon> Delete
-</button>
+                </div>
 
-
-                </mat-card-actions>
-              </div>
-
-              <!-- EDIT MODE -->
-              <div *ngIf="editingPostId === post.id" class="edit-mode">
-
-                <mat-card-header>
-                  <mat-card-title>
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Title</mat-label>
-                      <input matInput [(ngModel)]="editPostData.title" placeholder="Post title">
-                    </mat-form-field>
-                  </mat-card-title>
-                </mat-card-header>
-
-                <mat-card-content>
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Content</mat-label>
-                    <textarea matInput rows="5" [(ngModel)]="editPostData.content"></textarea>
-                  </mat-form-field>
-
-                  <!-- CURRENT MEDIA -->
-                  <div class="current-media-section" *ngIf="editPostData.currentMedia?.length > 0">
-                    <p><strong>Current media:</strong></p>
-                    <div class="media-grid">
-                      <div class="media-item removable" *ngFor="let file of editPostData.currentMedia; let i = index">
-                        <img *ngIf="file.type.startsWith('image')" [src]="environment.apiUrl + file.path" />
-                        <video *ngIf="file.type.startsWith('video')" controls>
-                          <source [src]="environment.apiUrl + file.path" [type]="file.type">
-                        </video>
-                        <button mat-icon-button color="warn" class="remove-btn"
-                                (click)="removeExistingMedia(i)">
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </div>
+                <!-- New Media Preview -->
+                <div *ngIf="editPostData.newFilePreviews?.length > 0">
+                  <p class="text-[#A2D45E] text-sm font-bold uppercase tracking-widest mb-2">New Media Preview</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div *ngFor="let preview of editPostData.newFilePreviews; let i = index" class="relative group">
+                      <img *ngIf="preview.type.startsWith('image')" [src]="preview.url" class="w-full h-24 object-cover rounded" />
+                      <video *ngIf="preview.type.startsWith('video')" [src]="preview.url" class="w-full h-24 object-cover rounded"></video>
+                      <button (click)="removeNewFile(i)" class="absolute top-1 right-1 bg-red-600 text-white p-1 rounded hidden group-hover:block">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                      </button>
                     </div>
                   </div>
+                </div>
 
-                  <!-- NEW FILES – REAL-TIME PREVIEW -->
-                  <div class="file-upload-section">
-                    <input type="file" #fileInput multiple (change)="onFilesSelected($event)"
-                           accept="image/*,video/*" style="display:none" />
-
-                    <button mat-stroked-button (click)="fileInput.click()" class="upload-btn">
-                      <mat-icon>photo_library</mat-icon>
-                      {{ editPostData.newFilePreviews.length > 0 
-                         ? editPostData.newFilePreviews.length + ' selected' 
-                         : 'Add photos/videos' }}
-                    </button>
-
-                    <!-- INSTANT PREVIEW OF NEW FILES -->
-                    <div class="new-media-preview" *ngIf="editPostData.newFilePreviews.length > 0">
-                      <p><strong>New media:</strong></p>
-                      <div class="media-grid">
-                        <div class="media-item removable" *ngFor="let preview of editPostData.newFilePreviews; let i = index">
-                          <img *ngIf="preview.type.startsWith('image')" [src]="preview.url" />
-                          <video *ngIf="preview.type.startsWith('video')" [src]="preview.url" controls></video>
-                          <button mat-icon-button color="warn" class="remove-btn"
-                                  (click)="removeNewFile(i)">
-                            <mat-icon>close</mat-icon>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </mat-card-content>
-
-                <mat-card-actions>
-                  <button mat-flat-button color="primary" (click)="savePost(post.id)">
-                    <mat-icon>save</mat-icon> Save Changes
+                <!-- Save/Cancel -->
+                <div class="flex gap-3">
+                  <button (click)="savePost(editingPostId)" class="flex-1 bg-[#A2D45E] text-[#190033] px-4 py-3 font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+                    <span class="material-symbols-outlined inline mr-2">save</span>SAVE
                   </button>
-                  <button mat-button (click)="cancelPostEdit()">Cancel</button>
-                </mat-card-actions>
+                  <button (click)="cancelPostEdit()" class="flex-1 border-2 border-[#00e3fd]/40 text-[#00e3fd] px-4 py-3 font-bold uppercase tracking-widest hover:bg-[#00e3fd]/10 transition-all">
+                    CANCEL
+                  </button>
+                </div>
               </div>
-            </mat-card>
+            </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
   </main>
 
-  <!-- FULL SCREEN MEDIA PREVIEW -->
-  <div class="media-preview-overlay" *ngIf="previewUrl" (click)="closePreview()">
-    <div class="media-preview-container" (click)="$event.stopPropagation()">
-      <button mat-icon-button class="close-preview" (click)="closePreview()">
-        <mat-icon>close</mat-icon>
-      </button>
-      <img [src]="previewUrl" *ngIf="previewType?.startsWith('image')" class="full-media" />
-      
-      <video [src]="previewUrl" *ngIf="previewType?.startsWith('video')" 
-             class="full-media" controls autoplay loop></video>
+  <!-- Full Screen Media Preview -->
+  <div class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center" *ngIf="previewUrl" (click)="closePreview()">
+    <button (click)="closePreview()" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-2 rounded-full hover:shadow-lg z-60">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="max-w-4xl max-h-screen object-contain" />
+    <video *ngIf="previewType?.startsWith('video')" [src]="previewUrl" class="max-w-4xl max-h-screen" controls autoplay loop muted playsinline></video>
+  </div>
+
+  <!-- Full Screen Media Preview -->
+  <div class="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4" *ngIf="previewUrl" (click)="closePreview()">
+    <button (click)="closePreview()" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-3 rounded-full hover:shadow-lg hover:shadow-[#A2D45E]/50 transition-all">
+      <span class="material-symbols-outlined text-2xl">close</span>
+    </button>
+
+    <img *ngIf="previewType?.startsWith('image')" [src]="previewUrl" class="max-w-4xl max-h-screen object-contain rounded-lg" (click)="$event.stopPropagation()" />
+    <video *ngIf="previewType?.startsWith('video')" [src]="previewUrl" class="max-w-4xl max-h-screen rounded-lg" controls autoplay muted playsinline (click)="$event.stopPropagation()"></video>
+  </div>
+
+  <!-- Post Preview Modal -->
+  <div class="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4" *ngIf="selectedPost" (click)="closePostModal()">
+    <button (click)="closePostModal()" class="absolute top-4 right-4 bg-[#A2D45E] text-[#190033] p-3 rounded-full hover:shadow-lg hover:shadow-[#A2D45E]/50 z-[201]">
+      <span class="material-symbols-outlined text-2xl">close</span>
+    </button>
+
+    <div class="bg-[#270646] border-2 border-[#A2D45E]/50 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Post Header -->
+      <div class="p-6 border-b border-[#00e3fd]/20 sticky top-0 bg-[#270646]">
+        <h2 class="text-2xl font-black text-[#A2D45E] mb-2">{{ selectedPost.title }}</h2>
+        <p class="text-[#00e3fd]/70 text-sm">{{ selectedPost.createdAt | date:'mediumDate' }}</p>
+      </div>
+
+      <!-- Post Content -->
+      <div class="p-6">
+        <p class="text-[#f1dfff]/90 leading-relaxed mb-6">{{ selectedPost.content }}</p>
+
+        <!-- Media Gallery -->
+        <div class="grid gap-4" *ngIf="selectedPost.mediaPaths?.length > 0" 
+             [ngClass]="selectedPost.mediaPaths.length === 1 ? 'grid-cols-1' : selectedPost.mediaPaths.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'">
+          <div *ngFor="let path of selectedPost.mediaPaths; let i = index" 
+               class="relative cursor-pointer group overflow-hidden rounded-lg border border-[#00e3fd]/30 hover:border-[#A2D45E] transition-all"
+               (click)="openMediaPreview(environment.apiUrl + path, selectedPost.mediaTypes[i])">
+            <img *ngIf="selectedPost.mediaTypes[i]?.startsWith('image')" 
+                 [src]="environment.apiUrl + path"
+                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform" />
+            <video *ngIf="selectedPost.mediaTypes[i]?.startsWith('video')" 
+                   [src]="environment.apiUrl + path"
+                   class="w-full h-48 object-cover" muted preload="metadata"></video>
+            <!-- Fullscreen icon on hover -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+              <span class="material-symbols-outlined text-3xl text-white">fullscreen</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-<!-- GLOBAL DELETE CONFIRMATION – ALWAYS CENTERED -->
-<div class="global-delete-overlay" *ngIf="showDeleteBox" (click)="showDeleteBox = false">
-  <div class="global-delete-box" (click)="$event.stopPropagation()">
-    <div class="delete-header">
-      <mat-icon color="warn">delete</mat-icon>
-      <h3>Delete Post #{{ currentPostId }}</h3>
-    </div>
 
-    <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+  <!-- Delete Confirmation Modal -->
+  <div class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" *ngIf="showDeleteBox" (click)="showDeleteBox = false">
+    <div class="bg-[#270646] border-2 border-red-500 rounded-lg p-8 max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="material-symbols-outlined text-3xl text-red-500">warning</span>
+        <h3 class="text-2xl font-black text-red-500 uppercase">DELETE POST</h3>
+      </div>
 
-    <div class="delete-actions">
-      <button mat-button (click)="showDeleteBox = false">Cancel</button>
-      <button mat-raised-button color="warn" (click)="confirmDeletePost()">
-        <mat-icon>delete</mat-icon> Delete
-      </button>
+      <p class="text-[#f1dfff]/90 mb-6">Are you sure you want to delete this post? This action cannot be undone.</p>
+
+      <div class="flex gap-3">
+        <button (click)="showDeleteBox = false" class="flex-1 py-3 border border-[#00e3fd]/40 text-[#00e3fd] font-bold uppercase hover:bg-[#00e3fd]/10 transition-all rounded">
+          CANCEL
+        </button>
+        <button (click)="confirmDeletePost()" class="flex-1 py-3 bg-red-600 text-white font-bold uppercase hover:bg-red-700 transition-all rounded">
+          <span class="material-symbols-outlined inline mr-2">delete</span>
+          DELETE
+        </button>
+      </div>
     </div>
   </div>
 </div>

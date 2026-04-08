@@ -41,6 +41,7 @@ export class Dashboard {
   selectedMediaName: any = '';
   selectedMedia: File | null = null;
   showPopup = false;
+  sidebarOpen = false;
   unreadCount = 0;
   notifications: any[] = [];
   allusernames: string[] = [];
@@ -81,8 +82,11 @@ export class Dashboard {
   commentToDelete: string | null = null;
   postIdForComment: number | null = null;
 
-  reportingPostId: number | null = null;
+  reportingPost: any = null;
   reportReason: string = '';
+  isSubmittingReport = false;
+  reportMessage = '';
+  reportMessageType: 'success' | 'error' = 'success';
   likedPosts: { [key: number]: boolean } = {};
   likeCounts: { [key: number]: number } = {};
   comments: { [key: string]: any[] } = {};
@@ -91,6 +95,42 @@ export class Dashboard {
   errorMessage = '';
   previewType: any;
   postid: any[] = [];
+  searchUsers: string = '';
+  
+  // Blog Statistics
+  blogStats = {
+    usersCount: 0,
+    postsCount: 0,
+    commentsCount: 0
+  };
+
+  promotions = [
+    {
+      id: 1,
+      title: 'KALAXIAN CRYSTALS',
+      subtitle: 'LIMITED STOCK',
+      description: 'Elevate your consciousness to the 5th dimension for only 200 Biemflarcks.',
+      badge: 'LIMITED STOCK',
+      color: 'from-[#ff6b9d]/30 to-[#a64d79]/30'
+    },
+    {
+      id: 2,
+      title: 'FLEEB JUICE',
+      subtitle: 'PREMIUM EXTRACT',
+      description: 'The secret ingredient for your interdimensional projects.',
+      badge: 'PREMIUM',
+      color: 'from-[#A2D45E]/20 to-[#7faf3d]/20'
+    },
+    {
+      id: 3,
+      title: 'PORTAL GEL',
+      subtitle: 'EXCLUSIVE OFFER',
+      description: 'Travel across dimensions with ease. Limited quantities available!',
+      badge: 'EXCLUSIVE',
+      color: 'from-[#00e3fd]/20 to-[#0099cc]/20'
+    }
+  ];
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -103,6 +143,7 @@ export class Dashboard {
     this.getToken();
     this.getUsernames();
     this.loadSuggestedUsers();
+    this.loadBlogStats();
   }
 
   middleware(): boolean {
@@ -205,32 +246,6 @@ this.loadLikeCount(postId);
     );
   }
 
-  reportPost(postId: number) {
-      var check = this.middleware();
-
-    if (check == false) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    //window create prompt to ask for reason
-    const reason = window.prompt('Please enter report reason:', '');
-    if (reason === null) return; // user cancelled
-
-    var objecte = {
-      reportedPostId: postId,
-      reason: reason,
-    };
-    const apiReport = `${environment.apiUrl}/reports/report-post`;
-    this.http.post(apiReport, objecte, { withCredentials: true }).subscribe(
-      (response: any) => {
-        const msg = response?.message || 'Post reported';
-        this.showNotification(msg);
-      },
-      (error: any) => {
-        this.showNotification(error.error?.message || error.error?.error || 'Reporting failed');
-      }
-    );
-  }
   @ViewChild('usersScroll') usersScroll!: ElementRef;
 
   scrollUsersLeft() {
@@ -264,6 +279,16 @@ this.loadLikeCount(postId);
     // Return deterministic Rick and Morty character avatar
     return `https://rickandmortyapi.com/api/character/avatar/${index}.jpeg`;
   }
+
+  get filteredUsers(): string[] {
+    if (!this.searchUsers.trim()) {
+      return this.allusernames;
+    }
+    return this.allusernames.filter(user =>
+      user.toLowerCase().includes(this.searchUsers.toLowerCase())
+    );
+  }
+
   showNotification(message: any) {
     this.errorMessage = message;
     setTimeout(() => {
@@ -416,6 +441,10 @@ this.loadLikeCount(postId);
     }
   }
 
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
   getNotificationIcon(message: string): string {
     const msg = message.toLowerCase();
     if (msg.includes('follow') || msg.includes('followed')) {
@@ -489,6 +518,34 @@ this.loadLikeCount(postId);
     );
   }
 
+  loadBlogStats() {
+    // Fetch users count
+    this.http.get(`${environment.apiUrl}/get-users`, { withCredentials: true }).subscribe(
+      (response: any) => {
+        this.blogStats.usersCount = (response.users || response || []).length;
+      },
+      (err: any) => console.log('Error loading users count')
+    );
+
+    // Fetch posts count and comments
+    this.http.get(`${environment.apiUrl}/get-followed-posts`, { withCredentials: true }).subscribe(
+      (response: any) => {
+        const posts = response || [];
+        this.blogStats.postsCount = posts.length;
+        
+        // Count total comments from all posts
+        let totalComments = 0;
+        posts.forEach((post: any) => {
+          if (this.comments[post.id] && Array.isArray(this.comments[post.id])) {
+            totalComments += this.comments[post.id].length;
+          }
+        });
+        this.blogStats.commentsCount = totalComments;
+      },
+      (err: any) => console.log('Error loading posts count')
+    );
+  }
+
   onMediaSelected(event: any) {
     const files = event.target.files;
     if (!files) return;
@@ -551,14 +608,73 @@ this.loadLikeCount(postId);
   selectedFiles: File[] = [];
 
   previewUrl: string | null = null;
+  selectedPostForModal: any = null; // For opening post with all media
 
   openMediaPreview(path: string, type: string) {
     this.previewUrl = environment.apiUrl + path;
     this.previewType = type; // 'image/jpeg' or 'video/mp4'
   }
 
+  openPostWithMedia(post: any) {
+    this.selectedPostForModal = post;
+  }
+
+  closePostModal() {
+    this.selectedPostForModal = null;
+  }
+
+  reportPost(post: any) {
+    this.reportingPost = post;
+    this.reportReason = '';
+    this.reportMessage = '';
+  }
+
+  submitReport() {
+    if (!this.reportReason || !this.reportReason.trim()) {
+      this.reportMessage = 'Please provide a reason for reporting';
+      this.reportMessageType = 'error';
+      return;
+    }
+
+    if (this.reportReason.trim().length < 10) {
+      this.reportMessage = 'Reason must be at least 10 characters long';
+      this.reportMessageType = 'error';
+      return;
+    }
+
+    this.isSubmittingReport = true;
+
+    const reportData = {
+      reportedPostId: this.reportingPost.id,
+      reason: this.reportReason.trim()
+    };
+
+    this.http.post(`${environment.apiUrl}/reports/report-post`, reportData, { withCredentials: true }).subscribe({
+      next: (response: any) => {
+        this.isSubmittingReport = false;
+        this.reportMessage = 'Post reported successfully. Thank you for helping keep the community safe!';
+        this.reportMessageType = 'success';
+        setTimeout(() => {
+          this.closeReportModal();
+        }, 2000);
+      },
+      error: (err: any) => {
+        this.isSubmittingReport = false;
+        this.reportMessage = err.error?.message || 'Failed to report post. Please try again.';
+        this.reportMessageType = 'error';
+      }
+    });
+  }
+
+  closeReportModal() {
+    this.reportingPost = null;
+    this.reportReason = '';
+    this.reportMessage = '';
+  }
+
   closePreview() {
     this.previewUrl = null;
+    this.previewType = null;
   }
 
   getallcomments() {
