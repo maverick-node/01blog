@@ -23,6 +23,7 @@ export class Admin {
   reports: any[] = [];
   reportssolved: any[] = [];
   errorMessage = '';
+  notificationType: 'error' | 'success' = 'error';
   currentTab = 'profile';
   currentSection = 'dashboard'; // Track which sidebar section is active
   sidebarOpen = false;
@@ -150,6 +151,10 @@ getSolvedReports() {
 
   showNotification(message: string) {
     this.errorMessage = message;
+    // Check if message is an error by looking for common error keywords
+    const errorKeywords = ['failed', 'error', 'unauthorized', 'forbidden', 'not found', 'exception', 'invalid', 'cannot', 'unable', 'problem', 'issue', 'wrong'];
+    const lowerMsg = message.toLowerCase();
+    this.notificationType = errorKeywords.some(keyword => lowerMsg.includes(keyword)) ? 'error' : 'success';
     setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
